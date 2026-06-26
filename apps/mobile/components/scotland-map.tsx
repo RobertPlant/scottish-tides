@@ -6,7 +6,7 @@
 
 import { useState } from 'react';
 import { type LayoutChangeEvent, StyleSheet, Text, View } from 'react-native';
-import Svg, { Circle, Path, Rect, Text as SvgText } from 'react-native-svg';
+import Svg, { Circle, G, Path, Rect, Text as SvgText } from 'react-native-svg';
 
 import coastRings from '@/assets/data/scotland-coast.json';
 import { usePalette } from '@/hooks/use-theme-color';
@@ -45,6 +45,7 @@ export function ScotlandMap({
   const sea = isDark ? '#0a1c29' : '#d8e7f0';
   const land = isDark ? '#16302a' : '#cdd9cb';
   const coast = isDark ? '#2c4a44' : '#9fb09c';
+  const halo = isDark ? '#06121d' : '#ffffff'; // label casing for contrast
 
   const [width, setWidth] = useState(0);
   const onLayout = (e: LayoutChangeEvent) => setWidth(e.nativeEvent.layout.width);
@@ -88,20 +89,30 @@ export function ScotlandMap({
             // Per-station nudges to separate crowded northern labels
             // (Kinlochbervie's long name points east toward Wick).
             const dy = LABEL_DY[s.id] ?? 0;
+            const lx = rightSide ? cx - 9 : cx + 9;
+            const ly = py(s.lat) + 4 + dy;
+            const anchor = rightSide ? 'end' : 'start';
+            const weight = s.id === selectedId ? '700' : '600';
             return (
-              <SvgText
-                key={`${s.id}-label`}
-                x={rightSide ? cx - 9 : cx + 9}
-                y={py(s.lat) + 3.5 + dy}
-                fill={palette.text}
-                fontSize={10}
-                fontWeight={s.id === selectedId ? '700' : '400'}
-                textAnchor={rightSide ? 'end' : 'start'}
-                stroke={sea}
-                strokeWidth={s.id === selectedId ? 0 : 0.4}
-              >
-                {s.name}
-              </SvgText>
+              <G key={`${s.id}-label`}>
+                {/* Halo "casing" drawn first so the glyphs read on any background. */}
+                <SvgText
+                  x={lx}
+                  y={ly}
+                  fontSize={11}
+                  fontWeight={weight}
+                  textAnchor={anchor}
+                  fill={halo}
+                  stroke={halo}
+                  strokeWidth={3}
+                  strokeLinejoin="round"
+                >
+                  {s.name}
+                </SvgText>
+                <SvgText x={lx} y={ly} fontSize={11} fontWeight={weight} textAnchor={anchor} fill={palette.text}>
+                  {s.name}
+                </SvgText>
+              </G>
             );
           })}
         </Svg>
