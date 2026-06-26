@@ -1,0 +1,204 @@
+{
+  "station": "Ullapool",
+  "units": "metres",
+  "datum": "The data refer to Admiralty Chart Datum (ACD)",
+  "timezone_obs": "UTC",
+  "fitted_at": "2026-06-26",
+  "n_obs": 83809,
+  "obs_span": [
+    "2019-01-01",
+    "2022-04-19"
+  ],
+  "constituents": [
+    {
+      "name": "Z0",
+      "amplitude": 3.23832,
+      "phase": 0.0
+    },
+    {
+      "name": "M2",
+      "amplitude": 1.50073,
+      "phase": 200.582
+    },
+    {
+      "name": "S2",
+      "amplitude": 0.58028,
+      "phase": 234.948
+    },
+    {
+      "name": "N2",
+      "amplitude": 0.30251,
+      "phase": 177.703
+    },
+    {
+      "name": "K1",
+      "amplitude": 0.11186,
+      "phase": 128.179
+    },
+    {
+      "name": "M4",
+      "amplitude": 0.0646,
+      "phase": 229.382
+    },
+    {
+      "name": "O1",
+      "amplitude": 0.07415,
+      "phase": 346.546
+    },
+    {
+      "name": "M6",
+      "amplitude": 0.00585,
+      "phase": 188.971
+    },
+    {
+      "name": "MK3",
+      "amplitude": 0.00981,
+      "phase": 204.983
+    },
+    {
+      "name": "S4",
+      "amplitude": 0.0124,
+      "phase": 37.343
+    },
+    {
+      "name": "MN4",
+      "amplitude": 0.01449,
+      "phase": 194.989
+    },
+    {
+      "name": "nu2",
+      "amplitude": 0.05607,
+      "phase": 183.128
+    },
+    {
+      "name": "S6",
+      "amplitude": 0.00042,
+      "phase": 145.754
+    },
+    {
+      "name": "mu2",
+      "amplitude": 0.05518,
+      "phase": 142.139
+    },
+    {
+      "name": "2N2",
+      "amplitude": 0.0456,
+      "phase": 154.088
+    },
+    {
+      "name": "OO1",
+      "amplitude": 0.00402,
+      "phase": 246.974
+    },
+    {
+      "name": "lambda2",
+      "amplitude": 0.00526,
+      "phase": 233.901
+    },
+    {
+      "name": "S1",
+      "amplitude": 0.01764,
+      "phase": 38.904
+    },
+    {
+      "name": "M1",
+      "amplitude": 0.00742,
+      "phase": 49.815
+    },
+    {
+      "name": "J1",
+      "amplitude": 0.00288,
+      "phase": 158.463
+    },
+    {
+      "name": "Mm",
+      "amplitude": 0.02794,
+      "phase": 252.037
+    },
+    {
+      "name": "Ssa",
+      "amplitude": 0.02835,
+      "phase": 269.254
+    },
+    {
+      "name": "Sa",
+      "amplitude": 0.1093,
+      "phase": 263.383
+    },
+    {
+      "name": "MSF",
+      "amplitude": 0.0172,
+      "phase": 266.619
+    },
+    {
+      "name": "Mf",
+      "amplitude": 0.02025,
+      "phase": 257.093
+    },
+    {
+      "name": "rho1",
+      "amplitude": 0.00475,
+      "phase": 287.637
+    },
+    {
+      "name": "Q1",
+      "amplitude": 0.02935,
+      "phase": 294.293
+    },
+    {
+      "name": "T2",
+      "amplitude": 0.03159,
+      "phase": 229.601
+    },
+    {
+      "name": "R2",
+      "amplitude": 0.00481,
+      "phase": 217.546
+    },
+    {
+      "name": "2Q1",
+      "amplitude": 0.0074,
+      "phase": 238.91
+    },
+    {
+      "name": "P1",
+      "amplitude": 0.03143,
+      "phase": 112.127
+    },
+    {
+      "name": "2SM2",
+      "amplitude": 0.00282,
+      "phase": 294.848
+    },
+    {
+      "name": "M3",
+      "amplitude": 0.03105,
+      "phase": 119.486
+    },
+    {
+      "name": "L2",
+      "amplitude": 0.0267,
+      "phase": 222.743
+    },
+    {
+      "name": "2MK3",
+      "amplitude": 0.00678,
+      "phase": 48.447
+    },
+    {
+      "name": "K2",
+      "amplitude": 0.16403,
+      "phase": 233.55
+    },
+    {
+      "name": "M8",
+      "amplitude": 0.00068,
+      "phase": 39.092
+    },
+    {
+      "name": "MS4",
+      "amplitude": 0.07306,
+      "phase": 304.423
+    }
+  ]
+}

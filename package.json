@@ -1,0 +1,12 @@
+{
+  "name": "scottish-tides",
+  "version": "0.1.0",
+  "private": true,
+  "license": "GPL-3.0-only",
+  "scripts": {
+    "format": "biome format --write apps/mobile",
+    "lint": "biome lint apps/mobile",
+    "check": "biome check --write apps/mobile"
+  },
+  "//": "biome is provided by devenv via pkgs.biome — no node_modules at this level"
+}

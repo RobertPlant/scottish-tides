@@ -1,0 +1,12 @@
+{
+  "name": "Oban",
+  "based_on": "Tobermory",
+  "method": "empirical secondary-port offset: mean(Oban actual - Tobermory model)",
+  "calibrated_from": "tidetimes.org.uk Oban vs tobermory.json, 27-30 Jun 2026 (3 days, 11 events)",
+  "calibrated_on": "2026-06-26",
+  "hw_time_min": -21,
+  "lw_time_min": -18,
+  "hw_height_m": -0.52,
+  "lw_height_m": -0.13,
+  "note": "Time offset varies ~13-30 min with spring/neap; height offset stable to +/-0.03 m. Kayak-grade, not for navigation."
+}
