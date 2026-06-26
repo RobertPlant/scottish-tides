@@ -7,10 +7,11 @@ import { SunMoonCard } from '@/components/sun-moon-card';
 import { ThemedText } from '@/components/themed-text';
 import { TideCurve } from '@/components/tide-curve';
 import { TideTable } from '@/components/tide-table';
+import { WeekOverview } from '@/components/week-overview';
 import { usePalette } from '@/hooks/use-theme-color';
 import { formatLongDay, ukDayStartFromYmd, ymdAddDays, ymdInUk } from '@/lib/datetime';
 import { STATIONS, stationById } from '@/lib/stations';
-import { dayEvents, dayHeightSeries } from '@/lib/tide-day';
+import { classifyTide, dayEvents, dayHeightSeries, dayRange, tidalStats } from '@/lib/tide-day';
 
 // Pre-render one static HTML page per station so deep links like
 // /station/oban survive a hard refresh on GitHub Pages.
@@ -34,6 +35,14 @@ export default function StationDetail() {
   const events = useMemo(() => dayEvents(station, dayStart), [station, dayStart]);
   const series = useMemo(() => dayHeightSeries(station, dayStart), [station, dayStart]);
   const isToday = ymd === todayYmd;
+
+  const tideClass = useMemo(() => {
+    const stats = tidalStats(station);
+    return classifyTide(dayRange(events), stats);
+  }, [station, events]);
+  const range = dayRange(events);
+  const classColor =
+    tideClass.label === 'Springs' ? palette.accent : tideClass.label === 'Neaps' ? palette.muted : palette.tint;
 
   return (
     <>
@@ -75,6 +84,13 @@ export default function StationDetail() {
               <ThemedText style={{ color: palette.accent }}>Today</ThemedText>
             </Pressable>
           ) : null}
+          <View style={styles.badgeSpacer} />
+          <View style={[styles.badge, { backgroundColor: classColor }]}>
+            <ThemedText style={styles.badgeText}>{tideClass.label}</ThemedText>
+          </View>
+          <ThemedText type="caption" style={{ color: palette.muted }}>
+            {range.toFixed(1)} m range
+          </ThemedText>
         </View>
 
         <View style={[styles.card, { backgroundColor: palette.surface, borderColor: palette.border }]}>
@@ -83,6 +99,8 @@ export default function StationDetail() {
         </View>
 
         <SunMoonCard date={dayStart} lat={station.lat} lon={station.lon} />
+
+        <WeekOverview station={station} fromYmd={ymd} selectedYmd={ymd} onSelectDay={setYmd} />
 
         <View style={[styles.info, { borderColor: palette.border }]}>
           <ThemedText type="caption" style={{ color: palette.muted }}>
@@ -111,7 +129,10 @@ const styles = StyleSheet.create({
   navRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8 },
   navButton: { borderRadius: 10, borderWidth: StyleSheet.hairlineWidth, paddingHorizontal: 14, paddingVertical: 8 },
   navLabel: { flex: 1, textAlign: 'center' },
-  pickerRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  pickerRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  badgeSpacer: { flex: 1 },
+  badge: { borderRadius: 999, paddingHorizontal: 10, paddingVertical: 3 },
+  badgeText: { color: '#fff', fontWeight: '700', fontSize: 12 },
   card: { borderRadius: 16, borderWidth: StyleSheet.hairlineWidth, padding: 16, gap: 12 },
   todayLink: { paddingVertical: 4, paddingHorizontal: 4 },
   info: { borderRadius: 12, borderWidth: StyleSheet.hairlineWidth, padding: 14, gap: 6 },

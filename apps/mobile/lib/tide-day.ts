@@ -47,6 +47,52 @@ export function dayHeightSeries(
   }));
 }
 
+export interface TidalStats {
+  springRange: number; // mean spring range (m)
+  neapRange: number; // mean neap range (m)
+}
+
+/**
+ * Mean spring/neap range from the semidiurnal constituents: spring = 2·(M2+S2),
+ * neap = 2·|M2−S2|. For secondary ports the constant height shift (HW − LW
+ * offset) is added, since it widens/narrows every tide equally.
+ */
+export function tidalStats(station: Station): TidalStats {
+  const amp = (name: string) =>
+    station.data.constituents.find((c) => c.name === name)?.amplitude ?? 0;
+  const m2 = amp('M2');
+  const s2 = amp('S2');
+  const rangeShift = station.shift ? station.shift.hw_height_m - station.shift.lw_height_m : 0;
+  return {
+    springRange: Math.max(2 * (m2 + s2) + rangeShift, 0.1),
+    neapRange: Math.max(2 * Math.abs(m2 - s2) + rangeShift, 0.05),
+  };
+}
+
+/** Range of a day's events: highest high water minus lowest low water. */
+export function dayRange(events: TideEvent[]): number {
+  const highs = events.filter((e) => e.type === 'high').map((e) => e.height);
+  const lows = events.filter((e) => e.type === 'low').map((e) => e.height);
+  if (highs.length === 0 || lows.length === 0) {
+    return 0;
+  }
+  return Math.max(...highs) - Math.min(...lows);
+}
+
+export interface TideClass {
+  label: 'Springs' | 'Neaps' | 'Mid-range';
+  /** 0 = neaps, 1 = springs. */
+  fraction: number;
+}
+
+/** Classify a day's range between the station's neap and spring ranges. */
+export function classifyTide(range: number, stats: TidalStats): TideClass {
+  const span = stats.springRange - stats.neapRange;
+  const fraction = span > 0 ? Math.min(Math.max((range - stats.neapRange) / span, 0), 1) : 0.5;
+  const label = fraction >= 0.66 ? 'Springs' : fraction <= 0.34 ? 'Neaps' : 'Mid-range';
+  return { label, fraction };
+}
+
 export interface NowState {
   heightNow: number;
   rising: boolean;
