@@ -22,6 +22,12 @@ jobs:
         working-directory: apps/mobile
     steps:
       - uses: actions/checkout@v4
+      # Enables Pages (build_type=workflow) on the first run using the built-in
+      # token, so no manual toggle in repo settings is needed.
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+        with:
+          enablement: true
       - uses: actions/setup-node@v4
         with:
           node-version: 22
@@ -30,6 +36,9 @@ jobs:
       - run: npm ci
       - name: Export static web build
         run: npx expo export --platform web
+      # Pages served from an Actions artifact isn't run through Jekyll, but add
+      # .nojekyll anyway so the underscore-prefixed _expo/ dir is never stripped.
+      - run: touch dist/.nojekyll
       - uses: actions/upload-pages-artifact@v3
         with:
           path: apps/mobile/dist
