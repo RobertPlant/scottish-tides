@@ -12,7 +12,8 @@ interface SelectedStationContext {
 const Ctx = createContext<SelectedStationContext | null>(null);
 
 export function SelectedStationProvider({ children }: { children: ReactNode }) {
-  const [stationId, setStationId] = useState(STATIONS[0]?.id ?? 'oban');
+  const defaultId = STATIONS.find((s) => s.id === 'oban')?.id ?? STATIONS[0]?.id ?? 'oban';
+  const [stationId, setStationId] = useState(defaultId);
   const value = useMemo(() => ({ stationId, setStationId }), [stationId]);
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }

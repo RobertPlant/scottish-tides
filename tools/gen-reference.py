@@ -45,6 +45,11 @@ WINDOWS = [
     ("leith.json", "2026-07-01T00:00:00"),
     ("leith.json", "2026-12-21T00:00:00"),
     ("ullapool.json", "2026-07-01T00:00:00"),
+    ("wick.json", "2026-07-01T00:00:00"),
+    ("aberdeen.json", "2026-08-10T00:00:00"),
+    ("stornoway.json", "2026-07-01T00:00:00"),
+    ("lerwick.json", "2026-09-01T00:00:00"),
+    ("port_ellen.json", "2026-07-01T00:00:00"),
 ]
 
 SPAN_HOURS = 48

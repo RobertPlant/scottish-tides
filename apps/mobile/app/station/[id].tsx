@@ -2,13 +2,20 @@ import { Stack, useLocalSearchParams } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
+import { DateField } from '@/components/date-field';
 import { ThemedText } from '@/components/themed-text';
 import { TideCurve } from '@/components/tide-curve';
 import { TideTable } from '@/components/tide-table';
 import { usePalette } from '@/hooks/use-theme-color';
-import { addDays, formatLongDay, ukStartOfDay } from '@/lib/datetime';
+import { formatLongDay, ukDayStartFromYmd, ymdAddDays, ymdInUk } from '@/lib/datetime';
 import { STATIONS, stationById } from '@/lib/stations';
 import { dayEvents, dayHeightSeries } from '@/lib/tide-day';
+
+// Pre-render one static HTML page per station so deep links like
+// /station/oban survive a hard refresh on GitHub Pages.
+export async function generateStaticParams(): Promise<{ id: string }[]> {
+  return STATIONS.map((s) => ({ id: s.id }));
+}
 
 export default function StationDetail() {
   const palette = usePalette();
@@ -16,12 +23,16 @@ export default function StationDetail() {
   const station = stationById(id) ?? STATIONS[0];
 
   const now = useMemo(() => new Date(), []);
-  const [offset, setOffset] = useState(0);
-  const dayStart = useMemo(() => addDays(ukStartOfDay(now), offset), [now, offset]);
+  const todayYmd = useMemo(() => ymdInUk(now), [now]);
+  const [ymd, setYmd] = useState(todayYmd);
+  const dayStart = useMemo(() => ukDayStartFromYmd(ymd), [ymd]);
+
+  const minYmd = useMemo(() => ymdAddDays(todayYmd, -730), [todayYmd]);
+  const maxYmd = useMemo(() => ymdAddDays(todayYmd, 730), [todayYmd]);
 
   const events = useMemo(() => dayEvents(station, dayStart), [station, dayStart]);
   const series = useMemo(() => dayHeightSeries(station, dayStart), [station, dayStart]);
-  const isToday = offset === 0;
+  const isToday = ymd === todayYmd;
 
   return (
     <>
@@ -40,7 +51,7 @@ export default function StationDetail() {
 
         <View style={styles.navRow}>
           <Pressable
-            onPress={() => setOffset((o) => o - 1)}
+            onPress={() => setYmd((d) => ymdAddDays(d, -1))}
             style={[styles.navButton, { borderColor: palette.border }]}
           >
             <ThemedText style={{ color: palette.accent }}>‹ Prev</ThemedText>
@@ -49,23 +60,26 @@ export default function StationDetail() {
             {formatLongDay(dayStart)}
           </ThemedText>
           <Pressable
-            onPress={() => setOffset((o) => o + 1)}
+            onPress={() => setYmd((d) => ymdAddDays(d, 1))}
             style={[styles.navButton, { borderColor: palette.border }]}
           >
             <ThemedText style={{ color: palette.accent }}>Next ›</ThemedText>
           </Pressable>
         </View>
 
+        <View style={styles.pickerRow}>
+          <DateField value={ymd} onChange={setYmd} min={minYmd} max={maxYmd} />
+          {!isToday ? (
+            <Pressable onPress={() => setYmd(todayYmd)} style={styles.todayLink}>
+              <ThemedText style={{ color: palette.accent }}>Today</ThemedText>
+            </Pressable>
+          ) : null}
+        </View>
+
         <View style={[styles.card, { backgroundColor: palette.surface, borderColor: palette.border }]}>
           <TideCurve series={series} events={events} now={isToday ? now : undefined} height={220} />
           <TideTable events={events} />
         </View>
-
-        {!isToday ? (
-          <Pressable onPress={() => setOffset(0)} style={styles.todayLink}>
-            <ThemedText style={{ color: palette.accent }}>Back to today</ThemedText>
-          </Pressable>
-        ) : null}
 
         <View style={[styles.info, { borderColor: palette.border }]}>
           <ThemedText type="caption" style={{ color: palette.muted }}>
@@ -94,7 +108,8 @@ const styles = StyleSheet.create({
   navRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8 },
   navButton: { borderRadius: 10, borderWidth: StyleSheet.hairlineWidth, paddingHorizontal: 14, paddingVertical: 8 },
   navLabel: { flex: 1, textAlign: 'center' },
+  pickerRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   card: { borderRadius: 16, borderWidth: StyleSheet.hairlineWidth, padding: 16, gap: 12 },
-  todayLink: { alignItems: 'center', paddingVertical: 4 },
+  todayLink: { paddingVertical: 4, paddingHorizontal: 4 },
   info: { borderRadius: 12, borderWidth: StyleSheet.hairlineWidth, padding: 14, gap: 6 },
 });

@@ -59,6 +59,32 @@ export function addDays(d: Date, n: number): Date {
   return new Date(d.getTime() + n * 86_400_000);
 }
 
+/** Calendar date (YYYY-MM-DD) of an instant as seen in UK local time. */
+export function ymdInUk(d: Date): string {
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: UK_TZ,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).formatToParts(d);
+  const get = (t: string) => parts.find((p) => p.type === t)?.value ?? '';
+  return `${get('year')}-${get('month')}-${get('day')}`;
+}
+
+/** Add days to a YYYY-MM-DD calendar string (pure UTC math, DST-safe). */
+export function ymdAddDays(ymd: string, n: number): string {
+  const d = new Date(`${ymd}T00:00:00Z`);
+  d.setUTCDate(d.getUTCDate() + n);
+  return d.toISOString().slice(0, 10);
+}
+
+/** The UK civil-midnight instant for a YYYY-MM-DD calendar date. */
+export function ukDayStartFromYmd(ymd: string): Date {
+  // Noon UTC is always within the same civil day in the UK (UTC or UTC+1),
+  // so reducing it to UK start-of-day yields that date's midnight.
+  return ukStartOfDay(new Date(`${ymd}T12:00:00Z`));
+}
+
 /** "in 2h 14m" / "2h 14m ago" relative to now. */
 export function formatRelative(target: Date, now: Date = new Date()): string {
   const ms = target.getTime() - now.getTime();
