@@ -20,19 +20,62 @@ export {
 import { applyShift, type Shift, type StationData, Tide, type TideEvent } from './predict';
 
 /**
+ * Drop insignificant high/low waters by prominence. Near-amphidromic ports (e.g.
+ * Port Ellen, where overtides dominate a tiny M2) genuinely have double-highs and
+ * standstills — the harmonic curve really does wiggle — but a 1 cm bump shouldn't
+ * be labelled a separate "High water". This collapses any extremum whose rise/
+ * fall to a neighbour is below `minProminenceM`; when one is removed its two
+ * same-type neighbours merge, keeping the more extreme. Normal ports (metres of
+ * range) are unaffected.
+ */
+export function pruneMinorExtrema(events: TideEvent[], minProminenceM: number): TideEvent[] {
+  const evs = [...events];
+  while (evs.length > 2) {
+    let minIdx = -1;
+    let minProm = Infinity;
+    for (let i = 1; i < evs.length - 1; i++) {
+      const prom = Math.min(
+        Math.abs(evs[i].height - evs[i - 1].height),
+        Math.abs(evs[i].height - evs[i + 1].height),
+      );
+      if (prom < minProm) {
+        minProm = prom;
+        minIdx = i;
+      }
+    }
+    if (minIdx === -1 || minProm >= minProminenceM) {
+      break;
+    }
+    evs.splice(minIdx, 1);
+    // The two neighbours are now the same type and adjacent — keep the more
+    // extreme (higher high / lower low), drop the other.
+    const a = evs[minIdx - 1];
+    const b = evs[minIdx];
+    if (a && b && a.type === b.type) {
+      const keepA = a.type === 'high' ? a.height >= b.height : a.height <= b.height;
+      evs.splice(keepA ? minIdx : minIdx - 1, 1);
+    }
+  }
+  return evs;
+}
+
+/**
  * High/low waters between two instants for a station, optionally corrected to a
  * secondary port. The window is padded internally so events near the edges are
- * not missed, then trimmed back to [from, to].
+ * not missed, then trimmed back to [from, to]. Sub-`minProminenceM` wiggles are
+ * pruned (see `pruneMinorExtrema`).
  */
 export function predictExtrema(
   data: StationData,
   from: Date,
   to: Date,
   shift?: Shift,
+  minProminenceM = 0.05,
 ): TideEvent[] {
   const tide = new Tide(data);
-  const events = tide.extrema(from, to);
-  return shift ? applyShift(events, shift) : events;
+  const raw = tide.extrema(from, to);
+  const shifted = shift ? applyShift(raw, shift) : raw;
+  return pruneMinorExtrema(shifted, minProminenceM);
 }
 
 /** Continuous height samples for charting, `stepMinutes` apart over [from, to]. */
