@@ -1,6 +1,7 @@
-// Tide curve for a single day: filled height-vs-time area with high/low markers
-// and an optional "now" line. Renders identically on web and native via
-// react-native-svg.
+// Tide curve for a single day: filled height-vs-time area with a height axis,
+// hour ticks, high/low markers and an optional "now" line. The high/low points
+// are merged into the polyline so the markers always sit exactly on the curve.
+// Renders identically on web and native via react-native-svg.
 
 import { useState } from 'react';
 import { type LayoutChangeEvent, StyleSheet, View } from 'react-native';
@@ -17,9 +18,18 @@ interface Props {
   height?: number;
 }
 
-const PAD_X = 10;
-const PAD_TOP = 18;
+const PAD_LEFT = 30;
+const PAD_RIGHT = 10;
+const PAD_TOP = 14;
 const PAD_BOTTOM = 22;
+
+/** A "nice" axis step (1, 2, 5 × 10ⁿ) close to the requested size. */
+function niceStep(raw: number): number {
+  const pow = 10 ** Math.floor(Math.log10(raw));
+  const n = raw / pow;
+  const s = n < 1.5 ? 1 : n < 3 ? 2 : n < 7 ? 5 : 10;
+  return s * pow;
+}
 
 export function TideCurve({ series, events, now, height = 200 }: Props) {
   const palette = usePalette();
@@ -33,33 +43,62 @@ export function TideCurve({ series, events, now, height = 200 }: Props) {
 
   const t0 = series[0].time.getTime();
   const t1 = series[series.length - 1].time.getTime();
-  const heights = series.map((s) => s.height);
-  let minH = Math.min(...heights);
-  let maxH = Math.max(...heights);
-  const span = Math.max(maxH - minH, 0.5);
-  minH -= span * 0.12;
-  maxH += span * 0.12;
 
-  const plotW = Math.max(width - PAD_X * 2, 1);
+  // Merge the exact high/low-water points into the sampled series so the drawn
+  // line passes through each marker (the 10-min sampling otherwise cuts peaks).
+  const merged = [
+    ...series.map((s) => ({ t: s.time.getTime(), h: s.height })),
+    ...events.map((e) => ({ t: e.time.getTime(), h: e.height })),
+  ]
+    .filter((p) => p.t >= t0 && p.t <= t1)
+    .sort((a, b) => a.t - b.t);
+
+  const hs = merged.map((p) => p.h);
+  const dataMin = Math.min(...hs);
+  const dataMax = Math.max(...hs);
+
+  // Height axis ticks around the data range.
+  const step = niceStep(Math.max((dataMax - dataMin) / 4, 0.1));
+  const yMin = Math.floor(dataMin / step) * step;
+  const yMax = Math.ceil(dataMax / step) * step;
+  const decimals = step < 1 ? 1 : 0;
+  const yTicks: number[] = [];
+  for (let v = yMin; v <= yMax + 1e-9; v += step) {
+    yTicks.push(Number(v.toFixed(4)));
+  }
+
+  const plotW = Math.max(width - PAD_LEFT - PAD_RIGHT, 1);
   const plotH = height - PAD_TOP - PAD_BOTTOM;
-  const x = (t: number) => PAD_X + ((t - t0) / (t1 - t0)) * plotW;
-  const y = (h: number) => PAD_TOP + (1 - (h - minH) / (maxH - minH)) * plotH;
+  const x = (t: number) => PAD_LEFT + ((t - t0) / (t1 - t0)) * plotW;
+  const y = (h: number) => PAD_TOP + (1 - (h - yMin) / (yMax - yMin)) * plotH;
+  const baseY = y(yMin);
 
-  const line = series.map((s, i) => `${i === 0 ? 'M' : 'L'} ${x(s.time.getTime()).toFixed(1)} ${y(s.height).toFixed(1)}`).join(' ');
-  const area = `${line} L ${x(t1).toFixed(1)} ${(height - PAD_BOTTOM).toFixed(1)} L ${x(t0).toFixed(1)} ${(height - PAD_BOTTOM).toFixed(1)} Z`;
+  const line = merged
+    .map((p, i) => `${i === 0 ? 'M' : 'L'} ${x(p.t).toFixed(1)} ${y(p.h).toFixed(1)}`)
+    .join(' ');
+  const area = `${line} L ${x(t1).toFixed(1)} ${baseY.toFixed(1)} L ${x(t0).toFixed(1)} ${baseY.toFixed(1)} Z`;
+
+  // Hour ticks every 6 h across the day.
+  const hourTicks: { t: number; label: string }[] = [];
+  for (let k = 0; k <= 24; k += 6) {
+    const t = t0 + k * 3600_000;
+    if (t <= t1 + 1) {
+      hourTicks.push({ t, label: String(k % 24).padStart(2, '0') });
+    }
+  }
 
   // Interpolated height at `now` for the marker dot.
   let nowX: number | null = null;
   let nowY: number | null = null;
   if (now && now.getTime() >= t0 && now.getTime() <= t1) {
     nowX = x(now.getTime());
-    let h = series[0].height;
-    for (let i = 1; i < series.length; i++) {
-      if (series[i].time.getTime() >= now.getTime()) {
-        const a = series[i - 1];
-        const b = series[i];
-        const f = (now.getTime() - a.time.getTime()) / (b.time.getTime() - a.time.getTime());
-        h = a.height + f * (b.height - a.height);
+    let h = merged[0].h;
+    for (let i = 1; i < merged.length; i++) {
+      if (merged[i].t >= now.getTime()) {
+        const a = merged[i - 1];
+        const b = merged[i];
+        const f = (now.getTime() - a.t) / (b.t - a.t || 1);
+        h = a.h + f * (b.h - a.h);
         break;
       }
     }
@@ -70,15 +109,59 @@ export function TideCurve({ series, events, now, height = 200 }: Props) {
     <View style={{ height }} onLayout={onLayout}>
       {width > 0 && (
         <Svg width={width} height={height}>
+          {/* Height gridlines + axis labels */}
+          {yTicks.map((v) => (
+            <G key={`y${v}`}>
+              <Line
+                x1={PAD_LEFT}
+                y1={y(v)}
+                x2={width - PAD_RIGHT}
+                y2={y(v)}
+                stroke={palette.border}
+                strokeWidth={1}
+              />
+              <SvgText x={PAD_LEFT - 4} y={y(v) + 3} fill={palette.muted} fontSize={9} textAnchor="end">
+                {v.toFixed(decimals)}
+              </SvgText>
+            </G>
+          ))}
+
+          {/* Hour ticks + labels */}
+          {hourTicks.map((tick) => (
+            <G key={`x${tick.label}`}>
+              <Line
+                x1={x(tick.t)}
+                y1={PAD_TOP}
+                x2={x(tick.t)}
+                y2={baseY}
+                stroke={palette.border}
+                strokeWidth={1}
+                opacity={0.5}
+              />
+              <SvgText
+                x={x(tick.t)}
+                y={height - 7}
+                fill={palette.muted}
+                fontSize={9}
+                textAnchor="middle"
+              >
+                {tick.label}
+              </SvgText>
+            </G>
+          ))}
+
+          {/* Tide curve */}
           <Path d={area} fill={palette.accent} opacity={0.16} />
           <Path d={line} stroke={palette.accent} strokeWidth={2.5} fill="none" />
+
+          {/* Now marker */}
           {now && nowX !== null && (
             <Line
               x1={nowX}
-              y1={PAD_TOP - 6}
+              y1={PAD_TOP - 4}
               x2={nowX}
-              y2={height - PAD_BOTTOM}
-              stroke={palette.muted}
+              y2={baseY}
+              stroke={palette.text}
               strokeWidth={1}
               strokeDasharray="3 3"
             />
@@ -86,9 +169,11 @@ export function TideCurve({ series, events, now, height = 200 }: Props) {
           {now && nowX !== null && nowY !== null && (
             <Circle cx={nowX} cy={nowY} r={4} fill={palette.text} />
           )}
+
+          {/* High/low water markers */}
           {events.map((e) => {
             const ex = x(e.time.getTime());
-            if (ex < PAD_X || ex > width - PAD_X) {
+            if (ex < PAD_LEFT || ex > width - PAD_RIGHT) {
               return null;
             }
             const ey = y(e.height);
@@ -98,9 +183,9 @@ export function TideCurve({ series, events, now, height = 200 }: Props) {
                 <Circle cx={ex} cy={ey} r={3.5} fill={color} />
                 <SvgText
                   x={ex}
-                  y={e.type === 'high' ? ey - 7 : ey + 14}
+                  y={e.type === 'high' ? ey - 6 : ey + 13}
                   fill={palette.muted}
-                  fontSize={10}
+                  fontSize={9}
                   textAnchor="middle"
                 >
                   {formatTime(e.time)}

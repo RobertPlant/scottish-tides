@@ -19,8 +19,10 @@ needs is bundled.
 `~/org/scripts/tides.py` (vendored pytides2). It must stay numerically faithful
 to the Python: **any change to the engine has to keep `npm run test:engine`
 green**, which checks predictions against reference vectors generated from
-`tides.py` (< 2 min on event times, < 0.03 m on heights). Regenerate the vectors
-with `tools/gen-reference.sh` if you add a station.
+`tides.py`. The strict gate is the hourly-height match (~5e-5 m actual); the
+high/low-water *time* tolerance is amplitude-aware because near-amphidromic flat
+ports (e.g. Port Ellen, ~0.5 m range) have ill-conditioned turning-point timing.
+Regenerate the vectors with `tools/gen-reference.py` if you add a station.
 
 Station data lives in `apps/mobile/assets/data/*.json` (one file per port:
 constituents + datum + provenance) with a registry in
@@ -38,11 +40,30 @@ port (e.g. Oban is derived from Tobermory by a constant offset). See
   `unstable_settings.anchor`, the anchor tab mounts *under* pushed Stack screens,
   so a bad Home-screen Link crashes every route, not just `/`.
 
-## More RN-Web quirks (from the sibling OtterPool e2e suite)
+## Tests
+
+Two layers, both in CI (`.github/workflows/test.yml`):
+
+- **Engine parity** — `npm run test:engine` (node --test + tsx) checks the TS
+  engine against the committed pytides reference (`lib/tides/__fixtures__/`).
+- **e2e** — `npm run test:e2e` (Playwright) drives the web build: routes render
+  without the React error overlay, the station list, the date picker changes the
+  day, and deep links render on direct load. Specs in `e2e/`.
+
+Running e2e on NixOS: `playwright.config.ts` auto-detects the devenv-provided
+`PLAYWRIGHT_BROWSERS_PATH` and points Playwright straight at the nix
+`chrome-headless-shell` via `executablePath` (the npm package's expected browser
+build won't match the nixpkgs one otherwise). Run inside `devenv shell`. In CI
+there's no such env var, so Playwright uses its own downloaded browser.
+
+## More RN-Web quirks
 
 - `Text` with `numberOfLines={N}` renders via `-webkit-box` line clamping;
   Playwright's `toBeVisible()` flags those as hidden — use `toBeAttached()`.
-- expo-router on web keeps the previous tab screen mounted; locators can resolve
-  to two elements — scope to `:visible` before interacting.
-- Playwright on NixOS: browsers come from `pkgs.playwright-driver.browsers` via
-  the root `devenv.nix`; run inside the devenv shell.
+- expo-router on web keeps the previous tab screen mounted (and the
+  `unstable_settings.anchor` tab stays mounted under pushed Stack screens);
+  locators can resolve to two elements — scope to `:visible` / use `.first()`.
+- Driving a controlled `<input type="date">` from a test: `fill()` doesn't fire
+  React's `onChange`; set `.value` via the prototype setter and dispatch
+  `input`+`change`. Also wait for dev-mode hydration first, or the synthetic
+  event has no listener yet.
