@@ -17,9 +17,16 @@ them in the browser / on the phone. The only thing that isn't free is the
 ## What it does
 
 - **High / low water** times and heights for any date at each station.
-- **Tide curve** — continuous height-vs-time for the day with a "now" marker.
+- **Tide curve** — continuous height-vs-time for the day; tap to read the level
+  at any moment.
 - **Now / next** — at a glance: rising or falling, and the next turn.
-- **Station map** — pick a port around the Scottish coast.
+- **Spring/neap + 7-day overview** — the day's range and a week ahead.
+- **Water-level windows** — when the water is above/below a chosen height
+  (slipways, drying rocks, causeways).
+- **Sun & moon** — daylight window and moon phase for the day.
+- **Station map** — a real coastline; pick a port around Scotland.
+- **Installable & offline** — add to your home screen; after one visit it works
+  with no signal (a service worker caches everything). Built for the coast.
 
 All heights are referenced to **Admiralty Chart Datum**, so they match printed
 charts and tide tables.
