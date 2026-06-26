@@ -3,6 +3,7 @@ import { useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
 import { DateField } from '@/components/date-field';
+import { SunMoonCard } from '@/components/sun-moon-card';
 import { ThemedText } from '@/components/themed-text';
 import { TideCurve } from '@/components/tide-curve';
 import { TideTable } from '@/components/tide-table';
@@ -80,6 +81,8 @@ export default function StationDetail() {
           <TideCurve series={series} events={events} now={isToday ? now : undefined} height={220} />
           <TideTable events={events} />
         </View>
+
+        <SunMoonCard date={dayStart} lat={station.lat} lon={station.lon} />
 
         <View style={[styles.info, { borderColor: palette.border }]}>
           <ThemedText type="caption" style={{ color: palette.muted }}>
