@@ -25,6 +25,12 @@ const LON_SCALE = Math.cos((MID_LAT * Math.PI) / 180);
 // Undistorted aspect: 1° lat ≈ 111 km, 1° lon ≈ 111·cos(lat) km.
 const ASPECT = (LAT1 - LAT0) / ((LON1 - LON0) * LON_SCALE);
 
+// Vertical label nudges (px) for stations whose labels would otherwise collide.
+const LABEL_DY: Record<string, number> = {
+  kinlochbervie: -7, // raise (it sits just W of and level with Wick)
+  wick: 9, // drop below the pin line
+};
+
 export function ScotlandMap({
   stations,
   selectedId,
@@ -79,11 +85,14 @@ export function ScotlandMap({
             // Flip labels near the right edge so they don't clip.
             const cx = px(s.lon);
             const rightSide = cx > width * 0.66;
+            // Per-station nudges to separate crowded northern labels
+            // (Kinlochbervie's long name points east toward Wick).
+            const dy = LABEL_DY[s.id] ?? 0;
             return (
               <SvgText
                 key={`${s.id}-label`}
                 x={rightSide ? cx - 9 : cx + 9}
-                y={py(s.lat) + 3.5}
+                y={py(s.lat) + 3.5 + dy}
                 fill={palette.text}
                 fontSize={10}
                 fontWeight={s.id === selectedId ? '700' : '400'}
