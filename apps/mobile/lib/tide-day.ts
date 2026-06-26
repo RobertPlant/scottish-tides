@@ -93,6 +93,49 @@ export function classifyTide(range: number, stats: TidalStats): TideClass {
   return { label, fraction };
 }
 
+export interface Window {
+  start: Date;
+  end: Date;
+}
+
+function crossingTime(
+  a: { time: Date; height: number },
+  b: { time: Date; height: number },
+  threshold: number,
+): Date {
+  const f = (threshold - a.height) / (b.height - a.height || 1);
+  const clamped = Math.min(Math.max(f, 0), 1);
+  return new Date(a.time.getTime() + clamped * (b.time.getTime() - a.time.getTime()));
+}
+
+/**
+ * Time windows when the water level is above (or below) `threshold`, from a fine
+ * height series. Edge crossing times are linearly interpolated. Use for "when
+ * can I float off the slip / clear that rock / cross the causeway".
+ */
+export function thresholdWindows(
+  series: { time: Date; height: number }[],
+  threshold: number,
+  mode: 'above' | 'below',
+): Window[] {
+  const meets = (h: number) => (mode === 'above' ? h >= threshold : h <= threshold);
+  const out: Window[] = [];
+  let start: Date | null = null;
+  for (let i = 0; i < series.length; i++) {
+    const inside = meets(series[i].height);
+    if (inside && start === null) {
+      start = i > 0 ? crossingTime(series[i - 1], series[i], threshold) : series[i].time;
+    } else if (!inside && start !== null) {
+      out.push({ start, end: crossingTime(series[i - 1], series[i], threshold) });
+      start = null;
+    }
+  }
+  if (start !== null) {
+    out.push({ start, end: series[series.length - 1].time });
+  }
+  return out;
+}
+
 export interface NowState {
   heightNow: number;
   rising: boolean;

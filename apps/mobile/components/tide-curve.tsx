@@ -4,8 +4,14 @@
 // Renders identically on web and native via react-native-svg.
 
 import { useState } from 'react';
-import { type LayoutChangeEvent, StyleSheet, View } from 'react-native';
-import Svg, { Circle, G, Line, Path, Text as SvgText } from 'react-native-svg';
+import {
+  type GestureResponderEvent,
+  type LayoutChangeEvent,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
+import Svg, { Circle, G, Line, Path, Rect, Text as SvgText } from 'react-native-svg';
 
 import { usePalette } from '@/hooks/use-theme-color';
 import { formatTime } from '@/lib/datetime';
@@ -16,6 +22,8 @@ interface Props {
   events: TideEvent[];
   now?: Date;
   height?: number;
+  /** Allow tapping/dragging the chart to read the height at any time. */
+  scrubbable?: boolean;
 }
 
 const PAD_LEFT = 30;
@@ -31,9 +39,10 @@ function niceStep(raw: number): number {
   return s * pow;
 }
 
-export function TideCurve({ series, events, now, height = 200 }: Props) {
+export function TideCurve({ series, events, now, height = 200, scrubbable = false }: Props) {
   const palette = usePalette();
   const [width, setWidth] = useState(0);
+  const [scrubT, setScrubT] = useState<number | null>(null);
 
   const onLayout = (e: LayoutChangeEvent) => setWidth(e.nativeEvent.layout.width);
 
@@ -105,8 +114,43 @@ export function TideCurve({ series, events, now, height = 200 }: Props) {
     nowY = y(h);
   }
 
+  // Interpolate height + trend at an arbitrary time (for the scrub readout).
+  const sampleAt = (tMs: number): { h: number; rising: boolean } => {
+    for (let i = 1; i < merged.length; i++) {
+      if (merged[i].t >= tMs) {
+        const a = merged[i - 1];
+        const b = merged[i];
+        const f = (tMs - a.t) / (b.t - a.t || 1);
+        return { h: a.h + f * (b.h - a.h), rising: b.h >= a.h };
+      }
+    }
+    return { h: merged[merged.length - 1].h, rising: false };
+  };
+
+  const onScrub = (e: GestureResponderEvent) => {
+    const lx = e.nativeEvent.locationX;
+    const clampedX = Math.min(Math.max(lx, PAD_LEFT), width - PAD_RIGHT);
+    setScrubT(t0 + ((clampedX - PAD_LEFT) / plotW) * (t1 - t0));
+  };
+
+  const scrub =
+    scrubbable && scrubT !== null
+      ? (() => {
+          const { h, rising } = sampleAt(scrubT);
+          return { sx: x(scrubT), sy: y(h), h, rising, time: new Date(scrubT) };
+        })()
+      : null;
+
+  const responder = scrubbable
+    ? {
+        onStartShouldSetResponder: () => true,
+        onResponderGrant: onScrub,
+        onResponderMove: onScrub,
+      }
+    : {};
+
   return (
-    <View style={{ height }} onLayout={onLayout}>
+    <View style={{ height }} onLayout={onLayout} {...responder}>
       {width > 0 && (
         <Svg width={width} height={height}>
           {/* Height gridlines + axis labels */}
@@ -193,8 +237,59 @@ export function TideCurve({ series, events, now, height = 200 }: Props) {
               </G>
             );
           })}
+
+          {/* Scrub marker */}
+          {scrub && (
+            <G>
+              <Line
+                x1={scrub.sx}
+                y1={PAD_TOP - 4}
+                x2={scrub.sx}
+                y2={baseY}
+                stroke={palette.accent}
+                strokeWidth={1}
+              />
+              <Circle
+                cx={scrub.sx}
+                cy={scrub.sy}
+                r={4.5}
+                fill={palette.accent}
+                stroke={palette.surface}
+                strokeWidth={1.5}
+              />
+            </G>
+          )}
         </Svg>
+      )}
+      {scrub && (
+        <View
+          style={[
+            styles.readout,
+            {
+              left: Math.min(Math.max(scrub.sx - 52, 2), Math.max(width - 106, 2)),
+              backgroundColor: palette.tint,
+            },
+          ]}
+          pointerEvents="none"
+        >
+          <Text style={[styles.readoutText, { color: palette.background }]}>
+            {formatTime(scrub.time)} · {scrub.h.toFixed(2)} m {scrub.rising ? '▲' : '▼'}
+          </Text>
+        </View>
       )}
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  readout: {
+    position: 'absolute',
+    top: 0,
+    borderRadius: 8,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    minWidth: 104,
+    alignItems: 'center',
+  },
+  readoutText: { fontSize: 12, fontWeight: '700' },
+});

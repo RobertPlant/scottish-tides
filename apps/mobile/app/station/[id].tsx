@@ -5,6 +5,7 @@ import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { DateField } from '@/components/date-field';
 import { SunMoonCard } from '@/components/sun-moon-card';
 import { ThemedText } from '@/components/themed-text';
+import { ThresholdTool } from '@/components/threshold-tool';
 import { TideCurve } from '@/components/tide-curve';
 import { TideTable } from '@/components/tide-table';
 import { WeekOverview } from '@/components/week-overview';
@@ -94,9 +95,20 @@ export default function StationDetail() {
         </View>
 
         <View style={[styles.card, { backgroundColor: palette.surface, borderColor: palette.border }]}>
-          <TideCurve series={series} events={events} now={isToday ? now : undefined} height={220} />
+          <TideCurve
+            series={series}
+            events={events}
+            now={isToday ? now : undefined}
+            height={220}
+            scrubbable
+          />
+          <ThemedText type="caption" style={{ color: palette.muted }}>
+            Tap the chart to read the level at any time.
+          </ThemedText>
           <TideTable events={events} />
         </View>
+
+        <ThresholdTool station={station} dayStart={dayStart} />
 
         <SunMoonCard date={dayStart} lat={station.lat} lon={station.lon} />
 
