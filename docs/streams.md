@@ -20,6 +20,13 @@ So a gate needs: a reference station, slack offsets, flood/ebb sense, and a
 **published** spring/neap peak rate (common knowledge — Pentland ~12 kn,
 Corryvreckan ~8.5 kn — *not* Admiralty's tables).
 
+The slack offsets are **calibrated from published figures** (sailing/kayak
+sources, not the Admiralty atlas), and match to ~5–15 min where checkable, e.g.:
+Corryvreckan W-going begins HW Oban +4:10 / E-going −2:10; Pentland W-going HW
+**Aberdeen** −1:05 / E-going +5:00; Dorus Mòr slack ~1½ h before HW/LW Oban.
+The flood/ebb *magnitudes* are still modelled symmetric (the timing is the part
+that's calibrated).
+
 **`sill`** — a basin behind a rock sill (**Falls of Lora**, at Connel). Here the
 stream is driven by the **head between the open sea and the loch**, not by local
 HW/LW. We take the sea level (the reference port) and low-pass it to estimate the
