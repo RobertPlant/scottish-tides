@@ -43,9 +43,10 @@ export interface Race {
   /** True if the "flood" runs during the rising tide (LW→HW) at the reference. */
   floodFromLwToHw?: boolean;
 
-  // sill-type only:
-  /** Loch low-pass time constant (hours): how much the basin lags the sea. */
-  lochTauHours?: number;
+  // sill-type only: the basin lags the sea, and (because the sill restricts
+  // outflow) drains slower than it fills — an asymmetric low-pass.
+  lochTauFillHours?: number;
+  lochTauDrainHours?: number;
   /** Knots of stream per metre of head (sea − loch). */
   headRateScale?: number;
 }
@@ -119,11 +120,13 @@ export const RACES: Race[] = [
     ebbName: 'Out-flowing (the falls)',
     springPeakKn: 7,
     neapPeakKn: 2,
-    lochTauHours: 3,
-    headRateScale: 4.0,
+    lochTauFillHours: 3.5,
+    lochTauDrainHours: 8,
+    headRateScale: 3.0,
     warning:
       'A tidal rapid over a rock ledge: the falls run OUT on the ebb once the falling sea drops below Loch Etive, then IN on the flood. Strongly range-dependent — negligible on small neaps, violent on big springs.',
-    source: 'Modelled from the sea↔loch head (the documented mechanism); rate scale indicative.',
+    source:
+      'Modelled from the sea↔loch head; turn times calibrated to fallsoflora.info (XTide) to ~12 min. Rate magnitude indicative.',
   },
   {
     id: 'dorus-mor',
@@ -262,19 +265,23 @@ function predictGate(race: Race, ref: Station, dayStart: Date, fraction: number)
 // --- 'sill' races (Falls of Lora): rate ∝ head between sea and lagged loch -----
 
 function predictSill(race: Race, ref: Station, dayStart: Date, fraction: number): StreamDay {
-  const tau = race.lochTauHours ?? 3;
+  const tauFill = race.lochTauFillHours ?? 3.5;
+  const tauDrain = race.lochTauDrainHours ?? 8;
   const scale = race.headRateScale ?? 4;
   const start = dayStart.getTime();
   const end = start + 24 * 3600_000;
 
   // Sea level over a padded window so the reservoir filter has warmed up.
-  const sea = seaLevelSeries(ref, new Date(start - 14 * 3600_000), new Date(end), 10);
+  const sea = seaLevelSeries(ref, new Date(start - 16 * 3600_000), new Date(end), 10);
 
-  // Loch level: a first-order low-pass of the sea (lags + damps). head = sea − loch.
+  // Loch level: an asymmetric first-order low-pass of the sea. It fills faster
+  // than it drains (the sill restricts outflow), so the falls run OUT longer.
+  // head = sea − loch.
   let loch = sea[0].height;
   const all: StreamSample[] = sea.map((s, i) => {
     if (i > 0) {
       const dtH = (s.time.getTime() - sea[i - 1].time.getTime()) / 3600_000;
+      const tau = sea[i - 1].height < loch ? tauDrain : tauFill;
       loch += (dtH / tau) * (sea[i - 1].height - loch);
     }
     return { time: s.time, rate: (s.height - loch) * scale }; // + = sea above loch = flood in

@@ -22,13 +22,17 @@ Corryvreckan ~8.5 kn — *not* Admiralty's tables).
 
 **`sill`** — a basin behind a rock sill (**Falls of Lora**, at Connel). Here the
 stream is driven by the **head between the open sea and the loch**, not by local
-HW/LW. We take the sea level (the reference port), low-pass it to estimate the
-lagged loch level (`lochTauHours`), and set the rate ∝ `head = sea − loch`
-(`headRateScale`). The falls run **out** when the falling sea drops below the
-loch and **in** when it rises above — the documented mechanism — giving the
-asymmetric, strongly range-dependent windows a sinusoid can't. Slacks are the
-head's zero crossings. Tune `lochTauHours` / `headRateScale` against a reference
-like fallsoflora.info.
+HW/LW. We take the sea level (the reference port) and low-pass it to estimate the
+lagged loch level, then set the rate ∝ `head = sea − loch` (`headRateScale`). The
+loch's low-pass is **asymmetric** — it fills faster (`lochTauFillHours`) than it
+drains (`lochTauDrainHours`), because the sill restricts outflow — so the falls
+run **out** longer on the ebb (the documented mechanism), giving asymmetric,
+strongly range-dependent windows a sinusoid can't.
+
+The Falls-of-Lora constants are **calibrated against fallsoflora.info** (itself
+XTide): fill τ 3.5 h / drain τ 8 h reproduces the published turn times to ~12 min
+mean. `headRateScale` is set so big springs peak ~7 kn (the rate isn't published,
+so its magnitude is indicative). Re-calibrate against that site if needed.
 
 ## What's approximate
 
