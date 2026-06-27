@@ -25,6 +25,9 @@ them in the browser / on the phone. The only thing that isn't free is the
   (slipways, drying rocks, causeways).
 - **Sun & moon** — daylight window and moon phase for the day.
 - **Station map** — a real coastline; pick a port around Scotland.
+- **Tidal streams (estimates)** — slack times and a flood/ebb curve for the
+  famous races (Pentland Firth, Corryvreckan…), modelled from the tide + a
+  published peak rate. A planning aid only — see the warning below.
 - **Installable & offline** — add to your home screen; after one visit it works
   with no signal (a service worker caches everything). Built for the coast.
 
@@ -33,10 +36,14 @@ charts and tide tables.
 
 ## What it is NOT
 
-⚠️ These are **water levels (height), not tidal streams.** Stream-dominated
-places — the **Pentland Firth**, **Falls of Lora**, **Kylerhea**, the **Grey
-Dogs** — need a tidal stream atlas, not this. Never plan a race transit from
-these height tables alone.
+⚠️ The station predictions are **water levels (height), not tidal streams.**
+
+The **Streams** section gives *estimated* slack times and rates for the famous
+races (Pentland Firth, Corryvreckan, Falls of Lora…), but it is a **simplified
+model** — slack timing and direction are approximate and the peak rates are
+*published* figures, not an Admiralty stream atlas. **Verify against the pilot
+and the tidal stream atlas before committing.** These races (Corryvreckan, the
+Pentland Firth) can kill; this app is a planning aid, never a navigation source.
 
 Predictions are *astronomical* only: they do not include weather (surge), so a
 deep low or a strong onshore gale can shift real levels by half a metre or more.

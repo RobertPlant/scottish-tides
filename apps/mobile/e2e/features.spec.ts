@@ -16,6 +16,16 @@ test('favouriting a station persists and pins it', async ({ page }) => {
   await expect(page.locator('body')).toContainText('FAVOURITES'); // persisted
 });
 
+test('streams: race list and detail render with the safety warning', async ({ page }) => {
+  await page.goto('/streams');
+  await expect(page.locator('body')).toContainText('not a tidal stream atlas');
+  await expect(page.locator('body')).toContainText('Pentland Firth');
+  await page.getByText('Pentland Firth').first().click();
+  await expect(page.locator('body')).toContainText('Slack water');
+  await expect(page.locator('body')).toContainText('Peak streams');
+  await expect(page.locator('body')).toContainText('Not for navigation');
+});
+
 test.describe('tides near me', () => {
   test.use({ geolocation: { latitude: 58.2, longitude: -6.39 }, permissions: ['geolocation'] });
 

@@ -32,6 +32,15 @@ export default function TabsLayout() {
           tabBarIcon: ({ color, size }) => <Ionicons name="map-outline" size={size} color={color} />,
         }}
       />
+      <Tabs.Screen
+        name="streams"
+        options={{
+          title: 'Streams',
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="swap-horizontal-outline" size={size} color={color} />
+          ),
+        }}
+      />
     </Tabs>
   );
 }
