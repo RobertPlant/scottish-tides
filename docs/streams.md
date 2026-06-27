@@ -4,21 +4,31 @@ The **Streams** feature estimates slack times and rates for well-known races. It
 is deliberately a *model*, not a tidal stream atlas, and uses no copyrighted
 Admiralty data.
 
-## The model
+## The two models
 
-For each race (`lib/streams.ts` → `RACES`):
+Each race in `lib/streams.ts` → `RACES` has a `type`:
 
-1. **Slack water** occurs near the reference port's HW/LW (± an offset), taken
-   straight from the offline tide engine (`predictExtrema`).
-2. Between consecutive slacks the **rate follows a sinusoid** (the "50/90" idea):
-   zero at slack, peak mid-way.
+**`gate`** — a strait/sound (Pentland Firth, Corryvreckan, Dorus Mòr…):
+
+1. **Slack water** occurs near the reference port's HW/LW (± an offset), from the
+   offline tide engine (`predictExtrema`).
+2. Between consecutive slacks the **rate follows a sinusoid** (the "50/90" idea).
 3. The **peak magnitude** scales between the race's neap and spring figures by
-   the day's spring/neap fraction (`classifyTide`), so the rate is small on
-   neaps and large on springs.
+   the day's spring/neap fraction (`classifyTide`).
 
-So a race needs only: a reference station, slack offsets, flood/ebb sense, and a
-**published** spring/neap peak rate (common knowledge — e.g. Pentland ~12 kn,
+So a gate needs: a reference station, slack offsets, flood/ebb sense, and a
+**published** spring/neap peak rate (common knowledge — Pentland ~12 kn,
 Corryvreckan ~8.5 kn — *not* Admiralty's tables).
+
+**`sill`** — a basin behind a rock sill (**Falls of Lora**, at Connel). Here the
+stream is driven by the **head between the open sea and the loch**, not by local
+HW/LW. We take the sea level (the reference port), low-pass it to estimate the
+lagged loch level (`lochTauHours`), and set the rate ∝ `head = sea − loch`
+(`headRateScale`). The falls run **out** when the falling sea drops below the
+loch and **in** when it rises above — the documented mechanism — giving the
+asymmetric, strongly range-dependent windows a sinusoid can't. Slacks are the
+head's zero crossings. Tune `lochTauHours` / `headRateScale` against a reference
+like fallsoflora.info.
 
 ## What's approximate
 

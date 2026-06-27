@@ -136,6 +136,24 @@ export function thresholdWindows(
   return out;
 }
 
+/**
+ * Continuous sea level for a station over an arbitrary window (secondary ports
+ * get the uniform shift). Used by the Falls-of-Lora sill model.
+ */
+export function seaLevelSeries(
+  station: Station,
+  from: Date,
+  to: Date,
+  stepMinutes = 10,
+): { time: Date; height: number }[] {
+  const base = heightSeries(station.data, from, to, stepMinutes);
+  if (!station.shift) {
+    return base;
+  }
+  const { dtMin, dh } = meanShift(station);
+  return base.map((s) => ({ time: new Date(s.time.getTime() + dtMin * 60_000), height: s.height + dh }));
+}
+
 export interface NowState {
   heightNow: number;
   rising: boolean;

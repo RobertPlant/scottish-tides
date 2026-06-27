@@ -10,8 +10,8 @@
 // Slack timing and direction are approximate — verify against the pilot/atlas.
 // These races (Corryvreckan, Pentland Firth) can kill.
 
-import { stationById } from '@/lib/stations';
-import { classifyTide, dayEvents, dayRange, tidalStats } from '@/lib/tide-day';
+import { type Station, stationById } from '@/lib/stations';
+import { classifyTide, dayEvents, dayRange, seaLevelSeries, tidalStats } from '@/lib/tide-day';
 import { predictExtrema } from '@/lib/tides';
 
 export interface Race {
@@ -20,13 +20,14 @@ export interface Race {
   area: string;
   lat: number;
   lon: number;
-  /** Bundled station whose HW/LW times the streams are keyed to. */
+  /** Bundled station whose tide drives the streams. */
   referenceStationId: string;
-  /** Slack near the reference HW / LW, offset in minutes (approx). */
-  slackAtHwOffsetMin: number;
-  slackAtLwOffsetMin: number;
-  /** True if the "flood" runs during the rising tide (LW→HW) at the reference. */
-  floodFromLwToHw: boolean;
+  /**
+   * 'gate' — a strait that goes slack near the reference HW/LW (Pentland etc.).
+   * 'sill' — a basin behind a rock sill (Falls of Lora): the rate follows the
+   * head between the sea and the lagged loch level, giving asymmetric windows.
+   */
+  type: 'gate' | 'sill';
   floodName: string;
   ebbName: string;
   springPeakKn: number;
@@ -34,6 +35,19 @@ export interface Race {
   /** Race-specific hazard note. */
   warning: string;
   source: string;
+
+  // gate-type only:
+  /** Slack near the reference HW / LW, offset in minutes (approx). */
+  slackAtHwOffsetMin?: number;
+  slackAtLwOffsetMin?: number;
+  /** True if the "flood" runs during the rising tide (LW→HW) at the reference. */
+  floodFromLwToHw?: boolean;
+
+  // sill-type only:
+  /** Loch low-pass time constant (hours): how much the basin lags the sea. */
+  lochTauHours?: number;
+  /** Knots of stream per metre of head (sea − loch). */
+  headRateScale?: number;
 }
 
 export const RACES: Race[] = [
@@ -44,6 +58,7 @@ export const RACES: Race[] = [
     lat: 58.72,
     lon: -3.15,
     referenceStationId: 'wick',
+    type: 'gate',
     slackAtHwOffsetMin: 0,
     slackAtLwOffsetMin: 0,
     floodFromLwToHw: true,
@@ -53,7 +68,7 @@ export const RACES: Race[] = [
     neapPeakKn: 6,
     warning:
       'One of the most dangerous tidal passages in Britain — overfalls (the Merry Men of Mey, Swelkie) build huge seas against wind. Transit only at slack with a firm escape plan.',
-    source: 'Published peak ~12 kn springs (indicative).',
+    source: 'Published peak ~12 kn springs (indicative); slack timing approximate.',
   },
   {
     id: 'corryvreckan',
@@ -62,6 +77,7 @@ export const RACES: Race[] = [
     lat: 56.15,
     lon: -5.71,
     referenceStationId: 'oban',
+    type: 'gate',
     slackAtHwOffsetMin: 0,
     slackAtLwOffsetMin: 0,
     floodFromLwToHw: true,
@@ -71,7 +87,7 @@ export const RACES: Race[] = [
     neapPeakKn: 4,
     warning:
       'The whirlpool — standing waves and the famous overfall on the west-going stream against swell. Slack window is short. Expert only.',
-    source: 'Published peak ~8.5 kn springs (indicative).',
+    source: 'Published peak ~8.5 kn springs (indicative); slack timing approximate.',
   },
   {
     id: 'grey-dogs',
@@ -80,6 +96,7 @@ export const RACES: Race[] = [
     lat: 56.18,
     lon: -5.67,
     referenceStationId: 'oban',
+    type: 'gate',
     slackAtHwOffsetMin: 0,
     slackAtLwOffsetMin: 0,
     floodFromLwToHw: true,
@@ -88,7 +105,7 @@ export const RACES: Race[] = [
     springPeakKn: 8,
     neapPeakKn: 4,
     warning: 'A narrow, fierce gap with a permanent standing wave near peak flow. Slack only.',
-    source: 'Published peak ~8 kn springs (indicative).',
+    source: 'Published peak ~8 kn springs (indicative); slack timing approximate.',
   },
   {
     id: 'falls-of-lora',
@@ -97,16 +114,16 @@ export const RACES: Race[] = [
     lat: 56.45,
     lon: -5.39,
     referenceStationId: 'oban',
-    slackAtHwOffsetMin: 75,
-    slackAtLwOffsetMin: 75,
-    floodFromLwToHw: true,
+    type: 'sill',
     floodName: 'In-flowing (flood)',
     ebbName: 'Out-flowing (the falls)',
     springPeakKn: 7,
     neapPeakKn: 2,
+    lochTauHours: 3,
+    headRateScale: 4.0,
     warning:
-      'A tidal rapid over a rock ledge; the falls run hard on the ebb after HW. Strongly range-dependent — negligible on small neaps, violent on big springs.',
-    source: 'Published peak ~7 kn springs (indicative); slack lags HW/LW Oban.',
+      'A tidal rapid over a rock ledge: the falls run OUT on the ebb once the falling sea drops below Loch Etive, then IN on the flood. Strongly range-dependent — negligible on small neaps, violent on big springs.',
+    source: 'Modelled from the sea↔loch head (the documented mechanism); rate scale indicative.',
   },
   {
     id: 'dorus-mor',
@@ -115,6 +132,7 @@ export const RACES: Race[] = [
     lat: 56.11,
     lon: -5.61,
     referenceStationId: 'oban',
+    type: 'gate',
     slackAtHwOffsetMin: 0,
     slackAtLwOffsetMin: 0,
     floodFromLwToHw: true,
@@ -123,7 +141,7 @@ export const RACES: Race[] = [
     springPeakKn: 8,
     neapPeakKn: 4,
     warning: 'Strong, with overfalls off the point; gateway to the Sound of Jura races.',
-    source: 'Published peak ~8 kn springs (indicative).',
+    source: 'Published peak ~8 kn springs (indicative); slack timing approximate.',
   },
   {
     id: 'sound-of-islay',
@@ -132,6 +150,7 @@ export const RACES: Race[] = [
     lat: 55.86,
     lon: -6.1,
     referenceStationId: 'port-ellen',
+    type: 'gate',
     slackAtHwOffsetMin: 0,
     slackAtLwOffsetMin: 0,
     floodFromLwToHw: true,
@@ -140,7 +159,7 @@ export const RACES: Race[] = [
     springPeakKn: 5,
     neapPeakKn: 2.5,
     warning: 'A steady, strong tidal river — time a transit with the stream, not against.',
-    source: 'Published peak ~5 kn springs (indicative).',
+    source: 'Published peak ~5 kn springs (indicative); slack timing approximate.',
   },
 ];
 
@@ -182,29 +201,34 @@ export function predictStreamDay(race: Race, dayStart: Date): StreamDay {
   if (!ref) {
     return { samples: [], slacks: [], peaks: [], springNeapFraction: 0, peakRate: 0 };
   }
+  const fraction = classifyTide(dayRange(dayEvents(ref, dayStart)), tidalStats(ref)).fraction;
+  return race.type === 'sill'
+    ? predictSill(race, ref, dayStart, fraction)
+    : predictGate(race, ref, dayStart, fraction);
+}
 
+// --- 'gate' races: slack near reference HW/LW, sinusoid between -----------------
+
+function predictGate(race: Race, ref: Station, dayStart: Date, fraction: number): StreamDay {
   const from = new Date(dayStart.getTime() - 9 * 3600_000);
   const to = new Date(dayStart.getTime() + 33 * 3600_000);
   const events = predictExtrema(ref.data, from, to, ref.shift);
-
-  // Spring/neap fraction from the reference port's day, scaling the peak rate.
-  const fraction = classifyTide(dayRange(dayEvents(ref, dayStart)), tidalStats(ref)).fraction;
   const peakRate = race.neapPeakKn + fraction * (race.springPeakKn - race.neapPeakKn);
+  const hwOff = race.slackAtHwOffsetMin ?? 0;
+  const lwOff = race.slackAtLwOffsetMin ?? 0;
+  const floodFromLwToHw = race.floodFromLwToHw ?? true;
 
-  // Slack times: near each reference HW/LW, offset.
   const slacks = events
     .map((e) => ({
-      t: e.time.getTime() + (e.type === 'high' ? race.slackAtHwOffsetMin : race.slackAtLwOffsetMin) * 60_000,
+      t: e.time.getTime() + (e.type === 'high' ? hwOff : lwOff) * 60_000,
       afterLow: e.type === 'low',
     }))
     .sort((a, b) => a.t - b.t);
 
-  // Segments between consecutive slacks; a rising-tide segment (starts at an
-  // LW-slack) is flood iff floodFromLwToHw.
   const segments: Segment[] = [];
   for (let i = 0; i < slacks.length - 1; i++) {
     const rising = slacks[i].afterLow; // LW-slack starts a rising segment
-    segments.push({ s0: slacks[i].t, s1: slacks[i + 1].t, flood: rising === race.floodFromLwToHw });
+    segments.push({ s0: slacks[i].t, s1: slacks[i + 1].t, flood: rising === floodFromLwToHw });
   }
 
   const rateAt = (t: number): number => {
@@ -223,15 +247,78 @@ export function predictStreamDay(race: Race, dayStart: Date): StreamDay {
   for (let t = start; t <= end; t += 15 * 60_000) {
     samples.push({ time: new Date(t), rate: rateAt(t) });
   }
-
   const daySlacks = slacks.filter((s) => s.t >= start && s.t <= end).map((s) => new Date(s.t));
-
   const peaks: StreamPeak[] = segments
-    .map((seg) => {
-      const mid = (seg.s0 + seg.s1) / 2;
-      return { time: new Date(mid), rate: seg.flood ? peakRate : -peakRate, dirName: seg.flood ? race.floodName : race.ebbName };
-    })
+    .map((seg) => ({
+      time: new Date((seg.s0 + seg.s1) / 2),
+      rate: seg.flood ? peakRate : -peakRate,
+      dirName: seg.flood ? race.floodName : race.ebbName,
+    }))
     .filter((p) => p.time.getTime() >= start && p.time.getTime() <= end);
 
   return { samples, slacks: daySlacks, peaks, springNeapFraction: fraction, peakRate };
+}
+
+// --- 'sill' races (Falls of Lora): rate ∝ head between sea and lagged loch -----
+
+function predictSill(race: Race, ref: Station, dayStart: Date, fraction: number): StreamDay {
+  const tau = race.lochTauHours ?? 3;
+  const scale = race.headRateScale ?? 4;
+  const start = dayStart.getTime();
+  const end = start + 24 * 3600_000;
+
+  // Sea level over a padded window so the reservoir filter has warmed up.
+  const sea = seaLevelSeries(ref, new Date(start - 14 * 3600_000), new Date(end), 10);
+
+  // Loch level: a first-order low-pass of the sea (lags + damps). head = sea − loch.
+  let loch = sea[0].height;
+  const all: StreamSample[] = sea.map((s, i) => {
+    if (i > 0) {
+      const dtH = (s.time.getTime() - sea[i - 1].time.getTime()) / 3600_000;
+      loch += (dtH / tau) * (sea[i - 1].height - loch);
+    }
+    return { time: s.time, rate: (s.height - loch) * scale }; // + = sea above loch = flood in
+  });
+  const samples = all.filter((s) => s.time.getTime() >= start && s.time.getTime() <= end);
+
+  const { slacks, peaks } = deriveEvents(samples, race.floodName, race.ebbName);
+  const peakRate = samples.reduce((m, s) => Math.max(m, Math.abs(s.rate)), 0);
+  return { samples, slacks, peaks, springNeapFraction: fraction, peakRate };
+}
+
+/** Slacks (zero crossings) and peaks (lobe maxima) from a signed-rate series. */
+function deriveEvents(
+  samples: StreamSample[],
+  floodName: string,
+  ebbName: string,
+): { slacks: Date[]; peaks: StreamPeak[] } {
+  const slacks: Date[] = [];
+  const crossings: number[] = [0];
+  for (let i = 1; i < samples.length; i++) {
+    const a = samples[i - 1].rate;
+    const b = samples[i].rate;
+    if ((a <= 0 && b > 0) || (a >= 0 && b < 0)) {
+      const f = a !== b ? a / (a - b) : 0;
+      const t = samples[i - 1].time.getTime() + f * (samples[i].time.getTime() - samples[i - 1].time.getTime());
+      slacks.push(new Date(t));
+      crossings.push(i);
+    }
+  }
+  crossings.push(samples.length - 1);
+
+  const peaks: StreamPeak[] = [];
+  for (let k = 0; k < crossings.length - 1; k++) {
+    let bi = crossings[k];
+    let bv = 0;
+    for (let i = crossings[k]; i <= crossings[k + 1]; i++) {
+      if (Math.abs(samples[i].rate) > Math.abs(bv)) {
+        bv = samples[i].rate;
+        bi = i;
+      }
+    }
+    if (Math.abs(bv) > 0.3) {
+      peaks.push({ time: samples[bi].time, rate: bv, dirName: bv > 0 ? floodName : ebbName });
+    }
+  }
+  return { slacks, peaks };
 }
