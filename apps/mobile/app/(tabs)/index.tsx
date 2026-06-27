@@ -15,8 +15,14 @@ import { dayEvents, dayHeightSeries, nowState } from '@/lib/tide-day';
 export default function HomeScreen() {
   const palette = usePalette();
   const router = useRouter();
-  const { stationId, setStationId } = useSelectedStation();
+  const { stationId, setStationId, isFavourite } = useSelectedStation();
   const station = stationById(stationId) ?? STATIONS[0];
+
+  // Favourite stations first in the chip row.
+  const chipStations = useMemo(
+    () => [...STATIONS].sort((a, b) => Number(isFavourite(b.id)) - Number(isFavourite(a.id))),
+    [isFavourite],
+  );
 
   // Re-render each minute so "now" stays live.
   const [now, setNow] = useState(() => new Date());
@@ -37,7 +43,7 @@ export default function HomeScreen() {
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.chips}
       >
-        {STATIONS.map((s) => {
+        {chipStations.map((s) => {
           const active = s.id === station.id;
           return (
             <Pressable

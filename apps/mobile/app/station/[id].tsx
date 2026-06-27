@@ -1,5 +1,5 @@
-import { Stack, useLocalSearchParams } from 'expo-router';
-import { useMemo, useState } from 'react';
+import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
+import { useCallback, useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
 import { DateField } from '@/components/date-field';
@@ -11,8 +11,11 @@ import { TideTable } from '@/components/tide-table';
 import { WeekOverview } from '@/components/week-overview';
 import { usePalette } from '@/hooks/use-theme-color';
 import { formatLongDay, ukDayStartFromYmd, ymdAddDays, ymdInUk } from '@/lib/datetime';
+import { useSelectedStation } from '@/lib/selected-station';
 import { STATIONS, stationById } from '@/lib/stations';
 import { classifyTide, dayEvents, dayHeightSeries, dayRange, tidalStats } from '@/lib/tide-day';
+
+const YMD_RE = /^\d{4}-\d{2}-\d{2}$/;
 
 // Pre-render one static HTML page per station so deep links like
 // /station/oban survive a hard refresh on GitHub Pages.
@@ -22,13 +25,26 @@ export async function generateStaticParams(): Promise<{ id: string }[]> {
 
 export default function StationDetail() {
   const palette = usePalette();
-  const { id } = useLocalSearchParams<{ id: string }>();
+  const router = useRouter();
+  const { id, d } = useLocalSearchParams<{ id: string; d?: string }>();
   const station = stationById(id) ?? STATIONS[0];
+  const { isFavourite, toggleFavourite } = useSelectedStation();
 
   const now = useMemo(() => new Date(), []);
   const todayYmd = useMemo(() => ymdInUk(now), [now]);
-  const [ymd, setYmd] = useState(todayYmd);
+  // Date can come from a shareable ?d=YYYY-MM-DD link.
+  const [ymd, setYmd] = useState(() => (d && YMD_RE.test(d) ? d : ymdInUk(new Date())));
   const dayStart = useMemo(() => ukDayStartFromYmd(ymd), [ymd]);
+
+  // Keep the URL in sync so the current day is bookmarkable/shareable.
+  const updateYmd = useCallback(
+    (next: string) => {
+      setYmd(next);
+      router.setParams({ d: next });
+    },
+    [router],
+  );
+  const fav = isFavourite(station.id);
 
   const minYmd = useMemo(() => ymdAddDays(todayYmd, -730), [todayYmd]);
   const maxYmd = useMemo(() => ymdAddDays(todayYmd, 730), [todayYmd]);
@@ -58,11 +74,21 @@ export default function StationDetail() {
               </ThemedText>
             ) : null}
           </View>
+          <Pressable
+            onPress={() => toggleFavourite(station.id)}
+            hitSlop={8}
+            accessibilityLabel={fav ? 'Remove favourite' : 'Add favourite'}
+            style={styles.star}
+          >
+            <ThemedText style={{ fontSize: 24, color: fav ? palette.accent : palette.muted }}>
+              {fav ? '★' : '☆'}
+            </ThemedText>
+          </Pressable>
         </View>
 
         <View style={styles.navRow}>
           <Pressable
-            onPress={() => setYmd((d) => ymdAddDays(d, -1))}
+            onPress={() => updateYmd(ymdAddDays(ymd, -1))}
             style={[styles.navButton, { borderColor: palette.border }]}
           >
             <ThemedText style={{ color: palette.accent }}>‹ Prev</ThemedText>
@@ -71,7 +97,7 @@ export default function StationDetail() {
             {formatLongDay(dayStart)}
           </ThemedText>
           <Pressable
-            onPress={() => setYmd((d) => ymdAddDays(d, 1))}
+            onPress={() => updateYmd(ymdAddDays(ymd, 1))}
             style={[styles.navButton, { borderColor: palette.border }]}
           >
             <ThemedText style={{ color: palette.accent }}>Next ›</ThemedText>
@@ -79,9 +105,9 @@ export default function StationDetail() {
         </View>
 
         <View style={styles.pickerRow}>
-          <DateField value={ymd} onChange={setYmd} min={minYmd} max={maxYmd} />
+          <DateField value={ymd} onChange={updateYmd} min={minYmd} max={maxYmd} />
           {!isToday ? (
-            <Pressable onPress={() => setYmd(todayYmd)} style={styles.todayLink}>
+            <Pressable onPress={() => updateYmd(todayYmd)} style={styles.todayLink}>
               <ThemedText style={{ color: palette.accent }}>Today</ThemedText>
             </Pressable>
           ) : null}
@@ -112,7 +138,7 @@ export default function StationDetail() {
 
         <SunMoonCard date={dayStart} lat={station.lat} lon={station.lon} />
 
-        <WeekOverview station={station} fromYmd={ymd} selectedYmd={ymd} onSelectDay={setYmd} />
+        <WeekOverview station={station} fromYmd={ymd} selectedYmd={ymd} onSelectDay={updateYmd} />
 
         <View style={[styles.info, { borderColor: palette.border }]}>
           <ThemedText type="caption" style={{ color: palette.muted }}>
@@ -138,6 +164,7 @@ export default function StationDetail() {
 const styles = StyleSheet.create({
   content: { padding: 16, gap: 16 },
   headerRow: { flexDirection: 'row', alignItems: 'flex-start' },
+  star: { paddingLeft: 8, paddingTop: 2 },
   navRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8 },
   navButton: { borderRadius: 10, borderWidth: StyleSheet.hairlineWidth, paddingHorizontal: 14, paddingVertical: 8 },
   navLabel: { flex: 1, textAlign: 'center' },
