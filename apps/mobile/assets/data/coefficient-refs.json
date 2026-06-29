@@ -1,0 +1,46 @@
+{
+  "Aberdeen": {
+    "springRef": 3.733,
+    "neapRef": 1.816
+  },
+  "Kinlochbervie": {
+    "springRef": 4.287,
+    "neapRef": 1.841
+  },
+  "Leith": {
+    "springRef": 5.125,
+    "neapRef": 2.477
+  },
+  "Lerwick": {
+    "springRef": 1.821,
+    "neapRef": 0.802
+  },
+  "Millport": {
+    "springRef": 3.075,
+    "neapRef": 1.799
+  },
+  "Port Ellen": {
+    "springRef": 0.848,
+    "neapRef": 0.355
+  },
+  "Portpatrick": {
+    "springRef": 3.621,
+    "neapRef": 2.062
+  },
+  "Stornoway": {
+    "springRef": 4.225,
+    "neapRef": 1.761
+  },
+  "Tobermory": {
+    "springRef": 3.874,
+    "neapRef": 1.471
+  },
+  "Ullapool": {
+    "springRef": 4.479,
+    "neapRef": 1.898
+  },
+  "Wick": {
+    "springRef": 3.027,
+    "neapRef": 1.396
+  }
+}

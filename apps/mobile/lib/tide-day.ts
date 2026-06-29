@@ -1,8 +1,11 @@
 // Per-day / "right now" derivations on top of the engine, shared by the screens.
 
+import coefficientRefs from '@/assets/data/coefficient-refs.json';
 import { addDays } from '@/lib/datetime';
 import type { Station } from '@/lib/stations';
 import { heightSeries, predictExtrema, type TideEvent, Tide } from '@/lib/tides';
+
+const COEF_REFS = coefficientRefs as Record<string, { springRef: number; neapRef: number }>;
 
 function dayWindow(dayStart: Date): { from: Date; to: Date } {
   return { from: dayStart, to: addDays(dayStart, 1) };
@@ -53,19 +56,31 @@ export interface TidalStats {
 }
 
 /**
- * Mean spring/neap range from the semidiurnal constituents: spring = 2·(M2+S2),
- * neap = 2·|M2−S2|. For secondary ports the constant height shift (HW − LW
- * offset) is added, since it widens/narrows every tide equally.
+ * Mean spring/neap range for a station. Prefers the empirically-calibrated
+ * references in coefficient-refs.json (mean of realised spring-peak / neap-
+ * trough daily ranges — see tools/gen-coefficient-refs.ts), which include K2,
+ * N2 and the diurnal contribution that the idealised 2·(M2±S2) formula misses.
+ * Falls back to that formula for any gauge without a baked reference. For
+ * secondary ports the constant HW−LW shift is added, since it widens/narrows
+ * every tide equally.
  */
 export function tidalStats(station: Station): TidalStats {
-  const amp = (name: string) =>
-    station.data.constituents.find((c) => c.name === name)?.amplitude ?? 0;
-  const m2 = amp('M2');
-  const s2 = amp('S2');
   const rangeShift = station.shift ? station.shift.hw_height_m - station.shift.lw_height_m : 0;
+  const ref = COEF_REFS[station.data.station];
+  let springRange: number;
+  let neapRange: number;
+  if (ref) {
+    springRange = ref.springRef + rangeShift;
+    neapRange = ref.neapRef + rangeShift;
+  } else {
+    const amp = (name: string) =>
+      station.data.constituents.find((c) => c.name === name)?.amplitude ?? 0;
+    springRange = 2 * (amp('M2') + amp('S2')) + rangeShift;
+    neapRange = 2 * Math.abs(amp('M2') - amp('S2')) + rangeShift;
+  }
   return {
-    springRange: Math.max(2 * (m2 + s2) + rangeShift, 0.1),
-    neapRange: Math.max(2 * Math.abs(m2 - s2) + rangeShift, 0.05),
+    springRange: Math.max(springRange, 0.1),
+    neapRange: Math.max(neapRange, 0.05),
   };
 }
 
