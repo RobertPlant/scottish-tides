@@ -9,7 +9,17 @@ import { formatRelative, formatTime } from '@/lib/datetime';
 import type { Station } from '@/lib/stations';
 import type { NowState } from '@/lib/tide-day';
 
-export function NowNext({ station, state, now }: { station: Station; state: NowState; now: Date }) {
+export function NowNext({
+  station,
+  state,
+  now,
+  showName = true,
+}: {
+  station: Station;
+  state: NowState;
+  now: Date;
+  showName?: boolean;
+}) {
   const palette = usePalette();
   const { heightNow, rising, next, afterNext } = state;
   const trendColor = rising ? palette.high : palette.low;
@@ -18,12 +28,20 @@ export function NowNext({ station, state, now }: { station: Station; state: NowS
     <View style={[styles.card, { backgroundColor: palette.surface, borderColor: palette.border }]}>
       <View style={styles.headerRow}>
         <View style={{ flex: 1 }}>
-          <ThemedText type="subtitle">{station.name}</ThemedText>
-          {station.subtitle ? (
+          {showName ? (
+            <>
+              <ThemedText type="subtitle">{station.name}</ThemedText>
+              {station.subtitle ? (
+                <ThemedText type="caption" style={{ color: palette.muted }}>
+                  {station.subtitle}
+                </ThemedText>
+              ) : null}
+            </>
+          ) : (
             <ThemedText type="caption" style={{ color: palette.muted }}>
-              {station.subtitle}
+              Right now
             </ThemedText>
-          ) : null}
+          )}
         </View>
         <View style={[styles.trendPill, { backgroundColor: trendColor }]}>
           <ThemedText style={styles.trendText}>{rising ? '▲ Rising' : '▼ Falling'}</ThemedText>
@@ -37,7 +55,12 @@ export function NowNext({ station, state, now }: { station: Station; state: NowS
 
       {next ? (
         <View style={styles.nextRow}>
-          <View style={[styles.dot, { backgroundColor: next.type === 'high' ? palette.high : palette.low }]} />
+          <View
+            style={[
+              styles.dot,
+              { backgroundColor: next.type === 'high' ? palette.high : palette.low },
+            ]}
+          />
           <ThemedText type="defaultSemiBold">
             {next.type === 'high' ? 'High' : 'Low'} {next.height.toFixed(2)} m
           </ThemedText>
@@ -49,7 +72,12 @@ export function NowNext({ station, state, now }: { station: Station; state: NowS
 
       {afterNext ? (
         <View style={styles.nextRow}>
-          <View style={[styles.dot, { backgroundColor: afterNext.type === 'high' ? palette.high : palette.low }]} />
+          <View
+            style={[
+              styles.dot,
+              { backgroundColor: afterNext.type === 'high' ? palette.high : palette.low },
+            ]}
+          />
           <ThemedText style={{ color: palette.muted }}>
             then {afterNext.type === 'high' ? 'High' : 'Low'} {afterNext.height.toFixed(2)} m at{' '}
             {formatTime(afterNext.time)}

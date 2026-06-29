@@ -36,7 +36,9 @@ test('stations page lists ports from around the coast', async ({ page }) => {
 
 test('station detail: the date picker changes the day', async ({ page }) => {
   await page.goto('/station/oban');
-  const input = page.locator('input[type=date]');
+  // The anchored Tides tab stays mounted (with its own date picker) beneath the
+  // pushed station detail, so two date inputs exist — the detail is rendered last.
+  const input = page.locator('input[type=date]').last();
   await expect(input).toBeVisible();
   // Let dev-mode hydration attach React's onChange before we dispatch a synthetic
   // edit (otherwise the event has no listener and state never updates).

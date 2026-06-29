@@ -38,7 +38,11 @@ export function WeekOverview({
       {days.map((d) => {
         const selected = d.ymd === selectedYmd;
         const barColor =
-          d.cls.label === 'Springs' ? palette.accent : d.cls.label === 'Neaps' ? palette.muted : palette.tint;
+          d.cls.label === 'Springs'
+            ? palette.accent
+            : d.cls.label === 'Neaps'
+              ? palette.muted
+              : palette.tint;
         return (
           <Pressable
             key={d.ymd}
@@ -63,6 +67,9 @@ export function WeekOverview({
             <ThemedText style={[styles.range, { color: palette.muted }]}>
               {d.range.toFixed(1)} m
             </ThemedText>
+            <ThemedText style={[styles.coef, { color: palette.muted }]}>
+              {d.cls.coefficient}
+            </ThemedText>
             <ThemedText style={[styles.tag, { color: barColor }]}>{d.cls.label}</ThemedText>
           </Pressable>
         );
@@ -73,10 +80,17 @@ export function WeekOverview({
 
 const styles = StyleSheet.create({
   card: { borderRadius: 16, borderWidth: StyleSheet.hairlineWidth, padding: 16, gap: 8 },
-  row: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingVertical: 6, paddingHorizontal: 4 },
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingVertical: 6,
+    paddingHorizontal: 4,
+  },
   day: { width: 92, fontSize: 13 },
   track: { flex: 1, height: 6, borderRadius: 3, overflow: 'hidden' },
   fill: { height: 6, borderRadius: 3 },
   range: { width: 48, textAlign: 'right', fontSize: 13 },
+  coef: { width: 28, textAlign: 'right', fontSize: 13, fontVariant: ['tabular-nums'] },
   tag: { width: 64, textAlign: 'right', fontSize: 12, fontWeight: '600' },
 });

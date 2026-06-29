@@ -81,16 +81,26 @@ export function dayRange(events: TideEvent[]): number {
 
 export interface TideClass {
   label: 'Springs' | 'Neaps' | 'Mid-range';
-  /** 0 = neaps, 1 = springs. */
+  /** 0 = neaps, 1 = springs (clamped). */
   fraction: number;
+  /**
+   * Tidal coefficient on the French (SHOM) 20–120 scale: a numerical measure
+   * of "springiness". Anchored so mean neaps = 45 and mean springs = 95, then
+   * extrapolated and clamped to [20, 120]. The constant range-shift for
+   * secondary ports cancels in the (range − neap)/(spring − neap) ratio, so
+   * this stays a purely astronomical quantity.
+   */
+  coefficient: number;
 }
 
 /** Classify a day's range between the station's neap and spring ranges. */
 export function classifyTide(range: number, stats: TidalStats): TideClass {
   const span = stats.springRange - stats.neapRange;
-  const fraction = span > 0 ? Math.min(Math.max((range - stats.neapRange) / span, 0), 1) : 0.5;
+  const raw = span > 0 ? (range - stats.neapRange) / span : 0.5;
+  const fraction = Math.min(Math.max(raw, 0), 1);
   const label = fraction >= 0.66 ? 'Springs' : fraction <= 0.34 ? 'Neaps' : 'Mid-range';
-  return { label, fraction };
+  const coefficient = Math.round(Math.min(Math.max(45 + raw * 50, 20), 120));
+  return { label, fraction, coefficient };
 }
 
 export interface Window {
@@ -151,7 +161,10 @@ export function seaLevelSeries(
     return base;
   }
   const { dtMin, dh } = meanShift(station);
-  return base.map((s) => ({ time: new Date(s.time.getTime() + dtMin * 60_000), height: s.height + dh }));
+  return base.map((s) => ({
+    time: new Date(s.time.getTime() + dtMin * 60_000),
+    height: s.height + dh,
+  }));
 }
 
 export interface NowState {
