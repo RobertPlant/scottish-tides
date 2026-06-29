@@ -1,12 +1,13 @@
 // A lightweight, fully-offline locator map. No map tiles: a schematic coastline
 // (mainland + major islands) is drawn from hand-traced lat/lon polygons, with
-// station pins projected on top. An equirectangular projection with longitude
+// station pins (round) and/or tidal-race markers (numbered diamonds) projected
+// on top. An equirectangular projection with longitude
 // scaled by cos(latitude) keeps Scotland from looking squashed. Decorative — not
 // for navigation.
 
 import { useState } from 'react';
 import { type LayoutChangeEvent, StyleSheet, Text, View } from 'react-native';
-import Svg, { Circle, G, Path, Rect, Text as SvgText } from 'react-native-svg';
+import Svg, { Circle, G, Path, Polygon, Rect, Text as SvgText } from 'react-native-svg';
 
 import coastRings from '@/assets/data/scotland-coast.json';
 import { usePalette } from '@/hooks/use-theme-color';
@@ -31,14 +32,29 @@ const LABEL_DY: Record<string, number> = {
   wick: 9, // drop below the pin line
 };
 
+/** A tidal-race marker: shown as a numbered diamond, tied to a numbered list. */
+export interface StreamMarker {
+  id: string;
+  name: string;
+  lat: number;
+  lon: number;
+}
+
 export function ScotlandMap({
-  stations,
+  stations = [],
   selectedId,
   onSelect,
+  streams = [],
+  selectedStreamId,
+  onSelectStream,
 }: {
-  stations: Station[];
+  stations?: Station[];
   selectedId?: string;
-  onSelect: (id: string) => void;
+  onSelect?: (id: string) => void;
+  /** Tidal races to overlay, drawn as numbered diamonds (1-based, in order). */
+  streams?: StreamMarker[];
+  selectedStreamId?: string;
+  onSelectStream?: (id: string) => void;
 }) {
   const palette = usePalette();
   const isDark = palette.background === '#06121d';
@@ -78,7 +94,7 @@ export function ScotlandMap({
                 fill={selected ? palette.accent : palette.tint}
                 stroke="#ffffff"
                 strokeWidth={1.5}
-                onPress={() => onSelect(s.id)}
+                onPress={onSelect ? () => onSelect(s.id) : undefined}
               />
             );
           })}
@@ -109,8 +125,42 @@ export function ScotlandMap({
                 >
                   {s.name}
                 </SvgText>
-                <SvgText x={lx} y={ly} fontSize={11} fontWeight={weight} textAnchor={anchor} fill={palette.text}>
+                <SvgText
+                  x={lx}
+                  y={ly}
+                  fontSize={11}
+                  fontWeight={weight}
+                  textAnchor={anchor}
+                  fill={palette.text}
+                >
                   {s.name}
+                </SvgText>
+              </G>
+            );
+          })}
+          {streams.map((st, i) => {
+            // Numbered diamonds, tied to the numbered list below the map. A
+            // diamond (vs the round station pins) reads as "race / hazard".
+            const cx = px(st.lon);
+            const cy = py(st.lat);
+            const sel = st.id === selectedStreamId;
+            const r = sel ? 11 : 9;
+            const pts = `${cx},${cy - r} ${cx + r},${cy} ${cx},${cy + r} ${cx - r},${cy}`;
+            return (
+              <G
+                key={`stream-${st.id}`}
+                onPress={onSelectStream ? () => onSelectStream(st.id) : undefined}
+              >
+                <Polygon points={pts} fill={palette.low} stroke="#ffffff" strokeWidth={1.5} />
+                <SvgText
+                  x={cx}
+                  y={cy + 4}
+                  fontSize={11}
+                  fontWeight="700"
+                  textAnchor="middle"
+                  fill="#ffffff"
+                >
+                  {i + 1}
                 </SvgText>
               </G>
             );
