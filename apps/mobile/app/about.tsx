@@ -20,7 +20,7 @@ const CREDITS: Credit[] = [
   {
     what: 'Tide predictions',
     detail:
-      'Harmonic constituents fitted from tide-gauge observations published by the British Oceanographic Data Centre (BODC) / National Tidal & Sea Level Facility.',
+      'Harmonic constituents fitted from UK National Tide Gauge Network data — owned by the Environment Agency, provided by the British Oceanographic Data Centre (BODC).',
     url: 'https://www.bodc.ac.uk/',
   },
   {
