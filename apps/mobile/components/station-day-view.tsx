@@ -1,7 +1,7 @@
 // The full per-station "date view": now/next (today only), day navigation,
-// spring/neap + coefficient badge, scrubbable curve, HW/LW table, threshold
-// tool, sun & moon, and the 7-day overview. Shared by the default tab and the
-// /station/[id] deep-link route so both show the complete picture.
+// spring/neap + coefficient badge, scrubbable curve (with daylight shading),
+// HW/LW table, sun & moon, and the 7-day overview. Shared by the default tab
+// and the /station/[id] deep-link route so both show the complete picture.
 
 import { useRouter } from 'expo-router';
 import { type ReactNode, useCallback, useEffect, useMemo, useState } from 'react';
@@ -15,6 +15,7 @@ import { TideCurve } from '@/components/tide-curve';
 import { TideTable } from '@/components/tide-table';
 import { WeekOverview } from '@/components/week-overview';
 import { usePalette } from '@/hooks/use-theme-color';
+import { sunTimes } from '@/lib/astronomy';
 import { formatLongDay, ukDayStartFromYmd, ymdAddDays, ymdInUk } from '@/lib/datetime';
 import type { Station } from '@/lib/stations';
 import {
@@ -76,6 +77,10 @@ export function StationDayView({
 
   const events = useMemo(() => dayEvents(station, dayStart), [station, dayStart]);
   const series = useMemo(() => dayHeightSeries(station, dayStart), [station, dayStart]);
+  const sun = useMemo(
+    () => sunTimes(dayStart, station.lat, station.lon),
+    [dayStart, station.lat, station.lon],
+  );
   const isToday = ymd === todayYmd;
   const state = useMemo(() => nowState(station, now), [station, now]);
 
@@ -147,9 +152,10 @@ export function StationDayView({
           now={isToday ? now : undefined}
           height={220}
           scrubbable
+          sun={sun}
         />
         <ThemedText type="caption" style={{ color: palette.muted }}>
-          Tap the chart to read the level at any time.
+          Tap the chart to read the level at any time. Gold band = daylight.
         </ThemedText>
         <TideTable events={events} />
       </View>

@@ -91,6 +91,6 @@ const styles = StyleSheet.create({
   track: { flex: 1, height: 6, borderRadius: 3, overflow: 'hidden' },
   fill: { height: 6, borderRadius: 3 },
   range: { width: 48, textAlign: 'right', fontSize: 13 },
-  coef: { width: 28, textAlign: 'right', fontSize: 13, fontVariant: ['tabular-nums'] },
+  coef: { width: 28, textAlign: 'right', fontSize: 13 },
   tag: { width: 64, textAlign: 'right', fontSize: 12, fontWeight: '600' },
 });

@@ -24,6 +24,8 @@ interface Props {
   height?: number;
   /** Allow tapping/dragging the chart to read the height at any time. */
   scrubbable?: boolean;
+  /** Sunrise/sunset for the day; shades the daylight hours behind the curve. */
+  sun?: { sunrise: Date | null; sunset: Date | null; alwaysUp?: boolean };
 }
 
 const PAD_LEFT = 30;
@@ -39,8 +41,9 @@ function niceStep(raw: number): number {
   return s * pow;
 }
 
-export function TideCurve({ series, events, now, height = 200, scrubbable = false }: Props) {
+export function TideCurve({ series, events, now, height = 200, scrubbable = false, sun }: Props) {
   const palette = usePalette();
+  const isDark = palette.background === '#06121d';
   const [width, setWidth] = useState(0);
   const [scrubT, setScrubT] = useState<number | null>(null);
 
@@ -81,6 +84,23 @@ export function TideCurve({ series, events, now, height = 200, scrubbable = fals
   const x = (t: number) => PAD_LEFT + ((t - t0) / (t1 - t0)) * plotW;
   const y = (h: number) => PAD_TOP + (1 - (h - yMin) / (yMax - yMin)) * plotH;
   const baseY = y(yMin);
+
+  // Daylight band (sun above the horizon), clamped to the plotted day.
+  let dayBand: { x0: number; x1: number } | null = null;
+  if (sun) {
+    let s0 = t0;
+    let s1 = t0;
+    if (sun.alwaysUp) {
+      s1 = t1;
+    } else if (sun.sunrise && sun.sunset) {
+      s0 = Math.max(sun.sunrise.getTime(), t0);
+      s1 = Math.min(sun.sunset.getTime(), t1);
+    }
+    if (s1 > s0) {
+      dayBand = { x0: x(s0), x1: x(s1) };
+    }
+  }
+  const dayFill = '#ffcf4d'; // warm gold, theme-agnostic
 
   const line = merged
     .map((p, i) => `${i === 0 ? 'M' : 'L'} ${x(p.t).toFixed(1)} ${y(p.h).toFixed(1)}`)
@@ -153,6 +173,18 @@ export function TideCurve({ series, events, now, height = 200, scrubbable = fals
     <View style={{ height }} onLayout={onLayout} {...responder}>
       {width > 0 && (
         <Svg width={width} height={height}>
+          {/* Daylight band behind the grid (sun above the horizon) */}
+          {dayBand && (
+            <Rect
+              x={dayBand.x0}
+              y={PAD_TOP}
+              width={Math.max(dayBand.x1 - dayBand.x0, 0)}
+              height={plotH}
+              fill={dayFill}
+              opacity={isDark ? 0.12 : 0.22}
+            />
+          )}
+
           {/* Height gridlines + axis labels */}
           {yTicks.map((v) => (
             <G key={`y${v}`}>
@@ -164,7 +196,13 @@ export function TideCurve({ series, events, now, height = 200, scrubbable = fals
                 stroke={palette.border}
                 strokeWidth={1}
               />
-              <SvgText x={PAD_LEFT - 4} y={y(v) + 3} fill={palette.muted} fontSize={9} textAnchor="end">
+              <SvgText
+                x={PAD_LEFT - 4}
+                y={y(v) + 3}
+                fill={palette.muted}
+                fontSize={9}
+                textAnchor="end"
+              >
                 {v.toFixed(decimals)}
               </SvgText>
             </G>
