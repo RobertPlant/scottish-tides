@@ -11,7 +11,6 @@ import { DateField } from '@/components/date-field';
 import { NowNext } from '@/components/now-next';
 import { SunMoonCard } from '@/components/sun-moon-card';
 import { ThemedText } from '@/components/themed-text';
-import { ThresholdTool } from '@/components/threshold-tool';
 import { TideCurve } from '@/components/tide-curve';
 import { TideTable } from '@/components/tide-table';
 import { WeekOverview } from '@/components/week-overview';
@@ -154,8 +153,6 @@ export function StationDayView({
         </ThemedText>
         <TideTable events={events} />
       </View>
-
-      <ThresholdTool station={station} dayStart={dayStart} />
 
       <SunMoonCard date={dayStart} lat={station.lat} lon={station.lon} />
 
