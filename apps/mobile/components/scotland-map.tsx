@@ -6,8 +6,8 @@
 // zoom — useful for the tightly-clustered Argyll races. Decorative, not for
 // navigation.
 
-import { useCallback, useMemo, useRef, useState } from 'react';
-import { type LayoutChangeEvent, Pressable, StyleSheet, Text, View } from 'react-native';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { type LayoutChangeEvent, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Svg, { Circle, G, Path, Polygon, Rect, Text as SvgText } from 'react-native-svg';
 
@@ -112,6 +112,27 @@ export function ScotlandMap({
     [setView],
   );
 
+  // Scroll-wheel / trackpad zoom on web. View props don't forward onWheel, so
+  // attach a non-passive DOM listener to the frame element and zoom around the
+  // cursor, preventing the page from scrolling while pointing at the map.
+  const frameRef = useRef<View>(null);
+  useEffect(() => {
+    if (Platform.OS !== 'web') {
+      return;
+    }
+    const el = frameRef.current as unknown as HTMLElement | null;
+    if (!el) {
+      return;
+    }
+    const onWheel = (e: WheelEvent) => {
+      e.preventDefault();
+      const rect = el.getBoundingClientRect();
+      zoomAround(Math.exp(-e.deltaY * 0.0015), e.clientX - rect.left, e.clientY - rect.top);
+    };
+    el.addEventListener('wheel', onWheel, { passive: false });
+    return () => el.removeEventListener('wheel', onWheel);
+  }, [zoomAround]);
+
   const start = useRef<ViewState & { fx: number; fy: number }>({ k: 1, x: 0, y: 0, fx: 0, fy: 0 });
   const gesture = useMemo(() => {
     const pan = Gesture.Pan()
@@ -167,6 +188,7 @@ export function ScotlandMap({
 
   return (
     <View
+      ref={frameRef}
       style={[styles.frame, { borderColor: palette.border, backgroundColor: sea }]}
       onLayout={onLayout}
     >
@@ -311,7 +333,7 @@ const styles = StyleSheet.create({
     // at full column width the map turns into a giant block on desktop. Cap it
     // and centre it — it's a locator, not a chart.
     width: '100%',
-    maxWidth: 380,
+    maxWidth: 460,
     alignSelf: 'center',
   },
   noteText: { position: 'absolute', right: 10, bottom: 8, fontSize: 10 },
