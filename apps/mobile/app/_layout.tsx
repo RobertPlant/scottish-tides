@@ -24,6 +24,7 @@ export default function RootLayout() {
               <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
               <Stack.Screen name="station/[id]" options={{ title: 'Tides' }} />
               <Stack.Screen name="stream/[id]" options={{ title: 'Stream' }} />
+              <Stack.Screen name="about" options={{ title: 'About' }} />
             </Stack>
             <StatusBar style="auto" />
           </ThemeProvider>

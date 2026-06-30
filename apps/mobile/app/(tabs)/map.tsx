@@ -192,6 +192,12 @@ export default function MapScreen() {
         More ports as the data is fitted. Each station is a small set of harmonic constituents
         bundled in the app — predictions run entirely offline.
       </ThemedText>
+
+      <Pressable onPress={() => router.push('/about')} style={styles.aboutLink}>
+        <ThemedText style={{ color: palette.accent, fontWeight: '600' }}>
+          About &amp; data sources →
+        </ThemedText>
+      </Pressable>
     </ScrollView>
   );
 }
@@ -220,4 +226,5 @@ const styles = StyleSheet.create({
     paddingVertical: 2,
   },
   footer: { lineHeight: 18 },
+  aboutLink: { alignItems: 'center', paddingVertical: 4 },
 });
