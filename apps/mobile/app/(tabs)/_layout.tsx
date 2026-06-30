@@ -22,22 +22,17 @@ export default function TabsLayout() {
         name="index"
         options={{
           title: 'Tides',
-          tabBarIcon: ({ color, size }) => <Ionicons name="water-outline" size={size} color={color} />,
-        }}
-      />
-      <Tabs.Screen
-        name="stations"
-        options={{
-          title: 'Stations',
-          tabBarIcon: ({ color, size }) => <Ionicons name="map-outline" size={size} color={color} />,
-        }}
-      />
-      <Tabs.Screen
-        name="streams"
-        options={{
-          title: 'Streams',
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="swap-horizontal-outline" size={size} color={color} />
+            <Ionicons name="water-outline" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="map"
+        options={{
+          title: 'Map',
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="map-outline" size={size} color={color} />
           ),
         }}
       />

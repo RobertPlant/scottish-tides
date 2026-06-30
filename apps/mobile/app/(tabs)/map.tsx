@@ -8,11 +8,13 @@ import { usePalette } from '@/hooks/use-theme-color';
 import { nearestStation } from '@/lib/geo';
 import { useSelectedStation } from '@/lib/selected-station';
 import { REGION_ORDER, type Station, STATIONS, stationById } from '@/lib/stations';
+import { RACES } from '@/lib/streams';
 
-export default function StationsScreen() {
+export default function MapScreen() {
   const palette = usePalette();
   const router = useRouter();
-  const { stationId, setStationId, favourites, isFavourite, toggleFavourite } = useSelectedStation();
+  const { stationId, setStationId, favourites, isFavourite, toggleFavourite } =
+    useSelectedStation();
   const [locating, setLocating] = useState(false);
   const [locErr, setLocErr] = useState<string | null>(null);
 
@@ -20,6 +22,7 @@ export default function StationsScreen() {
     setStationId(id);
     router.push({ pathname: '/station/[id]', params: { id } });
   };
+  const openStream = (id: string) => router.push({ pathname: '/stream/[id]', params: { id } });
 
   const findNearest = () => {
     if (Platform.OS !== 'web' || typeof navigator === 'undefined' || !navigator.geolocation) {
@@ -62,7 +65,9 @@ export default function StationsScreen() {
         ]}
       >
         <Pressable onPress={() => toggleFavourite(s.id)} hitSlop={8} style={styles.star}>
-          <ThemedText style={{ fontSize: 18, color: favd ? palette.accent : palette.tabIconDefault }}>
+          <ThemedText
+            style={{ fontSize: 18, color: favd ? palette.accent : palette.tabIconDefault }}
+          >
             {favd ? '★' : '☆'}
           </ThemedText>
         </Pressable>
@@ -91,7 +96,9 @@ export default function StationsScreen() {
       <ThemedText type="caption" style={[styles.groupTitle, { color: palette.muted }]}>
         {title}
       </ThemedText>
-      <View style={[styles.card, { backgroundColor: palette.surface, borderColor: palette.border }]}>
+      <View
+        style={[styles.card, { backgroundColor: palette.surface, borderColor: palette.border }]}
+      >
         {items.map((s, i) => (
           <Row key={s.id} s={s} last={i === items.length - 1} />
         ))}
@@ -100,8 +107,17 @@ export default function StationsScreen() {
   );
 
   return (
-    <ScrollView contentContainerStyle={styles.content} style={{ backgroundColor: palette.background }}>
-      <ScotlandMap stations={STATIONS} selectedId={stationId} onSelect={open} />
+    <ScrollView
+      contentContainerStyle={styles.content}
+      style={{ backgroundColor: palette.background }}
+    >
+      <ScotlandMap
+        stations={STATIONS}
+        selectedId={stationId}
+        onSelect={open}
+        streams={RACES}
+        onSelectStream={openStream}
+      />
 
       <Pressable
         onPress={findNearest}
@@ -123,6 +139,55 @@ export default function StationsScreen() {
         <Group key={region} title={region.toUpperCase()} items={items} />
       ))}
 
+      <View style={styles.group}>
+        <ThemedText type="caption" style={[styles.groupTitle, { color: palette.muted }]}>
+          ◆ TIDAL STREAMS
+        </ThemedText>
+        <View
+          style={[styles.warn, { borderColor: palette.low, backgroundColor: `${palette.low}14` }]}
+        >
+          <ThemedText type="defaultSemiBold" style={{ color: palette.low }}>
+            ⚠ Estimates — not a tidal stream atlas
+          </ThemedText>
+          <ThemedText type="caption" style={{ color: palette.muted }}>
+            Slack times and rates are modelled from the tide and published peak figures. Timing and
+            direction are approximate. Verify against the pilot/atlas before committing — these
+            races can kill.
+          </ThemedText>
+        </View>
+        <View
+          style={[styles.card, { backgroundColor: palette.surface, borderColor: palette.border }]}
+        >
+          {RACES.map((r, i) => (
+            <Pressable
+              key={r.id}
+              onPress={() => openStream(r.id)}
+              style={[
+                styles.row,
+                i < RACES.length - 1 && {
+                  borderBottomWidth: StyleSheet.hairlineWidth,
+                  borderColor: palette.border,
+                },
+              ]}
+            >
+              <View style={[styles.pin, { backgroundColor: palette.low }]}>
+                <ThemedText style={styles.pinText}>{i + 1}</ThemedText>
+              </View>
+              <View style={{ flex: 1 }}>
+                <ThemedText type="defaultSemiBold">{r.name}</ThemedText>
+                <ThemedText type="caption" style={{ color: palette.muted }}>
+                  {r.area}
+                </ThemedText>
+              </View>
+              <ThemedText style={[styles.rate, { color: palette.accent }]}>
+                ~{r.springPeakKn} kn
+              </ThemedText>
+              <ThemedText style={{ color: palette.muted }}>›</ThemedText>
+            </Pressable>
+          ))}
+        </View>
+      </View>
+
       <ThemedText type="caption" style={[styles.footer, { color: palette.muted }]}>
         More ports as the data is fitted. Each station is a small set of harmonic constituents
         bundled in the app — predictions run entirely offline.
@@ -142,8 +207,17 @@ const styles = StyleSheet.create({
   group: { gap: 8 },
   groupTitle: { letterSpacing: 0.6 },
   card: { borderRadius: 16, borderWidth: StyleSheet.hairlineWidth, paddingHorizontal: 14 },
+  warn: { borderRadius: 12, borderWidth: StyleSheet.hairlineWidth, padding: 14, gap: 4 },
   row: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 14 },
   star: { paddingRight: 2 },
-  badge: { borderRadius: 6, borderWidth: StyleSheet.hairlineWidth, paddingHorizontal: 6, paddingVertical: 2 },
+  pin: { width: 22, height: 22, borderRadius: 11, alignItems: 'center', justifyContent: 'center' },
+  pinText: { color: '#ffffff', fontWeight: '700', fontSize: 12 },
+  rate: { fontWeight: '700' },
+  badge: {
+    borderRadius: 6,
+    borderWidth: StyleSheet.hairlineWidth,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+  },
   footer: { lineHeight: 18 },
 });

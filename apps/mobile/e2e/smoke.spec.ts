@@ -26,8 +26,8 @@ test('home shows the now/next summary and station chips', async ({ page }) => {
   expect(errors, errors.join('\n')).toEqual([]);
 });
 
-test('stations page lists ports from around the coast', async ({ page }) => {
-  await page.goto('/stations');
+test('map tab lists ports from around the coast', async ({ page }) => {
+  await page.goto('/map');
   for (const name of ['Millport', 'Tobermory', 'Stornoway', 'Wick', 'Aberdeen', 'Leith']) {
     await expect(page.getByText(name, { exact: false }).first()).toBeAttached();
   }
