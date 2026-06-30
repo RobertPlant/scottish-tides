@@ -77,8 +77,10 @@ export function StationDayView({
 
   const events = useMemo(() => dayEvents(station, dayStart), [station, dayStart]);
   const series = useMemo(() => dayHeightSeries(station, dayStart), [station, dayStart]);
+  // Evaluate at midday so the returned sunrise/sunset land on this civil day
+  // (UK midnight is the previous UTC day in summer) — matches SunMoonCard.
   const sun = useMemo(
-    () => sunTimes(dayStart, station.lat, station.lon),
+    () => sunTimes(new Date(dayStart.getTime() + 12 * 3600_000), station.lat, station.lon),
     [dayStart, station.lat, station.lon],
   );
   const isToday = ymd === todayYmd;

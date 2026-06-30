@@ -85,22 +85,28 @@ export function TideCurve({ series, events, now, height = 200, scrubbable = fals
   const y = (h: number) => PAD_TOP + (1 - (h - yMin) / (yMax - yMin)) * plotH;
   const baseY = y(yMin);
 
-  // Daylight band (sun above the horizon), clamped to the plotted day.
+  // Daylight band (sun above the horizon), clamped to the plotted day, plus
+  // crisp sunrise/sunset edge lines so dawn/dusk read even near midsummer when
+  // the band fills most of the chart.
   let dayBand: { x0: number; x1: number } | null = null;
+  const dayEdges: number[] = [];
   if (sun) {
-    let s0 = t0;
-    let s1 = t0;
     if (sun.alwaysUp) {
-      s1 = t1;
+      dayBand = { x0: x(t0), x1: x(t1) };
     } else if (sun.sunrise && sun.sunset) {
-      s0 = Math.max(sun.sunrise.getTime(), t0);
-      s1 = Math.min(sun.sunset.getTime(), t1);
-    }
-    if (s1 > s0) {
-      dayBand = { x0: x(s0), x1: x(s1) };
+      const sr = sun.sunrise.getTime();
+      const ss = sun.sunset.getTime();
+      const s0 = Math.max(sr, t0);
+      const s1 = Math.min(ss, t1);
+      if (s1 > s0) {
+        dayBand = { x0: x(s0), x1: x(s1) };
+        if (sr > t0 && sr < t1) dayEdges.push(x(sr));
+        if (ss > t0 && ss < t1) dayEdges.push(x(ss));
+      }
     }
   }
   const dayFill = '#ffcf4d'; // warm gold, theme-agnostic
+  const dayEdge = '#e0a020'; // deeper gold for the dawn/dusk lines
 
   const line = merged
     .map((p, i) => `${i === 0 ? 'M' : 'L'} ${x(p.t).toFixed(1)} ${y(p.h).toFixed(1)}`)
@@ -181,9 +187,21 @@ export function TideCurve({ series, events, now, height = 200, scrubbable = fals
               width={Math.max(dayBand.x1 - dayBand.x0, 0)}
               height={plotH}
               fill={dayFill}
-              opacity={isDark ? 0.12 : 0.22}
+              opacity={isDark ? 0.16 : 0.3}
             />
           )}
+          {dayEdges.map((ex) => (
+            <Line
+              key={`sun${ex.toFixed(0)}`}
+              x1={ex}
+              y1={PAD_TOP}
+              x2={ex}
+              y2={baseY}
+              stroke={dayEdge}
+              strokeWidth={1.5}
+              strokeDasharray="2 2"
+            />
+          ))}
 
           {/* Height gridlines + axis labels */}
           {yTicks.map((v) => (
