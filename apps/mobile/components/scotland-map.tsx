@@ -180,6 +180,12 @@ const styles = StyleSheet.create({
     borderWidth: StyleSheet.hairlineWidth,
     overflow: 'hidden',
     padding: 0,
+    // Scotland is tall and narrow (and Shetland pushes the top up to ~61°N), so
+    // at full column width the map turns into a giant block on desktop. Cap it
+    // and centre it — it's a locator, not a chart.
+    width: '100%',
+    maxWidth: 380,
+    alignSelf: 'center',
   },
   noteText: { position: 'absolute', right: 10, bottom: 8, fontSize: 10 },
 });
