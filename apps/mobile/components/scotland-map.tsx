@@ -1,12 +1,14 @@
 // A lightweight, fully-offline locator map. No map tiles: a schematic coastline
 // (mainland + major islands) is drawn from hand-traced lat/lon polygons, with
 // station pins (round) and/or tidal-race markers (numbered diamonds) projected
-// on top. An equirectangular projection with longitude
-// scaled by cos(latitude) keeps Scotland from looking squashed. Decorative — not
-// for navigation.
+// on top. An equirectangular projection with longitude scaled by cos(latitude)
+// keeps Scotland from looking squashed. Pinch / drag (or the +/- buttons) to
+// zoom — useful for the tightly-clustered Argyll races. Decorative, not for
+// navigation.
 
-import { useState } from 'react';
-import { type LayoutChangeEvent, StyleSheet, Text, View } from 'react-native';
+import { useCallback, useMemo, useRef, useState } from 'react';
+import { type LayoutChangeEvent, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Svg, { Circle, G, Path, Polygon, Rect, Text as SvgText } from 'react-native-svg';
 
 import coastRings from '@/assets/data/scotland-coast.json';
@@ -26,6 +28,8 @@ const LON_SCALE = Math.cos((MID_LAT * Math.PI) / 180);
 // Undistorted aspect: 1° lat ≈ 111 km, 1° lon ≈ 111·cos(lat) km.
 const ASPECT = (LAT1 - LAT0) / ((LON1 - LON0) * LON_SCALE);
 
+const MAX_ZOOM = 8;
+
 // Vertical label nudges (px) for stations whose labels would otherwise collide.
 const LABEL_DY: Record<string, number> = {
   kinlochbervie: -7, // raise (it sits just W of and level with Wick)
@@ -39,6 +43,14 @@ export interface StreamMarker {
   lat: number;
   lon: number;
 }
+
+interface ViewState {
+  k: number; // zoom factor
+  x: number; // screen-space translation applied after scaling
+  y: number;
+}
+
+const clamp = (v: number, lo: number, hi: number) => Math.min(Math.max(v, lo), hi);
 
 export function ScotlandMap({
   stations = [],
@@ -64,13 +76,94 @@ export function ScotlandMap({
   const halo = isDark ? '#06121d' : '#ffffff'; // label casing for contrast
 
   const [width, setWidth] = useState(0);
-  const onLayout = (e: LayoutChangeEvent) => setWidth(e.nativeEvent.layout.width);
-
   const height = width * ASPECT;
+  const sizeRef = useRef({ w: 0, h: 0 });
+  const onLayout = (e: LayoutChangeEvent) => {
+    const w = e.nativeEvent.layout.width;
+    sizeRef.current = { w, h: w * ASPECT };
+    setWidth(w);
+  };
+
+  // Zoom/pan. screen = base·k + (x, y); base is the un-zoomed projection.
+  const [view, setViewState] = useState<ViewState>({ k: 1, x: 0, y: 0 });
+  const viewRef = useRef(view);
+  const clampView = useCallback((v: ViewState): ViewState => {
+    const k = clamp(v.k, 1, MAX_ZOOM);
+    const { w, h } = sizeRef.current;
+    // Keep the scaled content covering the frame (no empty gutters).
+    return { k, x: clamp(v.x, w * (1 - k), 0), y: clamp(v.y, h * (1 - k), 0) };
+  }, []);
+  const setView = useCallback(
+    (v: ViewState) => {
+      const c = clampView(v);
+      viewRef.current = c;
+      setViewState(c);
+    },
+    [clampView],
+  );
+
+  // Zoom around a focal point (screen px), keeping that point stationary.
+  const zoomAround = useCallback(
+    (factor: number, fx: number, fy: number) => {
+      const v = viewRef.current;
+      const k = clamp(v.k * factor, 1, MAX_ZOOM);
+      setView({ k, x: fx - (fx - v.x) * (k / v.k), y: fy - (fy - v.y) * (k / v.k) });
+    },
+    [setView],
+  );
+
+  const start = useRef<ViewState & { fx: number; fy: number }>({ k: 1, x: 0, y: 0, fx: 0, fy: 0 });
+  const gesture = useMemo(() => {
+    const pan = Gesture.Pan()
+      .minDistance(8)
+      .runOnJS(true)
+      .onStart(() => {
+        start.current = { ...viewRef.current, fx: 0, fy: 0 };
+      })
+      .onUpdate((e) => {
+        const s = start.current;
+        setView({ k: s.k, x: s.x + e.translationX, y: s.y + e.translationY });
+      });
+    const pinch = Gesture.Pinch()
+      .runOnJS(true)
+      .onStart((e) => {
+        start.current = { ...viewRef.current, fx: e.focalX, fy: e.focalY };
+      })
+      .onUpdate((e) => {
+        const s = start.current;
+        const k = clamp(s.k * e.scale, 1, MAX_ZOOM);
+        setView({ k, x: s.fx - (s.fx - s.x) * (k / s.k), y: s.fy - (s.fy - s.y) * (k / s.k) });
+      });
+    return Gesture.Race(pinch, pan);
+  }, [setView]);
+
   const px = (lon: number) => ((lon - LON0) / (LON1 - LON0)) * width;
   const py = (lat: number) => (1 - (lat - LAT0) / (LAT1 - LAT0)) * height;
-  const ringPath = (ring: [number, number][]) =>
-    `${ring.map(([lon, lat], i) => `${i === 0 ? 'M' : 'L'} ${px(lon).toFixed(1)} ${py(lat).toFixed(1)}`).join(' ')} Z`;
+  const sx = (lon: number) => px(lon) * view.k + view.x;
+  const sy = (lat: number) => py(lat) * view.k + view.y;
+
+  // The coastline is the heavy part (47 rings); it only depends on size + colour,
+  // not on the live zoom (which is just a transform on the wrapping <G>).
+  const coastPaths = useMemo(() => {
+    if (width === 0) {
+      return null;
+    }
+    const h = width * ASPECT;
+    const projX = (lon: number) => ((lon - LON0) / (LON1 - LON0)) * width;
+    const projY = (lat: number) => (1 - (lat - LAT0) / (LAT1 - LAT0)) * h;
+    const ringPath = (ring: [number, number][]) =>
+      `${ring
+        .map(
+          ([lon, lat], i) =>
+            `${i === 0 ? 'M' : 'L'} ${projX(lon).toFixed(1)} ${projY(lat).toFixed(1)}`,
+        )
+        .join(' ')} Z`;
+    return COAST.map((ring, i) => (
+      <Path key={i} d={ringPath(ring)} fill={land} stroke={coast} strokeWidth={0.5} />
+    ));
+  }, [width, land, coast]);
+
+  const canReset = view.k > 1;
 
   return (
     <View
@@ -78,99 +171,133 @@ export function ScotlandMap({
       onLayout={onLayout}
     >
       {width > 0 && (
-        <Svg width={width} height={height}>
-          <Rect x={0} y={0} width={width} height={height} fill={sea} />
-          {COAST.map((ring, i) => (
-            <Path key={i} d={ringPath(ring)} fill={land} stroke={coast} strokeWidth={0.5} />
-          ))}
-          {stations.map((s) => {
-            const selected = s.id === selectedId;
-            return (
-              <Circle
-                key={s.id}
-                cx={px(s.lon)}
-                cy={py(s.lat)}
-                r={selected ? 8 : 5}
-                fill={selected ? palette.accent : palette.tint}
-                stroke="#ffffff"
-                strokeWidth={1.5}
-                onPress={onSelect ? () => onSelect(s.id) : undefined}
-              />
-            );
-          })}
-          {stations.map((s) => {
-            // Flip labels near the right edge so they don't clip.
-            const cx = px(s.lon);
-            const rightSide = cx > width * 0.66;
-            // Per-station nudges to separate crowded northern labels
-            // (Kinlochbervie's long name points east toward Wick).
-            const dy = LABEL_DY[s.id] ?? 0;
-            const lx = rightSide ? cx - 9 : cx + 9;
-            const ly = py(s.lat) + 4 + dy;
-            const anchor = rightSide ? 'end' : 'start';
-            const weight = s.id === selectedId ? '700' : '600';
-            return (
-              <G key={`${s.id}-label`}>
-                {/* Halo "casing" drawn first so the glyphs read on any background. */}
-                <SvgText
-                  x={lx}
-                  y={ly}
-                  fontSize={11}
-                  fontWeight={weight}
-                  textAnchor={anchor}
-                  fill={halo}
-                  stroke={halo}
-                  strokeWidth={3}
-                  strokeLinejoin="round"
+        <GestureDetector gesture={gesture}>
+          <Svg width={width} height={height}>
+            <Rect x={0} y={0} width={width} height={height} fill={sea} />
+            <G transform={`translate(${view.x} ${view.y}) scale(${view.k})`}>{coastPaths}</G>
+            {stations.map((s) => {
+              const selected = s.id === selectedId;
+              return (
+                <Circle
+                  key={s.id}
+                  cx={sx(s.lon)}
+                  cy={sy(s.lat)}
+                  r={selected ? 8 : 5}
+                  fill={selected ? palette.accent : palette.tint}
+                  stroke="#ffffff"
+                  strokeWidth={1.5}
+                  onPress={onSelect ? () => onSelect(s.id) : undefined}
+                />
+              );
+            })}
+            {stations.map((s) => {
+              // Flip labels near the right edge so they don't clip.
+              const cx = sx(s.lon);
+              const rightSide = cx > width * 0.66;
+              const dy = LABEL_DY[s.id] ?? 0;
+              const lx = rightSide ? cx - 9 : cx + 9;
+              const ly = sy(s.lat) + 4 + dy;
+              const anchor = rightSide ? 'end' : 'start';
+              const weight = s.id === selectedId ? '700' : '600';
+              return (
+                <G key={`${s.id}-label`}>
+                  {/* Halo "casing" drawn first so the glyphs read on any background. */}
+                  <SvgText
+                    x={lx}
+                    y={ly}
+                    fontSize={11}
+                    fontWeight={weight}
+                    textAnchor={anchor}
+                    fill={halo}
+                    stroke={halo}
+                    strokeWidth={3}
+                    strokeLinejoin="round"
+                  >
+                    {s.name}
+                  </SvgText>
+                  <SvgText
+                    x={lx}
+                    y={ly}
+                    fontSize={11}
+                    fontWeight={weight}
+                    textAnchor={anchor}
+                    fill={palette.text}
+                  >
+                    {s.name}
+                  </SvgText>
+                </G>
+              );
+            })}
+            {streams.map((st, i) => {
+              // Numbered diamonds, tied to the numbered list below the map. A
+              // diamond (vs the round station pins) reads as "race / hazard".
+              const cx = sx(st.lon);
+              const cy = sy(st.lat);
+              const sel = st.id === selectedStreamId;
+              const r = sel ? 11 : 9;
+              const pts = `${cx},${cy - r} ${cx + r},${cy} ${cx},${cy + r} ${cx - r},${cy}`;
+              return (
+                <G
+                  key={`stream-${st.id}`}
+                  onPress={onSelectStream ? () => onSelectStream(st.id) : undefined}
                 >
-                  {s.name}
-                </SvgText>
-                <SvgText
-                  x={lx}
-                  y={ly}
-                  fontSize={11}
-                  fontWeight={weight}
-                  textAnchor={anchor}
-                  fill={palette.text}
-                >
-                  {s.name}
-                </SvgText>
-              </G>
-            );
-          })}
-          {streams.map((st, i) => {
-            // Numbered diamonds, tied to the numbered list below the map. A
-            // diamond (vs the round station pins) reads as "race / hazard".
-            const cx = px(st.lon);
-            const cy = py(st.lat);
-            const sel = st.id === selectedStreamId;
-            const r = sel ? 11 : 9;
-            const pts = `${cx},${cy - r} ${cx + r},${cy} ${cx},${cy + r} ${cx - r},${cy}`;
-            return (
-              <G
-                key={`stream-${st.id}`}
-                onPress={onSelectStream ? () => onSelectStream(st.id) : undefined}
-              >
-                <Polygon points={pts} fill={palette.low} stroke="#ffffff" strokeWidth={1.5} />
-                <SvgText
-                  x={cx}
-                  y={cy + 4}
-                  fontSize={11}
-                  fontWeight="700"
-                  textAnchor="middle"
-                  fill="#ffffff"
-                >
-                  {i + 1}
-                </SvgText>
-              </G>
-            );
-          })}
-        </Svg>
+                  <Polygon points={pts} fill={palette.low} stroke="#ffffff" strokeWidth={1.5} />
+                  <SvgText
+                    x={cx}
+                    y={cy + 4}
+                    fontSize={11}
+                    fontWeight="700"
+                    textAnchor="middle"
+                    fill="#ffffff"
+                  >
+                    {i + 1}
+                  </SvgText>
+                </G>
+              );
+            })}
+          </Svg>
+        </GestureDetector>
       )}
+
+      <View style={styles.zoomBar} pointerEvents="box-none">
+        <ZoomButton
+          label="+"
+          onPress={() => zoomAround(1.6, width / 2, height / 2)}
+          palette={palette}
+        />
+        <ZoomButton
+          label="−"
+          onPress={() => zoomAround(1 / 1.6, width / 2, height / 2)}
+          palette={palette}
+        />
+        {canReset ? (
+          <ZoomButton label="1×" onPress={() => setView({ k: 1, x: 0, y: 0 })} palette={palette} />
+        ) : null}
+      </View>
+
       <Text style={[styles.noteText, { color: palette.muted }]} pointerEvents="none">
         Schematic — not for navigation
       </Text>
     </View>
+  );
+}
+
+function ZoomButton({
+  label,
+  onPress,
+  palette,
+}: {
+  label: string;
+  onPress: () => void;
+  palette: ReturnType<typeof usePalette>;
+}) {
+  return (
+    <Pressable
+      onPress={onPress}
+      style={[styles.zoomBtn, { backgroundColor: palette.surface, borderColor: palette.border }]}
+    >
+      <Text style={[styles.zoomBtnText, { color: palette.text }]}>{label}</Text>
+    </Pressable>
   );
 }
 
@@ -188,4 +315,14 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
   },
   noteText: { position: 'absolute', right: 10, bottom: 8, fontSize: 10 },
+  zoomBar: { position: 'absolute', top: 8, right: 8, gap: 6 },
+  zoomBtn: {
+    width: 32,
+    height: 32,
+    borderRadius: 8,
+    borderWidth: StyleSheet.hairlineWidth,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  zoomBtnText: { fontSize: 20, fontWeight: '700', lineHeight: 22 },
 });
