@@ -40,7 +40,8 @@
           }
         }
       ],
-      "@react-native-community/datetimepicker"
+      "@react-native-community/datetimepicker",
+      "./plugins/with-low-memory-gradle"
     ],
     "experiments": {
       "typedRoutes": true,
