@@ -86,10 +86,8 @@ export function StationDayView({
   const isToday = ymd === todayYmd;
   const state = useMemo(() => nowState(station, now), [station, now]);
 
-  const tideClass = useMemo(
-    () => classifyTide(dayRange(events), tidalStats(station)),
-    [station, events],
-  );
+  const stats = useMemo(() => tidalStats(station), [station]);
+  const tideClass = useMemo(() => classifyTide(dayRange(events), stats), [stats, events]);
   const range = dayRange(events);
   const classColor =
     tideClass.label === 'Springs'
@@ -104,6 +102,25 @@ export function StationDayView({
       style={{ backgroundColor: palette.background }}
     >
       {header}
+
+      <View style={[styles.rangeStrip, { borderColor: palette.border }]}>
+        <ThemedText type="caption" style={{ color: palette.muted }}>
+          {station.region} tidal range
+        </ThemedText>
+        <View style={styles.rangeValues}>
+          <ThemedText type="defaultSemiBold" style={{ color: palette.accent }}>
+            {stats.springRange.toFixed(1)} m
+          </ThemedText>
+          <ThemedText type="caption" style={{ color: palette.muted }}>
+            springs
+          </ThemedText>
+          <ThemedText style={{ color: palette.border }}>·</ThemedText>
+          <ThemedText type="defaultSemiBold">{stats.neapRange.toFixed(1)} m</ThemedText>
+          <ThemedText type="caption" style={{ color: palette.muted }}>
+            neaps
+          </ThemedText>
+        </View>
+      </View>
 
       {isToday ? (
         <NowNext station={station} state={state} now={now} showName={showStationName} />
@@ -189,6 +206,16 @@ export function StationDayView({
 
 const styles = StyleSheet.create({
   content: { padding: 16, gap: 16 },
+  rangeStrip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    borderWidth: StyleSheet.hairlineWidth,
+    borderRadius: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+  },
+  rangeValues: { flexDirection: 'row', alignItems: 'baseline', gap: 6 },
   navRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8 },
   navButton: {
     borderRadius: 10,
