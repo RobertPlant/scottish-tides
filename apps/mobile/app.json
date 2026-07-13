@@ -7,7 +7,6 @@
     "icon": "./assets/images/icon.png",
     "scheme": "scottishtides",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": true,
     "ios": {
       "supportsTablet": true
     },
@@ -19,7 +18,6 @@
         "backgroundImage": "./assets/images/android-icon-background.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
-      "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false
     },
     "web": {
@@ -41,7 +39,9 @@
         }
       ],
       "@react-native-community/datetimepicker",
-      "./plugins/with-low-memory-gradle"
+      "./plugins/with-low-memory-gradle",
+      "expo-font",
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": true,
