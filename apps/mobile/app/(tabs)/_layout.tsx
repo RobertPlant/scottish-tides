@@ -1,4 +1,4 @@
-import { Ionicons } from '@expo/vector-icons';
+import Ionicons from '@react-native-vector-icons/ionicons/static';
 import { Tabs } from 'expo-router';
 
 import { Colors } from '@/constants/theme';

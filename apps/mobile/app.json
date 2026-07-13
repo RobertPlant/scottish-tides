@@ -41,7 +41,9 @@
       "@react-native-community/datetimepicker",
       "./plugins/with-low-memory-gradle",
       "expo-font",
-      "expo-web-browser"
+      "expo-web-browser",
+      "expo-status-bar",
+      "@react-native-vector-icons/ionicons"
     ],
     "experiments": {
       "typedRoutes": true,
