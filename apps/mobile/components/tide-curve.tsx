@@ -228,7 +228,7 @@ export function TideCurve({ series, events, now, height = 200, scrubbable = fals
 
           {/* Hour ticks + labels */}
           {hourTicks.map((tick) => (
-            <G key={`x${tick.label}`}>
+            <G key={`x${tick.t}`}>
               <Line
                 x1={x(tick.t)}
                 y1={PAD_TOP}

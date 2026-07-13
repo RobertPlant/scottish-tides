@@ -20,8 +20,16 @@ test('streams: race list and detail render with the safety warning', async ({ pa
   await page.goto('/map');
   await expect(page.locator('body')).toContainText('not a tidal stream atlas');
   await expect(page.locator('body')).toContainText('Pentland Firth');
-  await page.getByText('Pentland Firth').first().click();
-  await expect(page.locator('body')).toContainText('Slack water');
+  // In dev the click can land before expo-router has hydrated the Link (the text is
+  // in the static HTML but the client handler isn't wired up yet), so the tap is a
+  // no-op. Retry the click until the route actually changes.
+  await expect(async () => {
+    if (!/\/stream\//.test(page.url())) {
+      await page.getByText('Pentland Firth').first().click({ timeout: 2000 });
+    }
+    await expect(page).toHaveURL(/\/stream\//, { timeout: 2000 });
+  }).toPass({ timeout: 30_000 });
+  await expect(page.locator('body')).toContainText('Slack water', { timeout: 15_000 });
   await expect(page.locator('body')).toContainText('Peak streams');
   await expect(page.locator('body')).toContainText('Not for navigation');
 });

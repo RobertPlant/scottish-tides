@@ -1,3 +1,4 @@
+import { useFonts } from 'expo-font';
 import { DarkTheme, DefaultTheme, ThemeProvider } from 'expo-router/react-navigation';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
@@ -14,6 +15,13 @@ export const unstable_settings = {
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
+  // The scoped @react-native-vector-icons/* static packages don't register their
+  // web @font-face (unlike the old @expo/vector-icons), so the tab-bar glyphs render
+  // as tofu on web unless we load the font ourselves. Harmless on native, where the
+  // config plugin already bundles it.
+  useFonts({
+    Ionicons: require('@react-native-vector-icons/ionicons/fonts/Ionicons.ttf'),
+  });
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>

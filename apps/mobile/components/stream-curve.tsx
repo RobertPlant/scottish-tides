@@ -87,7 +87,7 @@ export function StreamCurve({ samples, slacks, now, floodName, ebbName, height =
 
           {hourTicks.map((tk) => (
             <SvgText
-              key={`x${tk.label}`}
+              key={`x${tk.t}`}
               x={x(tk.t)}
               y={height - 7}
               fill={palette.muted}
