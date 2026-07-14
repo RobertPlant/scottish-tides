@@ -5,7 +5,7 @@ import { Pressable, StyleSheet, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
 import { usePalette } from '@/hooks/use-theme-color';
-import { formatDay, ukDayStartFromYmd, ymdAddDays } from '@/lib/datetime';
+import { formatDay, ukDayStartFromYmd, ymdAddDays, ymdInUk } from '@/lib/datetime';
 import type { Station } from '@/lib/stations';
 import { classifyTide, dayEvents, dayRange, tidalStats } from '@/lib/tide-day';
 
@@ -32,9 +32,14 @@ export function WeekOverview({
     return { ymd, start, range, cls };
   });
 
+  // The window is anchored to the selected day, not always today — so only call
+  // it "Next 7 days" when it really starts today; otherwise name the start date.
+  const title =
+    fromYmd === ymdInUk(new Date()) ? 'Next 7 days' : `7 days from ${formatDay(days[0].start)}`;
+
   return (
     <View style={[styles.card, { backgroundColor: palette.surface, borderColor: palette.border }]}>
-      <ThemedText type="defaultSemiBold">Next 7 days</ThemedText>
+      <ThemedText type="defaultSemiBold">{title}</ThemedText>
       {days.map((d) => {
         const selected = d.ymd === selectedYmd;
         const barColor =
