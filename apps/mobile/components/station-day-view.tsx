@@ -4,8 +4,8 @@
 // and the /station/[id] deep-link route so both show the complete picture.
 
 import { useRouter } from 'expo-router';
-import { type ReactNode, useCallback, useEffect, useMemo, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { PanResponder, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
 import { DateField } from '@/components/date-field';
 import { NowNext } from '@/components/now-next';
@@ -75,6 +75,28 @@ export function StationDayView({
   const minYmd = useMemo(() => ymdAddDays(todayYmd, -730), [todayYmd]);
   const maxYmd = useMemo(() => ymdAddDays(todayYmd, 730), [todayYmd]);
 
+  // Swipe left → next day, swipe right → previous day. A non-capturing responder
+  // that only claims clearly-horizontal drags: the chart keeps its own scrub
+  // (it grabs the touch on start) and vertical scrolling falls through to the
+  // ScrollView. Latest ymd/handler are read from a ref so the responder — built
+  // once — never acts on a stale day.
+  const swipeRef = useRef({ ymd, go: updateYmd });
+  swipeRef.current = { ymd, go: updateYmd };
+  const swipe = useRef(
+    PanResponder.create({
+      onMoveShouldSetPanResponder: (_e, g) =>
+        Math.abs(g.dx) > 24 && Math.abs(g.dx) > Math.abs(g.dy) * 1.8,
+      onPanResponderRelease: (_e, g) => {
+        const { ymd: cur, go } = swipeRef.current;
+        if (g.dx <= -40) {
+          go(ymdAddDays(cur, 1));
+        } else if (g.dx >= 40) {
+          go(ymdAddDays(cur, -1));
+        }
+      },
+    }),
+  ).current;
+
   const events = useMemo(() => dayEvents(station, dayStart), [station, dayStart]);
   const series = useMemo(() => dayHeightSeries(station, dayStart), [station, dayStart]);
   // Evaluate at midday so the returned sunrise/sunset land on this civil day
@@ -101,97 +123,100 @@ export function StationDayView({
       contentContainerStyle={styles.content}
       style={{ backgroundColor: palette.background }}
     >
-      {header}
+      <View style={styles.inner} {...swipe.panHandlers}>
+        {header}
 
-      {isToday ? (
-        <NowNext station={station} state={state} now={now} showName={showStationName} />
-      ) : null}
+        {isToday ? (
+          <NowNext station={station} state={state} now={now} showName={showStationName} />
+        ) : null}
 
-      <View style={styles.navRow}>
-        <Pressable
-          onPress={() => updateYmd(ymdAddDays(ymd, -1))}
-          style={[styles.navButton, { borderColor: palette.border }]}
-        >
-          <ThemedText style={{ color: palette.accent }}>‹ Prev</ThemedText>
-        </Pressable>
-        <ThemedText type="defaultSemiBold" style={styles.navLabel}>
-          {formatLongDay(dayStart)}
-        </ThemedText>
-        <Pressable
-          onPress={() => updateYmd(ymdAddDays(ymd, 1))}
-          style={[styles.navButton, { borderColor: palette.border }]}
-        >
-          <ThemedText style={{ color: palette.accent }}>Next ›</ThemedText>
-        </Pressable>
-      </View>
+        <View style={styles.navRow}>
+          <Pressable
+            onPress={() => updateYmd(ymdAddDays(ymd, -1))}
+            style={[styles.navButton, { borderColor: palette.border }]}
+          >
+            <ThemedText style={{ color: palette.accent }}>‹ Prev</ThemedText>
+          </Pressable>
+          <ThemedText type="defaultSemiBold" style={styles.navLabel}>
+            {formatLongDay(dayStart)}
+          </ThemedText>
+          <Pressable
+            onPress={() => updateYmd(ymdAddDays(ymd, 1))}
+            style={[styles.navButton, { borderColor: palette.border }]}
+          >
+            <ThemedText style={{ color: palette.accent }}>Next ›</ThemedText>
+          </Pressable>
+        </View>
 
-      <View style={styles.pickerBlock}>
-        <View style={styles.pickerRow}>
-          <DateField value={ymd} onChange={updateYmd} min={minYmd} max={maxYmd} />
-          {!isToday ? (
-            <Pressable onPress={() => updateYmd(todayYmd)} style={styles.todayLink}>
-              <ThemedText style={{ color: palette.accent }}>Today</ThemedText>
-            </Pressable>
-          ) : null}
-          <View style={styles.badgeSpacer} />
-          <View style={[styles.badge, { backgroundColor: classColor }]}>
-            <ThemedText style={styles.badgeText}>
-              {tideClass.label} · {tideClass.coefficient}
+        <View style={styles.pickerBlock}>
+          <View style={styles.pickerRow}>
+            <DateField value={ymd} onChange={updateYmd} min={minYmd} max={maxYmd} />
+            {!isToday ? (
+              <Pressable onPress={() => updateYmd(todayYmd)} style={styles.todayLink}>
+                <ThemedText style={{ color: palette.accent }}>Today</ThemedText>
+              </Pressable>
+            ) : null}
+            <View style={styles.badgeSpacer} />
+            <View style={[styles.badge, { backgroundColor: classColor }]}>
+              <ThemedText style={styles.badgeText}>
+                {tideClass.label} · {tideClass.coefficient}
+              </ThemedText>
+            </View>
+            <ThemedText type="caption" style={{ color: palette.muted }}>
+              {range.toFixed(1)} m range
             </ThemedText>
           </View>
-          <ThemedText type="caption" style={{ color: palette.muted }}>
-            {range.toFixed(1)} m range
+          <ThemedText type="caption" style={[styles.normalRange, { color: palette.muted }]}>
+            normal {stats.springRange.toFixed(1)} m springs · {stats.neapRange.toFixed(1)} m neaps
           </ThemedText>
         </View>
-        <ThemedText type="caption" style={[styles.normalRange, { color: palette.muted }]}>
-          normal {stats.springRange.toFixed(1)} m springs · {stats.neapRange.toFixed(1)} m neaps
-        </ThemedText>
-      </View>
 
-      <View
-        style={[styles.card, { backgroundColor: palette.surface, borderColor: palette.border }]}
-      >
-        <TideCurve
-          series={series}
-          events={events}
-          now={isToday ? now : undefined}
-          height={220}
-          scrubbable
-          sun={sun}
-        />
-        <ThemedText type="caption" style={{ color: palette.muted }}>
-          Tap the chart to read the level at any time. Gold band = daylight.
-        </ThemedText>
-        <TideTable events={events} />
-      </View>
-
-      <SunMoonCard date={dayStart} lat={station.lat} lon={station.lon} />
-
-      <WeekOverview station={station} fromYmd={ymd} selectedYmd={ymd} onSelectDay={updateYmd} />
-
-      <View style={[styles.info, { borderColor: palette.border }]}>
-        <ThemedText type="caption" style={{ color: palette.muted }}>
-          {station.standardPort
-            ? 'Standard port — predicted directly from its own gauge.'
-            : `Secondary port — derived from ${station.shift?.based_on ?? 'a nearby gauge'} by a constant Admiralty offset.`}
-        </ThemedText>
-        {station.data.obs_span ? (
+        <View
+          style={[styles.card, { backgroundColor: palette.surface, borderColor: palette.border }]}
+        >
+          <TideCurve
+            series={series}
+            events={events}
+            now={isToday ? now : undefined}
+            height={220}
+            scrubbable
+            sun={sun}
+          />
           <ThemedText type="caption" style={{ color: palette.muted }}>
-            Fitted from gauge data {station.data.obs_span[0]} → {station.data.obs_span[1]}.
+            Tap the chart to read the level at any time. Gold band = daylight.
           </ThemedText>
-        ) : null}
-        <ThemedText type="caption" style={{ color: palette.muted }}>
-          Heights vs {station.data.datum?.replace('The data refer to ', '') ?? 'chart datum'}.
-          Astronomical only (no surge). Water levels, not streams — never plan a race transit from
-          these tables.
-        </ThemedText>
+          <TideTable events={events} />
+        </View>
+
+        <SunMoonCard date={dayStart} lat={station.lat} lon={station.lon} />
+
+        <WeekOverview station={station} fromYmd={ymd} selectedYmd={ymd} onSelectDay={updateYmd} />
+
+        <View style={[styles.info, { borderColor: palette.border }]}>
+          <ThemedText type="caption" style={{ color: palette.muted }}>
+            {station.standardPort
+              ? 'Standard port — predicted directly from its own gauge.'
+              : `Secondary port — derived from ${station.shift?.based_on ?? 'a nearby gauge'} by a constant Admiralty offset.`}
+          </ThemedText>
+          {station.data.obs_span ? (
+            <ThemedText type="caption" style={{ color: palette.muted }}>
+              Fitted from gauge data {station.data.obs_span[0]} → {station.data.obs_span[1]}.
+            </ThemedText>
+          ) : null}
+          <ThemedText type="caption" style={{ color: palette.muted }}>
+            Heights vs {station.data.datum?.replace('The data refer to ', '') ?? 'chart datum'}.
+            Astronomical only (no surge). Water levels, not streams — never plan a race transit from
+            these tables.
+          </ThemedText>
+        </View>
       </View>
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  content: { padding: 16, gap: 16 },
+  content: { padding: 16 },
+  inner: { gap: 16 },
   navRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8 },
   navButton: {
     borderRadius: 10,
