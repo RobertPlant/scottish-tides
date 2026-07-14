@@ -5,7 +5,7 @@
 
 import { useRouter } from 'expo-router';
 import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { PanResponder, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { PanResponder, Platform, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
 import { DateField } from '@/components/date-field';
 import { NowNext } from '@/components/now-next';
@@ -48,6 +48,10 @@ export function StationDayView({
 }) {
   const palette = usePalette();
   const router = useRouter();
+
+  // On web the chart hint is revealed on hover to keep the chart clean; on
+  // native (no hover) it stays visible so tap-to-read is still discoverable.
+  const [chartHovered, setChartHovered] = useState(false);
 
   // Keep "now" live so the now/next card and the current-time marker stay current.
   const [now, setNow] = useState(() => new Date());
@@ -172,6 +176,8 @@ export function StationDayView({
         </View>
 
         <View
+          onPointerEnter={() => setChartHovered(true)}
+          onPointerLeave={() => setChartHovered(false)}
           style={[styles.card, { backgroundColor: palette.surface, borderColor: palette.border }]}
         >
           <TideCurve
@@ -182,7 +188,13 @@ export function StationDayView({
             scrubbable
             sun={sun}
           />
-          <ThemedText type="caption" style={{ color: palette.muted }}>
+          <ThemedText
+            type="caption"
+            style={[
+              { color: palette.muted },
+              Platform.OS === 'web' && !chartHovered && styles.hintHidden,
+            ]}
+          >
             Tap the chart to read the level at any time. Gold band = daylight.
           </ThemedText>
           <TideTable events={events} now={isToday ? now : undefined} />
@@ -232,6 +244,7 @@ const styles = StyleSheet.create({
   badge: { borderRadius: 999, paddingHorizontal: 10, paddingVertical: 3 },
   badgeText: { color: '#fff', fontWeight: '700', fontSize: 12 },
   card: { borderRadius: 16, borderWidth: StyleSheet.hairlineWidth, padding: 16, gap: 12 },
+  hintHidden: { opacity: 0 },
   todayLink: { paddingVertical: 4, paddingHorizontal: 4 },
   info: { borderRadius: 12, borderWidth: StyleSheet.hairlineWidth, padding: 14, gap: 6 },
 });
