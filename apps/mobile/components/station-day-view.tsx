@@ -185,7 +185,7 @@ export function StationDayView({
           <ThemedText type="caption" style={{ color: palette.muted }}>
             Tap the chart to read the level at any time. Gold band = daylight.
           </ThemedText>
-          <TideTable events={events} />
+          <TideTable events={events} now={isToday ? now : undefined} />
         </View>
 
         <SunMoonCard date={dayStart} lat={station.lat} lon={station.lon} />
