@@ -67,6 +67,28 @@ test('swipe left/right changes the day', async ({ page }) => {
   await expect(page.locator('body')).toContainText('14 July 2026');
 });
 
+test('tapping the chart shows the scrub readout', async ({ page }) => {
+  await page.goto('/station/oban?d=2026-07-14');
+  await page.waitForTimeout(1500); // hydrate so the chart responder is live
+
+  // The readout is "HH:MM · X.XX m ▲/▼" — the time prefix distinguishes it from
+  // the (untimed) current-level pill. It only exists once you touch the chart.
+  const readout = page.getByText(/\d{2}:\d{2} · \d+\.\d{2} m [▲▼]/);
+  await expect(readout).toHaveCount(0);
+
+  const chart = page.locator('svg').first();
+  const box = await chart.boundingBox();
+  if (!box) throw new Error('chart svg not found');
+  const x = box.x + box.width * 0.5;
+  const y = box.y + box.height * 0.55;
+  await page.mouse.move(x, y);
+  await page.mouse.down();
+  await page.mouse.move(x + 8, y); // nudge so onResponderMove fires the readout
+  await page.mouse.up();
+
+  await expect(readout.first()).toBeAttached();
+});
+
 test('about screen: reached from the map, shows licence, credits and disclaimer', async ({
   page,
 }) => {
