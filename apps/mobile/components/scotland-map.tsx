@@ -281,7 +281,7 @@ export function ScotlandMap({
         </GestureDetector>
       )}
 
-      <View style={styles.zoomBar} pointerEvents="box-none">
+      <View style={styles.zoomBar}>
         <ZoomButton
           label="+"
           onPress={() => zoomAround(1.6, width / 2, height / 2)}
@@ -297,7 +297,7 @@ export function ScotlandMap({
         ) : null}
       </View>
 
-      <Text style={[styles.noteText, { color: palette.muted }]} pointerEvents="none">
+      <Text style={[styles.noteText, { color: palette.muted }]}>
         Schematic — not for navigation
       </Text>
     </View>
@@ -336,8 +336,8 @@ const styles = StyleSheet.create({
     maxWidth: 460,
     alignSelf: 'center',
   },
-  noteText: { position: 'absolute', right: 10, bottom: 8, fontSize: 10 },
-  zoomBar: { position: 'absolute', top: 8, right: 8, gap: 6 },
+  noteText: { position: 'absolute', right: 10, bottom: 8, fontSize: 10, pointerEvents: 'none' },
+  zoomBar: { position: 'absolute', top: 8, right: 8, gap: 6, pointerEvents: 'box-none' },
   zoomBtn: {
     width: 32,
     height: 32,

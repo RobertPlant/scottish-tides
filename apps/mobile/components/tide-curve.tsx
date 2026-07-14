@@ -330,7 +330,6 @@ export function TideCurve({ series, events, now, height = 200, scrubbable = fals
               backgroundColor: palette.tint,
             },
           ]}
-          pointerEvents="none"
         >
           <Text style={[styles.readoutText, { color: palette.background }]}>
             {formatTime(scrub.time)} · {scrub.h.toFixed(2)} m {scrub.rising ? '▲' : '▼'}
@@ -350,6 +349,7 @@ const styles = StyleSheet.create({
     paddingVertical: 3,
     minWidth: 104,
     alignItems: 'center',
+    pointerEvents: 'none',
   },
   readoutText: { fontSize: 12, fontWeight: '700' },
 });
