@@ -1,9 +1,6 @@
 // Date/time helpers, with an emphasis on the UK BST/GMT boundaries these tools
-// have to get right (every day view keys off them).
-//
-// `ukStartOfDay`/`ukDayStartFromYmd` derive an absolute instant via host-local
-// Date parsing, so pin TZ=UTC (as CI runs) to keep the expectations stable.
-process.env.TZ = 'UTC';
+// have to get right (every day view keys off them). The UK functions are
+// timezone-independent (Intl-based), so these run identically under any host TZ.
 
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
