@@ -18,8 +18,9 @@ export function TideTable({ events, now }: { events: TideEvent[]; now?: Date }) 
     <View>
       {events.map((e) => {
         const color = e.type === 'high' ? palette.high : palette.low;
-        // Countdown for events still ahead today ("in 3h 20m"); nothing for past ones.
-        const rel = now && e.time.getTime() > now.getTime() ? formatRelative(e.time, now) : null;
+        // On today's view, show each event's timing relative to now:
+        // "in 3h 20m" ahead, "2h 20m ago" behind.
+        const rel = now ? formatRelative(e.time, now) : null;
         return (
           <View key={e.time.toISOString()} style={[styles.row, { borderColor: palette.border }]}>
             <View style={styles.left}>
