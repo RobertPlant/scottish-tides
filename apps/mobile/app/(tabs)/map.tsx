@@ -83,13 +83,26 @@ export default function MapScreen() {
     return (
       <Pressable
         onPress={() => open(s.id)}
+        accessibilityRole="button"
+        accessibilityLabel={`${s.name}${s.subtitle ? `, ${s.subtitle}` : ''}${
+          !s.standardPort ? ', secondary port' : ''
+        }`}
         style={[
           styles.row,
           !last && { borderBottomWidth: StyleSheet.hairlineWidth, borderColor: palette.border },
         ]}
       >
-        <Pressable onPress={() => toggleFavourite(s.id)} hitSlop={8} style={styles.star}>
+        <Pressable
+          onPress={() => toggleFavourite(s.id)}
+          hitSlop={8}
+          accessibilityRole="button"
+          accessibilityLabel={
+            favd ? `Remove ${s.name} from favourites` : `Add ${s.name} to favourites`
+          }
+          style={styles.star}
+        >
           <ThemedText
+            importantForAccessibility="no"
             style={{ fontSize: 18, color: favd ? palette.accent : palette.tabIconDefault }}
           >
             {favd ? '★' : '☆'}
@@ -145,6 +158,9 @@ export default function MapScreen() {
 
       <Pressable
         onPress={findNearest}
+        accessibilityRole="button"
+        accessibilityLabel="Find tides near me"
+        accessibilityState={{ busy: locating }}
         style={[styles.nearBtn, { borderColor: palette.border, backgroundColor: palette.surface }]}
       >
         <ThemedText style={{ color: palette.accent, fontWeight: '600' }}>
@@ -186,6 +202,8 @@ export default function MapScreen() {
             <Pressable
               key={r.id}
               onPress={() => openStream(r.id)}
+              accessibilityRole="button"
+              accessibilityLabel={`${r.name}, ${r.area}, about ${r.springPeakKn} knots at springs`}
               style={[
                 styles.row,
                 i < RACES.length - 1 && {
@@ -217,7 +235,12 @@ export default function MapScreen() {
         bundled in the app — predictions run entirely offline.
       </ThemedText>
 
-      <Pressable onPress={() => router.push('/about')} style={styles.aboutLink}>
+      <Pressable
+        onPress={() => router.push('/about')}
+        accessibilityRole="link"
+        accessibilityLabel="About and data sources"
+        style={styles.aboutLink}
+      >
         <ThemedText style={{ color: palette.accent, fontWeight: '600' }}>
           About &amp; data sources →
         </ThemedText>
