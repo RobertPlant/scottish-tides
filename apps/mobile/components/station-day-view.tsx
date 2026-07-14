@@ -103,25 +103,6 @@ export function StationDayView({
     >
       {header}
 
-      <View style={[styles.rangeStrip, { borderColor: palette.border }]}>
-        <ThemedText type="caption" style={{ color: palette.muted }}>
-          {station.region} tidal range
-        </ThemedText>
-        <View style={styles.rangeValues}>
-          <ThemedText type="defaultSemiBold" style={{ color: palette.accent }}>
-            {stats.springRange.toFixed(1)} m
-          </ThemedText>
-          <ThemedText type="caption" style={{ color: palette.muted }}>
-            springs
-          </ThemedText>
-          <ThemedText style={{ color: palette.border }}>·</ThemedText>
-          <ThemedText type="defaultSemiBold">{stats.neapRange.toFixed(1)} m</ThemedText>
-          <ThemedText type="caption" style={{ color: palette.muted }}>
-            neaps
-          </ThemedText>
-        </View>
-      </View>
-
       {isToday ? (
         <NowNext station={station} state={state} now={now} showName={showStationName} />
       ) : null}
@@ -144,21 +125,26 @@ export function StationDayView({
         </Pressable>
       </View>
 
-      <View style={styles.pickerRow}>
-        <DateField value={ymd} onChange={updateYmd} min={minYmd} max={maxYmd} />
-        {!isToday ? (
-          <Pressable onPress={() => updateYmd(todayYmd)} style={styles.todayLink}>
-            <ThemedText style={{ color: palette.accent }}>Today</ThemedText>
-          </Pressable>
-        ) : null}
-        <View style={styles.badgeSpacer} />
-        <View style={[styles.badge, { backgroundColor: classColor }]}>
-          <ThemedText style={styles.badgeText}>
-            {tideClass.label} · {tideClass.coefficient}
+      <View style={styles.pickerBlock}>
+        <View style={styles.pickerRow}>
+          <DateField value={ymd} onChange={updateYmd} min={minYmd} max={maxYmd} />
+          {!isToday ? (
+            <Pressable onPress={() => updateYmd(todayYmd)} style={styles.todayLink}>
+              <ThemedText style={{ color: palette.accent }}>Today</ThemedText>
+            </Pressable>
+          ) : null}
+          <View style={styles.badgeSpacer} />
+          <View style={[styles.badge, { backgroundColor: classColor }]}>
+            <ThemedText style={styles.badgeText}>
+              {tideClass.label} · {tideClass.coefficient}
+            </ThemedText>
+          </View>
+          <ThemedText type="caption" style={{ color: palette.muted }}>
+            {range.toFixed(1)} m range
           </ThemedText>
         </View>
-        <ThemedText type="caption" style={{ color: palette.muted }}>
-          {range.toFixed(1)} m range
+        <ThemedText type="caption" style={[styles.normalRange, { color: palette.muted }]}>
+          normal {stats.springRange.toFixed(1)} m springs · {stats.neapRange.toFixed(1)} m neaps
         </ThemedText>
       </View>
 
@@ -206,16 +192,6 @@ export function StationDayView({
 
 const styles = StyleSheet.create({
   content: { padding: 16, gap: 16 },
-  rangeStrip: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    borderWidth: StyleSheet.hairlineWidth,
-    borderRadius: 12,
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-  },
-  rangeValues: { flexDirection: 'row', alignItems: 'baseline', gap: 6 },
   navRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8 },
   navButton: {
     borderRadius: 10,
@@ -224,8 +200,10 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
   },
   navLabel: { flex: 1, textAlign: 'center' },
+  pickerBlock: { gap: 6 },
   pickerRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   badgeSpacer: { flex: 1 },
+  normalRange: { textAlign: 'right' },
   badge: { borderRadius: 999, paddingHorizontal: 10, paddingVertical: 3 },
   badgeText: { color: '#fff', fontWeight: '700', fontSize: 12 },
   card: { borderRadius: 16, borderWidth: StyleSheet.hairlineWidth, padding: 16, gap: 12 },
