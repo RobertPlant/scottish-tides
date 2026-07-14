@@ -45,8 +45,10 @@ Gates: `tsc` clean · `npm run test:engine` 22/22 · `npm run test:e2e` 8/8 (run
       `~/org/scripts/tides_lib` (only works on Rob's machine). Copy `tides.py` + vendored
       pytides2 so the repo is self-contained for contributors. Same for the coastline generator
       deps (documented as `npm i --no-save` in `tools/gen-coastline.mjs`).
-- [ ] Run a **Biome format pass** (`npm run check` from repo root, in `devenv shell`) — code
-      follows the style but Biome hasn't been run to normalise.
+- [x] **Biome pass done** — `biome check --write apps/mobile` is a no-op on the tree (all
+      `.ts/.tsx` already match the style); only fix needed was wrapping two single-line `if`s in
+      `tide-curve.tsx` (`useBlockStatements`). `biome lint` is clean. Note: `manifest.json` /
+      `reference.json` are left as-is (generated/hand-kept; the repo's `check` doesn't rewrite them).
 - [ ] **Retry the TypeScript 7 bump** once typescript-eslint supports the native (Go) port.
       Tried `typescript@7.0.2`: `tsc --noEmit` is clean and `test:engine` passes, but `expo lint`
       crashes at load — `@typescript-eslint`/`ts-api-utils` read internal TS APIs the Go port
