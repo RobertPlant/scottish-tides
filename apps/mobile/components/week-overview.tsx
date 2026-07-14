@@ -33,9 +33,11 @@ export function WeekOverview({
   });
 
   // The window is anchored to the selected day, not always today — so only call
-  // it "Next 7 days" when it really starts today; otherwise name the start date.
+  // it "Next 7 days" when it really starts today; otherwise show the date range.
   const title =
-    fromYmd === ymdInUk(new Date()) ? 'Next 7 days' : `7 days from ${formatDay(days[0].start)}`;
+    fromYmd === ymdInUk(new Date())
+      ? 'Next 7 days'
+      : `${formatDay(days[0].start)} – ${formatDay(days[6].start)}`;
 
   return (
     <View style={[styles.card, { backgroundColor: palette.surface, borderColor: palette.border }]}>
