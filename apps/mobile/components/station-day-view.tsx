@@ -152,26 +152,21 @@ export function StationDayView({
           </Pressable>
         </View>
 
-        <View style={styles.pickerBlock}>
-          <View style={styles.pickerRow}>
-            <DateField value={ymd} onChange={updateYmd} min={minYmd} max={maxYmd} />
-            {!isToday ? (
-              <Pressable onPress={() => updateYmd(todayYmd)} style={styles.todayLink}>
-                <ThemedText style={{ color: palette.accent }}>Today</ThemedText>
-              </Pressable>
-            ) : null}
-            <View style={styles.badgeSpacer} />
-            <View style={[styles.badge, { backgroundColor: classColor }]}>
-              <ThemedText style={styles.badgeText}>
-                {tideClass.label} · {tideClass.coefficient}
-              </ThemedText>
-            </View>
-            <ThemedText type="caption" style={{ color: palette.muted }}>
-              {range.toFixed(1)} m range
+        <View style={styles.pickerRow}>
+          <DateField value={ymd} onChange={updateYmd} min={minYmd} max={maxYmd} />
+          {!isToday ? (
+            <Pressable onPress={() => updateYmd(todayYmd)} style={styles.todayLink}>
+              <ThemedText style={{ color: palette.accent }}>Today</ThemedText>
+            </Pressable>
+          ) : null}
+          <View style={styles.badgeSpacer} />
+          <View style={[styles.badge, { backgroundColor: classColor }]}>
+            <ThemedText style={styles.badgeText}>
+              {tideClass.label} · {tideClass.coefficient}
             </ThemedText>
           </View>
-          <ThemedText type="caption" style={[styles.normalRange, { color: palette.muted }]}>
-            normal {stats.springRange.toFixed(1)} m springs · {stats.neapRange.toFixed(1)} m neaps
+          <ThemedText type="caption" style={{ color: palette.muted }}>
+            {range.toFixed(1)} m range
           </ThemedText>
         </View>
 
@@ -237,10 +232,8 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
   },
   navLabel: { flex: 1, textAlign: 'center' },
-  pickerBlock: { gap: 6 },
   pickerRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   badgeSpacer: { flex: 1 },
-  normalRange: { textAlign: 'right' },
   badge: { borderRadius: 999, paddingHorizontal: 10, paddingVertical: 3 },
   badgeText: { color: '#fff', fontWeight: '700', fontSize: 12 },
   card: { borderRadius: 16, borderWidth: StyleSheet.hairlineWidth, padding: 16, gap: 12 },

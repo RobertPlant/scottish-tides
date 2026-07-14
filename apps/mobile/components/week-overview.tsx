@@ -41,7 +41,13 @@ export function WeekOverview({
 
   return (
     <View style={[styles.card, { backgroundColor: palette.surface, borderColor: palette.border }]}>
-      <ThemedText type="defaultSemiBold">{title}</ThemedText>
+      <View style={styles.heading}>
+        <ThemedText type="defaultSemiBold">{title}</ThemedText>
+        <ThemedText type="caption" style={{ color: palette.muted }}>
+          Typical here: {stats.springRange.toFixed(1)} m springs · {stats.neapRange.toFixed(1)} m
+          neaps
+        </ThemedText>
+      </View>
       {days.map((d) => {
         const selected = d.ymd === selectedYmd;
         const barColor =
@@ -87,6 +93,7 @@ export function WeekOverview({
 
 const styles = StyleSheet.create({
   card: { borderRadius: 16, borderWidth: StyleSheet.hairlineWidth, padding: 16, gap: 8 },
+  heading: { gap: 2 },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
