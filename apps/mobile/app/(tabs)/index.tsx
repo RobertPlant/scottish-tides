@@ -29,10 +29,15 @@ export default function HomeScreen() {
         >
           {chipStations.map((s) => {
             const active = s.id === station.id;
+            const fav = isFavourite(s.id);
+            const textColor = active ? palette.background : palette.text;
             return (
               <Pressable
                 key={s.id}
                 onPress={() => setStationId(s.id)}
+                accessibilityRole="button"
+                accessibilityState={{ selected: active }}
+                accessibilityLabel={fav ? `${s.name} (favourite)` : s.name}
                 style={[
                   styles.chip,
                   {
@@ -41,11 +46,16 @@ export default function HomeScreen() {
                   },
                 ]}
               >
-                <ThemedText
-                  style={{ color: active ? palette.background : palette.text, fontWeight: '600' }}
-                >
-                  {s.name}
-                </ThemedText>
+                {fav ? (
+                  <ThemedText
+                    accessibilityElementsHidden
+                    importantForAccessibility="no"
+                    style={{ color: active ? palette.background : palette.accent }}
+                  >
+                    ★
+                  </ThemedText>
+                ) : null}
+                <ThemedText style={{ color: textColor, fontWeight: '600' }}>{s.name}</ThemedText>
               </Pressable>
             );
           })}
@@ -57,5 +67,13 @@ export default function HomeScreen() {
 
 const styles = StyleSheet.create({
   chips: { gap: 8, paddingVertical: 2 },
-  chip: { borderRadius: 999, borderWidth: 1, paddingHorizontal: 14, paddingVertical: 8 },
+  chip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    borderRadius: 999,
+    borderWidth: 1,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+  },
 });
