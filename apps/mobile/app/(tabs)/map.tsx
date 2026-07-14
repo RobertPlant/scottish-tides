@@ -21,7 +21,8 @@ export default function MapScreen() {
 
   const open = (id: string) => {
     setStationId(id);
-    router.push({ pathname: '/station/[id]', params: { id } });
+    // Station is a tab now — switch to it rather than pushing a stacked copy.
+    router.navigate({ pathname: '/station/[id]', params: { id } });
   };
   const openStream = (id: string) => router.push({ pathname: '/stream/[id]', params: { id } });
 

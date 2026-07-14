@@ -3,10 +3,12 @@ import { Tabs } from 'expo-router';
 
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import { useSelectedStation } from '@/lib/selected-station';
 
 export default function TabsLayout() {
   const scheme = useColorScheme() ?? 'light';
   const palette = Colors[scheme];
+  const { stationId } = useSelectedStation();
 
   return (
     <Tabs
@@ -18,10 +20,14 @@ export default function TabsLayout() {
         tabBarStyle: { backgroundColor: palette.surface, borderTopColor: palette.border },
       }}
     >
+      {/* `/` just redirects to the selected station — hidden from the tab bar. */}
+      <Tabs.Screen name="index" options={{ href: null }} />
       <Tabs.Screen
-        name="index"
+        name="station/[id]"
         options={{
           title: 'Tides',
+          // The Station tab always points at the currently selected station.
+          href: { pathname: '/station/[id]', params: { id: stationId } },
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="water-outline" size={size} color={color} />
           ),
