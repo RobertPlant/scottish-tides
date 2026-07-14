@@ -45,10 +45,12 @@ Gates: `tsc` clean · `npm run test:engine` 22/22 · `npm run test:e2e` 8/8 (run
       `~/org/scripts/tides_lib` (only works on Rob's machine). Copy `tides.py` + vendored
       pytides2 so the repo is self-contained for contributors. Same for the coastline generator
       deps (documented as `npm i --no-save` in `tools/gen-coastline.mjs`).
-- [x] **Biome pass done** — `biome check --write apps/mobile` is a no-op on the tree (all
-      `.ts/.tsx` already match the style); only fix needed was wrapping two single-line `if`s in
-      `tide-curve.tsx` (`useBlockStatements`). `biome lint` is clean. Note: `manifest.json` /
-      `reference.json` are left as-is (generated/hand-kept; the repo's `check` doesn't rewrite them).
+- [x] **Biome pass done** — `biome check --write apps/mobile` reformatted 12 files (line
+      wrapping, array/object layout, redundant parens; no semantic changes). `tsc` + engine tests
+      still green. The generated parity fixture (`lib/tides/__fixtures__/*.json`) is now Biome-
+      excluded like `assets/data/*.json` so `gen-reference.py` output won't fight the formatter.
+      NB: a global `rtk` command-rewrite hook (`~/.claude/hooks/rtk-rewrite.sh`) rewrites `biome`
+      → `rtk lint`, which masked the pass at first — run Biome by absolute path to bypass it.
 - [ ] **Retry the TypeScript 7 bump** once typescript-eslint supports the native (Go) port.
       Tried `typescript@7.0.2`: `tsc --noEmit` is clean and `test:engine` passes, but `expo lint`
       crashes at load — `@typescript-eslint`/`ts-api-utils` read internal TS APIs the Go port
