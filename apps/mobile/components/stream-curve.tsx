@@ -6,6 +6,7 @@ import { type LayoutChangeEvent, StyleSheet, View } from 'react-native';
 import Svg, { Circle, G, Line, Path, Text as SvgText } from 'react-native-svg';
 
 import { usePalette } from '@/hooks/use-theme-color';
+import { CHART_PAD, chartFrame } from '@/lib/chart-frame';
 import { formatTime } from '@/lib/datetime';
 import type { StreamSample } from '@/lib/streams';
 
@@ -18,10 +19,7 @@ interface Props {
   height?: number;
 }
 
-const PAD_LEFT = 30;
-const PAD_RIGHT = 10;
-const PAD_TOP = 14;
-const PAD_BOTTOM = 22;
+const { left: PAD_LEFT, right: PAD_RIGHT, top: PAD_TOP, bottom: PAD_BOTTOM } = CHART_PAD;
 
 export function StreamCurve({ samples, slacks, now, floodName, ebbName, height = 200 }: Props) {
   const palette = usePalette();
@@ -39,9 +37,7 @@ export function StreamCurve({ samples, slacks, now, floodName, ebbName, height =
   const t1 = samples[samples.length - 1].time.getTime();
   const maxRate = Math.max(...samples.map((s) => Math.abs(s.rate)), 0.5) * 1.1;
 
-  const plotW = Math.max(width - PAD_LEFT - PAD_RIGHT, 1);
-  const plotH = height - PAD_TOP - PAD_BOTTOM;
-  const x = (t: number) => PAD_LEFT + ((t - t0) / (t1 - t0)) * plotW;
+  const { plotH, x, hourTicks, nowX } = chartFrame(width, { t0, t1, height, now });
   const zeroY = PAD_TOP + plotH / 2;
   const y = (rate: number) => zeroY - (rate / maxRate) * (plotH / 2);
 
@@ -56,16 +52,6 @@ export function StreamCurve({ samples, slacks, now, floodName, ebbName, height =
   // Y ticks at 0 and ±maxRate/2-ish.
   const tick = Math.max(Math.round((maxRate / 1.1) * 0.5 * 2) / 2, 0.5);
   const yTicks = [tick, 0, -tick];
-
-  const hourTicks: { t: number; label: string }[] = [];
-  for (let k = 0; k <= 24; k += 6) {
-    const t = t0 + k * 3600_000;
-    if (t <= t1 + 1) {
-      hourTicks.push({ t, label: String(k % 24).padStart(2, '0') });
-    }
-  }
-
-  const nowX = now && now.getTime() >= t0 && now.getTime() <= t1 ? x(now.getTime()) : null;
 
   return (
     <View style={{ height }} onLayout={onLayout}>

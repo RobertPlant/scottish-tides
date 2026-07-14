@@ -14,6 +14,7 @@ import {
 import Svg, { Circle, G, Line, Path, Rect, Text as SvgText } from 'react-native-svg';
 
 import { usePalette } from '@/hooks/use-theme-color';
+import { CHART_PAD, chartFrame } from '@/lib/chart-frame';
 import { formatTime } from '@/lib/datetime';
 import type { TideEvent } from '@/lib/tides';
 
@@ -28,10 +29,7 @@ interface Props {
   sun?: { sunrise: Date | null; sunset: Date | null; alwaysUp?: boolean };
 }
 
-const PAD_LEFT = 30;
-const PAD_RIGHT = 10;
-const PAD_TOP = 14;
-const PAD_BOTTOM = 22;
+const { left: PAD_LEFT, right: PAD_RIGHT, top: PAD_TOP, bottom: PAD_BOTTOM } = CHART_PAD;
 
 /** A "nice" axis step (1, 2, 5 × 10ⁿ) close to the requested size. */
 function niceStep(raw: number): number {
@@ -79,9 +77,7 @@ export function TideCurve({ series, events, now, height = 200, scrubbable = fals
     yTicks.push(Number(v.toFixed(4)));
   }
 
-  const plotW = Math.max(width - PAD_LEFT - PAD_RIGHT, 1);
-  const plotH = height - PAD_TOP - PAD_BOTTOM;
-  const x = (t: number) => PAD_LEFT + ((t - t0) / (t1 - t0)) * plotW;
+  const { plotW, plotH, x, hourTicks, nowX } = chartFrame(width, { t0, t1, height, now });
   const y = (h: number) => PAD_TOP + (1 - (h - yMin) / (yMax - yMin)) * plotH;
   const baseY = y(yMin);
 
@@ -117,23 +113,13 @@ export function TideCurve({ series, events, now, height = 200, scrubbable = fals
     .join(' ');
   const area = `${line} L ${x(t1).toFixed(1)} ${baseY.toFixed(1)} L ${x(t0).toFixed(1)} ${baseY.toFixed(1)} Z`;
 
-  // Hour ticks every 6 h across the day.
-  const hourTicks: { t: number; label: string }[] = [];
-  for (let k = 0; k <= 24; k += 6) {
-    const t = t0 + k * 3600_000;
-    if (t <= t1 + 1) {
-      hourTicks.push({ t, label: String(k % 24).padStart(2, '0') });
-    }
-  }
-
   // Interpolated height (and rising/falling trend) at `now` for the marker dot
-  // and the current-level readout.
-  let nowX: number | null = null;
+  // and the current-level readout. `nowX` (the line position) comes from the
+  // shared frame; here we only add the height/trend the tide chart needs.
   let nowY: number | null = null;
   let nowH: number | null = null;
   let nowRising = false;
-  if (now && now.getTime() >= t0 && now.getTime() <= t1) {
-    nowX = x(now.getTime());
+  if (nowX !== null && now) {
     let h = merged[0].h;
     for (let i = 1; i < merged.length; i++) {
       if (merged[i].t >= now.getTime()) {
