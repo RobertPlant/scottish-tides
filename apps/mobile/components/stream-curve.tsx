@@ -46,7 +46,9 @@ export function StreamCurve({ samples, slacks, now, floodName, ebbName, height =
   const y = (rate: number) => zeroY - (rate / maxRate) * (plotH / 2);
 
   const pts = samples.map((s) => ({ x: x(s.time.getTime()), r: s.rate }));
-  const line = pts.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x.toFixed(1)} ${y(p.r).toFixed(1)}`).join(' ');
+  const line = pts
+    .map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x.toFixed(1)} ${y(p.r).toFixed(1)}`)
+    .join(' ');
   // Two-tone fill: flood lobes (clamp >=0) and ebb lobes (clamp <=0), each back to zero.
   const floodArea = `M ${pts[0].x.toFixed(1)} ${zeroY} ${pts.map((p) => `L ${p.x.toFixed(1)} ${y(Math.max(p.r, 0)).toFixed(1)}`).join(' ')} L ${pts[pts.length - 1].x.toFixed(1)} ${zeroY} Z`;
   const ebbArea = `M ${pts[0].x.toFixed(1)} ${zeroY} ${pts.map((p) => `L ${p.x.toFixed(1)} ${y(Math.min(p.r, 0)).toFixed(1)}`).join(' ')} L ${pts[pts.length - 1].x.toFixed(1)} ${zeroY} Z`;
@@ -79,7 +81,13 @@ export function StreamCurve({ samples, slacks, now, floodName, ebbName, height =
                 stroke={v === 0 ? palette.muted : palette.border}
                 strokeWidth={1}
               />
-              <SvgText x={PAD_LEFT - 4} y={y(v) + 3} fill={palette.muted} fontSize={9} textAnchor="end">
+              <SvgText
+                x={PAD_LEFT - 4}
+                y={y(v) + 3}
+                fill={palette.muted}
+                fontSize={9}
+                textAnchor="end"
+              >
                 {Math.abs(v).toFixed(1)}
               </SvgText>
             </G>
@@ -103,7 +111,15 @@ export function StreamCurve({ samples, slacks, now, floodName, ebbName, height =
           <Path d={line} stroke={palette.text} strokeWidth={2} fill="none" />
 
           {nowX !== null && (
-            <Line x1={nowX} y1={PAD_TOP} x2={nowX} y2={height - PAD_BOTTOM} stroke={palette.text} strokeWidth={1} strokeDasharray="3 3" />
+            <Line
+              x1={nowX}
+              y1={PAD_TOP}
+              x2={nowX}
+              y2={height - PAD_BOTTOM}
+              stroke={palette.text}
+              strokeWidth={1}
+              strokeDasharray="3 3"
+            />
           )}
 
           {slacks.map((s) => {
@@ -125,7 +141,13 @@ export function StreamCurve({ samples, slacks, now, floodName, ebbName, height =
           <SvgText x={width - PAD_RIGHT} y={PAD_TOP + 9} fill={flood} fontSize={9} textAnchor="end">
             {floodName} ▲
           </SvgText>
-          <SvgText x={width - PAD_RIGHT} y={height - PAD_BOTTOM - 3} fill={ebb} fontSize={9} textAnchor="end">
+          <SvgText
+            x={width - PAD_RIGHT}
+            y={height - PAD_BOTTOM - 3}
+            fill={ebb}
+            fontSize={9}
+            textAnchor="end"
+          >
             {ebbName} ▼
           </SvgText>
         </Svg>

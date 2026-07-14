@@ -45,7 +45,10 @@ export default function RaceDetail() {
   return (
     <>
       <Stack.Screen options={{ title: race.name }} />
-      <ScrollView contentContainerStyle={styles.content} style={{ backgroundColor: palette.background }}>
+      <ScrollView
+        contentContainerStyle={styles.content}
+        style={{ backgroundColor: palette.background }}
+      >
         <View>
           <ThemedText type="title">{race.name}</ThemedText>
           <ThemedText type="caption" style={{ color: palette.muted }}>
@@ -53,20 +56,28 @@ export default function RaceDetail() {
           </ThemedText>
         </View>
 
-        <View style={[styles.warn, { borderColor: palette.low, backgroundColor: `${palette.low}14` }]}>
+        <View
+          style={[styles.warn, { borderColor: palette.low, backgroundColor: `${palette.low}14` }]}
+        >
           <ThemedText type="caption" style={{ color: palette.low, fontWeight: '700' }}>
             ⚠ {race.warning}
           </ThemedText>
         </View>
 
         <View style={styles.navRow}>
-          <Pressable onPress={() => updateYmd(ymdAddDays(ymd, -1))} style={[styles.navButton, { borderColor: palette.border }]}>
+          <Pressable
+            onPress={() => updateYmd(ymdAddDays(ymd, -1))}
+            style={[styles.navButton, { borderColor: palette.border }]}
+          >
             <ThemedText style={{ color: palette.accent }}>‹ Prev</ThemedText>
           </Pressable>
           <ThemedText type="defaultSemiBold" style={styles.navLabel}>
             {formatLongDay(dayStart)}
           </ThemedText>
-          <Pressable onPress={() => updateYmd(ymdAddDays(ymd, 1))} style={[styles.navButton, { borderColor: palette.border }]}>
+          <Pressable
+            onPress={() => updateYmd(ymdAddDays(ymd, 1))}
+            style={[styles.navButton, { borderColor: palette.border }]}
+          >
             <ThemedText style={{ color: palette.accent }}>Next ›</ThemedText>
           </Pressable>
         </View>
@@ -84,7 +95,9 @@ export default function RaceDetail() {
           </ThemedText>
         </View>
 
-        <View style={[styles.card, { backgroundColor: palette.surface, borderColor: palette.border }]}>
+        <View
+          style={[styles.card, { backgroundColor: palette.surface, borderColor: palette.border }]}
+        >
           <StreamCurve
             samples={stream.samples}
             slacks={stream.slacks}
@@ -95,7 +108,9 @@ export default function RaceDetail() {
           />
         </View>
 
-        <View style={[styles.card, { backgroundColor: palette.surface, borderColor: palette.border }]}>
+        <View
+          style={[styles.card, { backgroundColor: palette.surface, borderColor: palette.border }]}
+        >
           <ThemedText type="defaultSemiBold">Slack water (best transit)</ThemedText>
           {stream.slacks.length === 0 ? (
             <ThemedText style={{ color: palette.muted }}>—</ThemedText>
@@ -110,7 +125,9 @@ export default function RaceDetail() {
           </ThemedText>
           {stream.peaks.map((p) => (
             <View key={p.time.toISOString()} style={styles.peakRow}>
-              <View style={[styles.dot, { backgroundColor: p.rate > 0 ? palette.high : palette.low }]} />
+              <View
+                style={[styles.dot, { backgroundColor: p.rate > 0 ? palette.high : palette.low }]}
+              />
               <ThemedText style={{ flex: 1 }}>{p.dirName}</ThemedText>
               <ThemedText style={styles.peakTime}>{formatTime(p.time)}</ThemedText>
               <ThemedText style={[styles.peakRate, { color: palette.muted }]}>
@@ -139,7 +156,12 @@ const styles = StyleSheet.create({
   content: { padding: 16, gap: 16 },
   warn: { borderRadius: 12, borderWidth: StyleSheet.hairlineWidth, padding: 14 },
   navRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8 },
-  navButton: { borderRadius: 10, borderWidth: StyleSheet.hairlineWidth, paddingHorizontal: 14, paddingVertical: 8 },
+  navButton: {
+    borderRadius: 10,
+    borderWidth: StyleSheet.hairlineWidth,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+  },
   navLabel: { flex: 1, textAlign: 'center' },
   pickerRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   todayLink: { paddingVertical: 4, paddingHorizontal: 4 },

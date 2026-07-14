@@ -164,7 +164,8 @@ export const RACES: Race[] = [
     springPeakKn: 5,
     neapPeakKn: 2.5,
     warning: 'A steady, strong tidal river — time a transit with the stream, not against.',
-    source: 'Slack ≈ HW Oban −0:40 / +5:30 (Rhinns-of-Islay figures, approximate); peak ~5 kn springs.',
+    source:
+      'Slack ≈ HW Oban −0:40 / +5:30 (Rhinns-of-Islay figures, approximate); peak ~5 kn springs.',
   },
 ];
 
@@ -308,7 +309,9 @@ function deriveEvents(
     const b = samples[i].rate;
     if ((a <= 0 && b > 0) || (a >= 0 && b < 0)) {
       const f = a !== b ? a / (a - b) : 0;
-      const t = samples[i - 1].time.getTime() + f * (samples[i].time.getTime() - samples[i - 1].time.getTime());
+      const t =
+        samples[i - 1].time.getTime() +
+        f * (samples[i].time.getTime() - samples[i - 1].time.getTime());
       slacks.push(new Date(t));
       crossings.push(i);
     }

@@ -10,7 +10,13 @@ import { fileURLToPath } from 'node:url';
 
 import { predictExtrema, type StationData, Tide } from './index';
 
-const dataDir = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', '..', 'assets', 'data');
+const dataDir = path.join(
+  path.dirname(fileURLToPath(import.meta.url)),
+  '..',
+  '..',
+  'assets',
+  'data',
+);
 const load = (f: string): StationData => JSON.parse(readFileSync(path.join(dataDir, f), 'utf8'));
 
 const FROM = new Date('2026-06-26T00:00:00Z');
@@ -21,7 +27,10 @@ test('Port Ellen: sub-5cm wiggles are pruned, leaving a sensible day', () => {
   const raw = new Tide(load('port_ellen.json')).extrema(FROM, TO);
   const pruned = predictExtrema(load('port_ellen.json'), FROM, TO, undefined, PROM);
 
-  assert.ok(pruned.length < raw.length, `expected pruning to remove events (${raw.length} -> ${pruned.length})`);
+  assert.ok(
+    pruned.length < raw.length,
+    `expected pruning to remove events (${raw.length} -> ${pruned.length})`,
+  );
   assert.ok(pruned.length <= 5, `still too many events: ${pruned.length}`);
 
   // Events must alternate high/low and every interior extremum clears the

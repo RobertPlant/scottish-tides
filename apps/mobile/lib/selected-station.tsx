@@ -1,7 +1,15 @@
 // Selected station + favourites, shared across tabs and persisted (AsyncStorage).
 // Last station is restored on launch; favourites are starred ports pinned first.
 
-import { createContext, type ReactNode, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import {
+  createContext,
+  type ReactNode,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
 
 import { STATIONS } from '@/lib/stations';
 import { loadFavourites, loadLastStation, saveFavourites, saveLastStation } from '@/lib/storage';
@@ -29,7 +37,9 @@ export function SelectedStationProvider({ children }: { children: ReactNode }) {
         setStationIdState(id);
       }
     });
-    loadFavourites().then((ids) => setFavourites(ids.filter((id) => STATIONS.some((s) => s.id === id))));
+    loadFavourites().then((ids) =>
+      setFavourites(ids.filter((id) => STATIONS.some((s) => s.id === id))),
+    );
   }, []);
 
   const setStationId = useCallback((id: string) => {

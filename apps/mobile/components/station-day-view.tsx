@@ -130,9 +130,7 @@ export function StationDayView({
       <View style={styles.inner} {...swipe.panHandlers}>
         {header}
 
-        {isToday ? (
-          <NowNext station={station} state={state} showName={showStationName} />
-        ) : null}
+        {isToday ? <NowNext station={station} state={state} showName={showStationName} /> : null}
 
         <View style={styles.navRow}>
           <Pressable

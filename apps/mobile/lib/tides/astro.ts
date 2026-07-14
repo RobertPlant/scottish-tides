@@ -79,7 +79,7 @@ const terrestrialObliquityCoefficients = [
   s2d(0, 0, 27.87),
   s2d(0, 0, 5.79),
   s2d(0, 0, 2.45),
-].map((c, i) => c * (1e-2) ** i);
+].map((c, i) => c * 1e-2 ** i);
 
 const solarPerigeeCoefficients = [
   280.46645 - 357.5291,
@@ -101,13 +101,7 @@ const lunarLongitudeCoefficients = [
   1 / 538841.0 - 1 / 65194000.0,
 ];
 
-const lunarNodeCoefficients = [
-  125.044555,
-  -1934.1361849,
-  0.0020762,
-  1 / 467410.0,
-  -1 / 60616000.0,
-];
+const lunarNodeCoefficients = [125.044555, -1934.1361849, 0.0020762, 1 / 467410.0, -1 / 60616000.0];
 
 const lunarPerigeeCoefficients = [
   83.353243,
@@ -156,13 +150,16 @@ function _nu(N: number, i: number, omega: number): number {
 function _nup(N: number, i: number, omega: number): number {
   const I = d2r * _I(N, i, omega);
   const nu = d2r * _nu(N, i, omega);
-  return r2d * Math.atan((Math.sin(2 * I) * Math.sin(nu)) / (Math.sin(2 * I) * Math.cos(nu) + 0.3347));
+  return (
+    r2d * Math.atan((Math.sin(2 * I) * Math.sin(nu)) / (Math.sin(2 * I) * Math.cos(nu) + 0.3347))
+  );
 }
 
 function _nupp(N: number, i: number, omega: number): number {
   const I = d2r * _I(N, i, omega);
   const nu = d2r * _nu(N, i, omega);
-  const tan2nupp = (Math.sin(I) ** 2 * Math.sin(2 * nu)) / (Math.sin(I) ** 2 * Math.cos(2 * nu) + 0.0727);
+  const tan2nupp =
+    (Math.sin(I) ** 2 * Math.sin(2 * nu)) / (Math.sin(I) ** 2 * Math.cos(2 * nu) + 0.0727);
   return r2d * 0.5 * Math.atan(tan2nupp);
 }
 

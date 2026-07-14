@@ -84,7 +84,7 @@ const PHASE_NAMES: [string, string][] = [
 /** Moon phase & illumination for an instant (mid-day of the civil date is fine). */
 export function moonInfo(date: Date): MoonInfo {
   const days = toJulian(date) - KNOWN_NEW_MOON;
-  const phase = ((days / SYNODIC) % 1 + 1) % 1;
+  const phase = (((days / SYNODIC) % 1) + 1) % 1;
   const illumination = (1 - Math.cos(2 * Math.PI * phase)) / 2;
   // 8 named phases; the four cardinal ones occupy a narrow band around their point.
   const idx = Math.round(phase * 8) % 8;

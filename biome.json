@@ -11,6 +11,7 @@
       "!**/test-results",
       "!**/*.min.js",
       "!**/assets/data/*.json",
+      "!**/lib/tides/__fixtures__/*.json",
       "!**/package-lock.json"
     ]
   },

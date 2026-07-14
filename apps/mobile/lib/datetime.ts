@@ -48,9 +48,7 @@ export function ukStartOfDay(d: Date): Date {
   const day = get('day');
   // UK offset (minutes) at this date: compare the wall time to UTC.
   const guessUtcMidnight = new Date(`${y}-${m}-${day}T00:00:00Z`);
-  const wall = new Date(
-    guessUtcMidnight.toLocaleString('en-US', { timeZone: UK_TZ }),
-  );
+  const wall = new Date(guessUtcMidnight.toLocaleString('en-US', { timeZone: UK_TZ }));
   const offsetMs = wall.getTime() - guessUtcMidnight.getTime();
   return new Date(guessUtcMidnight.getTime() - offsetMs);
 }

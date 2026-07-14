@@ -10,9 +10,32 @@ import type { Astro } from './astro';
 import * as nc from './nodal';
 
 const XDO_INT: Record<string, number> = {
-  A: 1, B: 2, C: 3, D: 4, E: 5, F: 6, G: 7, H: 8, I: 9, J: 10, K: 11, L: 12,
-  M: 13, N: 14, O: 15, P: 16, Q: 17, R: -8, S: -7, T: -6, U: -5, V: -4, W: -3,
-  X: -2, Y: -1, Z: 0,
+  A: 1,
+  B: 2,
+  C: 3,
+  D: 4,
+  E: 5,
+  F: 6,
+  G: 7,
+  H: 8,
+  I: 9,
+  J: 10,
+  K: 11,
+  L: 12,
+  M: 13,
+  N: 14,
+  O: 15,
+  P: 16,
+  Q: 17,
+  R: -8,
+  S: -7,
+  T: -6,
+  U: -5,
+  V: -4,
+  W: -3,
+  X: -2,
+  Y: -1,
+  Z: 0,
 };
 
 const LETTERS = /[A-Za-z]/;
@@ -164,25 +187,86 @@ const _M3 = new BaseConstituent(
 
 // --- Compound constituents ---------------------------------------------------
 
-const _MSF = new CompoundConstituent('MSF', [[_S2, 1], [_M2, -1]]);
-const _2Q1 = new CompoundConstituent('2Q1', [[_N2, 1], [_J1, -1]]);
-const _rho1 = new CompoundConstituent('rho1', [[_nu2, 1], [_K1, -1]]);
-const _mu2 = new CompoundConstituent('mu2', [[_M2, 2], [_S2, -1]]);
-const _2SM2 = new CompoundConstituent('2SM2', [[_S2, 2], [_M2, -1]]);
-const _2MK3 = new CompoundConstituent('2MK3', [[_M2, 1], [_O1, 1]]);
-const _MK3 = new CompoundConstituent('MK3', [[_M2, 1], [_K1, 1]]);
-const _MN4 = new CompoundConstituent('MN4', [[_M2, 1], [_N2, 1]]);
+const _MSF = new CompoundConstituent('MSF', [
+  [_S2, 1],
+  [_M2, -1],
+]);
+const _2Q1 = new CompoundConstituent('2Q1', [
+  [_N2, 1],
+  [_J1, -1],
+]);
+const _rho1 = new CompoundConstituent('rho1', [
+  [_nu2, 1],
+  [_K1, -1],
+]);
+const _mu2 = new CompoundConstituent('mu2', [
+  [_M2, 2],
+  [_S2, -1],
+]);
+const _2SM2 = new CompoundConstituent('2SM2', [
+  [_S2, 2],
+  [_M2, -1],
+]);
+const _2MK3 = new CompoundConstituent('2MK3', [
+  [_M2, 1],
+  [_O1, 1],
+]);
+const _MK3 = new CompoundConstituent('MK3', [
+  [_M2, 1],
+  [_K1, 1],
+]);
+const _MN4 = new CompoundConstituent('MN4', [
+  [_M2, 1],
+  [_N2, 1],
+]);
 const _M4 = new CompoundConstituent('M4', [[_M2, 2]]);
-const _MS4 = new CompoundConstituent('MS4', [[_M2, 1], [_S2, 1]]);
+const _MS4 = new CompoundConstituent('MS4', [
+  [_M2, 1],
+  [_S2, 1],
+]);
 const _S4 = new CompoundConstituent('S4', [[_S2, 2]]);
 const _M6 = new CompoundConstituent('M6', [[_M2, 3]]);
 const _S6 = new CompoundConstituent('S6', [[_S2, 3]]);
 const _M8 = new CompoundConstituent('M8', [[_M2, 4]]);
 
 export const noaa: Constituent[] = [
-  _M2, _S2, _N2, _K1, _M4, _O1, _M6, _MK3, _S4, _MN4, _nu2, _S6, _mu2, _2N2,
-  _OO1, _lambda2, _S1, _M1, _J1, _Mm, _Ssa, _Sa, _MSF, _Mf, _rho1, _Q1, _T2,
-  _R2, _2Q1, _P1, _2SM2, _M3, _L2, _2MK3, _K2, _M8, _MS4,
+  _M2,
+  _S2,
+  _N2,
+  _K1,
+  _M4,
+  _O1,
+  _M6,
+  _MK3,
+  _S4,
+  _MN4,
+  _nu2,
+  _S6,
+  _mu2,
+  _2N2,
+  _OO1,
+  _lambda2,
+  _S1,
+  _M1,
+  _J1,
+  _Mm,
+  _Ssa,
+  _Sa,
+  _MSF,
+  _Mf,
+  _rho1,
+  _Q1,
+  _T2,
+  _R2,
+  _2Q1,
+  _P1,
+  _2SM2,
+  _M3,
+  _L2,
+  _2MK3,
+  _K2,
+  _M8,
+  _MS4,
 ];
 
 export const Z0 = _Z0;
