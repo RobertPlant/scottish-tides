@@ -117,6 +117,62 @@ test('about screen: renders on direct load (refresh-safe)', async ({ page }) => 
   await expect(page.locator('body')).toContainText('GNU General Public License');
 });
 
+test('map: zoom buttons and wheel zoom, with reset', async ({ page }) => {
+  await page.goto('/map');
+  await page.waitForTimeout(1000);
+
+  const reset = page.getByText('1×', { exact: true });
+  const coast = page.locator('svg g[transform]').first();
+  await expect(reset).toHaveCount(0); // starts fitted
+  expect(await coast.getAttribute('transform')).toBe('translate(0 0) scale(1)');
+
+  // Zoom in with the + button → reset control appears, coastline scales up.
+  await page.getByText('+', { exact: true }).click();
+  await expect(reset).toHaveCount(1);
+  expect(await coast.getAttribute('transform')).toContain('scale(1.6)');
+
+  // 1× resets to fit.
+  await reset.click();
+  await expect(reset).toHaveCount(0);
+  expect(await coast.getAttribute('transform')).toBe('translate(0 0) scale(1)');
+
+  // Scroll-wheel over the map also zooms (web wheel listener).
+  const svg = page.locator('svg').first();
+  const box = await svg.boundingBox();
+  if (!box) throw new Error('map svg not found');
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+  await page.mouse.wheel(0, -300); // wheel up → zoom in
+  await expect(reset).toHaveCount(1);
+});
+
+test('map: drag pans the view when zoomed in', async ({ page }) => {
+  await page.goto('/map');
+  await page.waitForTimeout(1000);
+
+  // Pan is clamped to a no-op at fit scale, so zoom in first.
+  await page.getByText('+', { exact: true }).click();
+  await page.getByText('+', { exact: true }).click();
+  await page.waitForTimeout(200);
+
+  const coast = page.locator('svg g[transform]').first();
+  const before = await coast.getAttribute('transform');
+
+  const svg = page.locator('svg').first();
+  const box = await svg.boundingBox();
+  if (!box) throw new Error('map svg not found');
+  const x = box.x + box.width * 0.5;
+  const y = box.y + box.height * 0.4;
+  await page.mouse.move(x, y);
+  await page.mouse.down();
+  await page.mouse.move(x - 50, y + 40, { steps: 8 });
+  await page.mouse.move(x - 100, y + 80, { steps: 8 });
+  await page.mouse.up();
+  await page.waitForTimeout(200);
+
+  expect(await coast.getAttribute('transform')).not.toBe(before);
+  await expect(page).toHaveURL(/\/map/); // didn't accidentally open a station pin
+});
+
 test.describe('tides near me', () => {
   test.use({ geolocation: { latitude: 58.2, longitude: -6.39 }, permissions: ['geolocation'] });
 
