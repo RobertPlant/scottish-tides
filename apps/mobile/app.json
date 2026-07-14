@@ -39,6 +39,12 @@
         }
       ],
       "@react-native-community/datetimepicker",
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Scottish Tides uses your location to find the nearest tide station."
+        }
+      ],
       "./plugins/with-low-memory-gradle",
       "expo-font",
       "expo-web-browser",

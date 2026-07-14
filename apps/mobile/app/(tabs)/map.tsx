@@ -1,3 +1,4 @@
+import * as Location from 'expo-location';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { Platform, Pressable, ScrollView, StyleSheet, View } from 'react-native';
@@ -24,25 +25,48 @@ export default function MapScreen() {
   };
   const openStream = (id: string) => router.push({ pathname: '/stream/[id]', params: { id } });
 
-  const findNearest = () => {
-    if (Platform.OS !== 'web' || typeof navigator === 'undefined' || !navigator.geolocation) {
-      setLocErr('Location is available in the web app / browser.');
+  const findNearest = async () => {
+    setLocErr(null);
+
+    // Web: use the browser geolocation API (its own permission prompt).
+    if (Platform.OS === 'web') {
+      if (typeof navigator === 'undefined' || !navigator.geolocation) {
+        setLocErr('Location is not available in this browser.');
+        return;
+      }
+      setLocating(true);
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          setLocating(false);
+          const { station } = nearestStation(pos.coords.latitude, pos.coords.longitude);
+          open(station.id);
+        },
+        () => {
+          setLocating(false);
+          setLocErr('Could not get your location.');
+        },
+        { enableHighAccuracy: false, timeout: 10_000, maximumAge: 300_000 },
+      );
       return;
     }
+
+    // Native: ask for foreground location permission, then locate.
     setLocating(true);
-    setLocErr(null);
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
+    try {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
         setLocating(false);
-        const { station } = nearestStation(pos.coords.latitude, pos.coords.longitude);
-        open(station.id);
-      },
-      () => {
-        setLocating(false);
-        setLocErr('Could not get your location.');
-      },
-      { enableHighAccuracy: false, timeout: 10_000, maximumAge: 300_000 },
-    );
+        setLocErr('Location permission denied — enable it in Settings to use this.');
+        return;
+      }
+      const pos = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Low });
+      setLocating(false);
+      const { station } = nearestStation(pos.coords.latitude, pos.coords.longitude);
+      open(station.id);
+    } catch {
+      setLocating(false);
+      setLocErr('Could not get your location.');
+    }
   };
 
   const favStations = favourites
