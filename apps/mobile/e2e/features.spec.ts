@@ -34,6 +34,39 @@ test('streams: race list and detail render with the safety warning', async ({ pa
   await expect(page.locator('body')).toContainText('Not for navigation');
 });
 
+test('swipe left/right changes the day', async ({ page }) => {
+  await page.setViewportSize({ width: 430, height: 900 });
+  await page.goto('/station/oban?d=2026-07-14');
+  await page.waitForTimeout(1500); // hydrate so the pan responder is live
+  await expect(page.locator('body')).toContainText('14 July 2026');
+
+  // Drag horizontally across the sun/moon card — a non-chart, non-pressable
+  // area, so the day-view pan responder handles it (the chart keeps its scrub,
+  // and the week-day rows keep their tap-to-select).
+  const swipe = async (dir: 'left' | 'right') => {
+    const card = page.getByText('Daylight', { exact: false }).first();
+    await card.scrollIntoViewIfNeeded();
+    const b = await card.boundingBox();
+    if (!b) throw new Error('sun/moon card not found');
+    const y = b.y + b.height / 2;
+    const [fromX, toX] = dir === 'left' ? [340, 110] : [110, 340];
+    await page.mouse.move(fromX, y);
+    await page.mouse.down();
+    await page.mouse.move((fromX + toX) / 2, y, { steps: 5 });
+    await page.mouse.move(toX, y, { steps: 5 });
+    await page.mouse.up();
+    await page.waitForTimeout(300);
+  };
+
+  await swipe('left'); // → next day
+  await expect(page).toHaveURL(/d=2026-07-15/);
+  await expect(page.locator('body')).toContainText('15 July 2026');
+
+  await swipe('right'); // → previous day, back to the 14th
+  await expect(page).toHaveURL(/d=2026-07-14/);
+  await expect(page.locator('body')).toContainText('14 July 2026');
+});
+
 test('about screen: reached from the map, shows licence, credits and disclaimer', async ({
   page,
 }) => {
