@@ -43,6 +43,12 @@ Gates: `tsc` clean · `npm run test:engine` 22/22 · `npm run test:e2e` 8/8 (run
       deps (documented as `npm i --no-save` in `tools/gen-coastline.mjs`).
 - [ ] Run a **Biome format pass** (`npm run check` from repo root, in `devenv shell`) — code
       follows the style but Biome hasn't been run to normalise.
+- [ ] **Retry the TypeScript 7 bump** once typescript-eslint supports the native (Go) port.
+      Tried `typescript@7.0.2`: `tsc --noEmit` is clean and `test:engine` passes, but `expo lint`
+      crashes at load — `@typescript-eslint`/`ts-api-utils` read internal TS APIs the Go port
+      doesn't expose (`TypeError: Cannot read properties of undefined (reading 'Intrinsic')`).
+      CI is unaffected (it doesn't run `tsc`). Revisit when typescript-eslint ships a TS7-compatible
+      release, then it should be a clean bump.
 - [ ] Add an **About/Settings** screen: data attribution (BODC, Natural Earth, fallsoflora),
       GPL source link, and unit toggles (metres/feet, 12/24 h).
 
