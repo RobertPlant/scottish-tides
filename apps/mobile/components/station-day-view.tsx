@@ -3,23 +3,23 @@
 // HW/LW table, sun & moon, and the 7-day overview. Shared by the default tab
 // and the /station/[id] deep-link route so both show the complete picture.
 
-import { useRouter } from 'expo-router';
-import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { PanResponder, Platform, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { type ReactNode, useEffect, useMemo, useRef, useState } from 'react';
+import { PanResponder, Platform, ScrollView, StyleSheet, View } from 'react-native';
 
-import { DateField } from '@/components/date-field';
+import { Card } from '@/components/card';
+import { DayNav } from '@/components/day-nav';
+import { Note } from '@/components/note';
 import { SunMoonCard } from '@/components/sun-moon-card';
 import { ThemedText } from '@/components/themed-text';
 import { TideCurve } from '@/components/tide-curve';
 import { TideTable } from '@/components/tide-table';
 import { WeekOverview } from '@/components/week-overview';
+import { useDayNav } from '@/hooks/use-day-nav';
 import { usePalette } from '@/hooks/use-theme-color';
 import { sunTimes } from '@/lib/astronomy';
-import { formatLongDay, ukDayStartFromYmd, ymdAddDays, ymdInUk } from '@/lib/datetime';
+import { ymdAddDays } from '@/lib/datetime';
 import type { Station } from '@/lib/stations';
 import { classifyTide, dayEvents, dayHeightSeries, dayRange, tidalStats } from '@/lib/tide-day';
-
-const YMD_RE = /^\d{4}-\d{2}-\d{2}$/;
 
 export function StationDayView({
   station,
@@ -36,45 +36,28 @@ export function StationDayView({
   header?: ReactNode;
 }) {
   const palette = usePalette();
-  const router = useRouter();
 
   // On web the chart hint is revealed on hover to keep the chart clean; on
   // native (no hover) it stays visible so tap-to-read is still discoverable.
   const [chartHovered, setChartHovered] = useState(false);
 
-  // Keep "now" live so the now/next card and the current-time marker stay current.
+  // Keep "now" live so the current-time marker/readout stays current.
   const [now, setNow] = useState(() => new Date());
   useEffect(() => {
     const id = setInterval(() => setNow(new Date()), 60_000);
     return () => clearInterval(id);
   }, []);
 
-  const todayYmd = useMemo(() => ymdInUk(now), [now]);
-  const [ymd, setYmd] = useState(() =>
-    initialYmd && YMD_RE.test(initialYmd) ? initialYmd : ymdInUk(new Date()),
-  );
-  const dayStart = useMemo(() => ukDayStartFromYmd(ymd), [ymd]);
-
-  const updateYmd = useCallback(
-    (next: string) => {
-      setYmd(next);
-      if (syncUrl) {
-        router.setParams({ d: next });
-      }
-    },
-    [router, syncUrl],
-  );
-
-  const minYmd = useMemo(() => ymdAddDays(todayYmd, -730), [todayYmd]);
-  const maxYmd = useMemo(() => ymdAddDays(todayYmd, 730), [todayYmd]);
+  const nav = useDayNav({ initialYmd, syncUrl });
+  const { ymd, dayStart, isToday } = nav;
 
   // Swipe left → next day, swipe right → previous day. A non-capturing responder
   // that only claims clearly-horizontal drags: the chart keeps its own scrub
   // (it grabs the touch on start) and vertical scrolling falls through to the
   // ScrollView. Latest ymd/handler are read from a ref so the responder — built
   // once — never acts on a stale day.
-  const swipeRef = useRef({ ymd, go: updateYmd });
-  swipeRef.current = { ymd, go: updateYmd };
+  const swipeRef = useRef({ ymd, go: nav.setDay });
+  swipeRef.current = { ymd, go: nav.setDay };
   const swipe = useRef(
     PanResponder.create({
       onMoveShouldSetPanResponder: (_e, g) =>
@@ -98,7 +81,6 @@ export function StationDayView({
     () => sunTimes(new Date(dayStart.getTime() + 12 * 3600_000), station.lat, station.lon),
     [dayStart, station.lat, station.lon],
   );
-  const isToday = ymd === todayYmd;
 
   const stats = useMemo(() => tidalStats(station), [station]);
   const tideClass = useMemo(() => classifyTide(dayRange(events), stats), [stats, events]);
@@ -118,32 +100,7 @@ export function StationDayView({
       <View style={styles.inner} {...swipe.panHandlers}>
         {header}
 
-        <View style={styles.navRow}>
-          <Pressable
-            onPress={() => updateYmd(ymdAddDays(ymd, -1))}
-            style={[styles.navButton, { borderColor: palette.border }]}
-          >
-            <ThemedText style={{ color: palette.accent }}>‹ Prev</ThemedText>
-          </Pressable>
-          <ThemedText type="defaultSemiBold" style={styles.navLabel}>
-            {formatLongDay(dayStart)}
-          </ThemedText>
-          <Pressable
-            onPress={() => updateYmd(ymdAddDays(ymd, 1))}
-            style={[styles.navButton, { borderColor: palette.border }]}
-          >
-            <ThemedText style={{ color: palette.accent }}>Next ›</ThemedText>
-          </Pressable>
-        </View>
-
-        <View style={styles.pickerRow}>
-          <DateField value={ymd} onChange={updateYmd} min={minYmd} max={maxYmd} />
-          {!isToday ? (
-            <Pressable onPress={() => updateYmd(todayYmd)} style={styles.todayLink}>
-              <ThemedText style={{ color: palette.accent }}>Today</ThemedText>
-            </Pressable>
-          ) : null}
-          <View style={styles.badgeSpacer} />
+        <DayNav nav={nav}>
           <View style={[styles.badge, { backgroundColor: classColor }]}>
             <ThemedText style={styles.badgeText}>
               {tideClass.label} · {tideClass.coefficient}
@@ -152,12 +109,11 @@ export function StationDayView({
           <ThemedText type="caption" style={{ color: palette.muted }}>
             {range.toFixed(1)} m range
           </ThemedText>
-        </View>
+        </DayNav>
 
-        <View
+        <Card
           onPointerEnter={() => setChartHovered(true)}
           onPointerLeave={() => setChartHovered(false)}
-          style={[styles.card, { backgroundColor: palette.surface, borderColor: palette.border }]}
         >
           <TideCurve
             series={series}
@@ -177,13 +133,13 @@ export function StationDayView({
             Tap the chart to read the level at any time. Gold band = daylight.
           </ThemedText>
           <TideTable events={events} now={isToday ? now : undefined} />
-        </View>
+        </Card>
 
         <SunMoonCard date={dayStart} lat={station.lat} lon={station.lon} />
 
-        <WeekOverview station={station} fromYmd={ymd} selectedYmd={ymd} onSelectDay={updateYmd} />
+        <WeekOverview station={station} fromYmd={ymd} selectedYmd={ymd} onSelectDay={nav.setDay} />
 
-        <View style={[styles.info, { borderColor: palette.border }]}>
+        <Note>
           <ThemedText type="caption" style={{ color: palette.muted }}>
             {station.standardPort
               ? 'Standard port — predicted directly from its own gauge.'
@@ -199,7 +155,7 @@ export function StationDayView({
             Astronomical only (no surge). Water levels, not streams — never plan a race transit from
             these tables.
           </ThemedText>
-        </View>
+        </Note>
       </View>
     </ScrollView>
   );
@@ -208,20 +164,7 @@ export function StationDayView({
 const styles = StyleSheet.create({
   content: { padding: 16 },
   inner: { gap: 16 },
-  navRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8 },
-  navButton: {
-    borderRadius: 10,
-    borderWidth: StyleSheet.hairlineWidth,
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-  },
-  navLabel: { flex: 1, textAlign: 'center' },
-  pickerRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  badgeSpacer: { flex: 1 },
   badge: { borderRadius: 999, paddingHorizontal: 10, paddingVertical: 3 },
   badgeText: { color: '#fff', fontWeight: '700', fontSize: 12 },
-  card: { borderRadius: 16, borderWidth: StyleSheet.hairlineWidth, padding: 16, gap: 12 },
   hintHidden: { opacity: 0 },
-  todayLink: { paddingVertical: 4, paddingHorizontal: 4 },
-  info: { borderRadius: 12, borderWidth: StyleSheet.hairlineWidth, padding: 14, gap: 6 },
 });

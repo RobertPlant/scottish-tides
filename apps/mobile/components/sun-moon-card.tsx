@@ -2,6 +2,7 @@
 
 import { StyleSheet, View } from 'react-native';
 
+import { Card } from '@/components/card';
 import { ThemedText } from '@/components/themed-text';
 import { usePalette } from '@/hooks/use-theme-color';
 import { moonInfo, sunTimes } from '@/lib/astronomy';
@@ -27,7 +28,7 @@ export function SunMoonCard({ date, lat, lon }: { date: Date; lat: number; lon: 
       : 'No sunrise';
 
   return (
-    <View style={[styles.card, { backgroundColor: palette.surface, borderColor: palette.border }]}>
+    <Card style={styles.card}>
       <View style={styles.col}>
         <ThemedText type="caption" style={{ color: palette.muted }}>
           ☀︎ Daylight
@@ -51,18 +52,12 @@ export function SunMoonCard({ date, lat, lon }: { date: Date; lat: number; lon: 
           {Math.round(moon.illumination * 100)}% illuminated
         </ThemedText>
       </View>
-    </View>
+    </Card>
   );
 }
 
 const styles = StyleSheet.create({
-  card: {
-    flexDirection: 'row',
-    borderRadius: 16,
-    borderWidth: StyleSheet.hairlineWidth,
-    padding: 16,
-    gap: 12,
-  },
+  card: { flexDirection: 'row' },
   col: { flex: 1, gap: 2 },
   divider: { width: StyleSheet.hairlineWidth },
 });

@@ -5,6 +5,7 @@ import Constants from 'expo-constants';
 import { Stack } from 'expo-router';
 import { Linking, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
+import { Card } from '@/components/card';
 import { ThemedText } from '@/components/themed-text';
 import { usePalette } from '@/hooks/use-theme-color';
 
@@ -76,9 +77,7 @@ export default function About() {
           </ThemedText>
         </View>
 
-        <View
-          style={[styles.card, { backgroundColor: palette.surface, borderColor: palette.border }]}
-        >
+        <Card gap={8}>
           <ThemedText type="defaultSemiBold">Source &amp; licence</ThemedText>
           <ThemedText type="caption" style={{ color: palette.muted }}>
             Free software under the GNU General Public License v3.0. You can use, study, share and
@@ -87,15 +86,13 @@ export default function About() {
           <Pressable onPress={() => open(REPO)} style={styles.linkRow}>
             <ThemedText type="link">View the source on GitHub →</ThemedText>
           </Pressable>
-        </View>
+        </Card>
 
         <View style={styles.section}>
           <ThemedText type="caption" style={[styles.sectionTitle, { color: palette.muted }]}>
             DATA &amp; CREDITS
           </ThemedText>
-          <View
-            style={[styles.card, { backgroundColor: palette.surface, borderColor: palette.border }]}
-          >
+          <Card gap={8}>
             {CREDITS.map((c, i) => (
               <Pressable
                 key={c.what}
@@ -120,12 +117,10 @@ export default function About() {
                 ) : null}
               </Pressable>
             ))}
-          </View>
+          </Card>
         </View>
 
-        <View
-          style={[styles.card, { backgroundColor: palette.surface, borderColor: palette.border }]}
-        >
+        <Card gap={8}>
           <ThemedText type="defaultSemiBold">Disclaimer</ThemedText>
           <ThemedText type="caption" style={{ color: palette.muted }}>
             Heights are astronomical predictions and exclude weather (surge). Tidal streams are
@@ -133,7 +128,7 @@ export default function About() {
             navigation or for planning a race transit — always cross-check the official pilot, chart
             and tidal-stream atlas.
           </ThemedText>
-        </View>
+        </Card>
       </ScrollView>
     </>
   );
@@ -141,7 +136,6 @@ export default function About() {
 
 const styles = StyleSheet.create({
   content: { padding: 16, gap: 16 },
-  card: { borderRadius: 16, borderWidth: StyleSheet.hairlineWidth, padding: 16, gap: 8 },
   linkRow: { paddingTop: 2 },
   section: { gap: 8 },
   sectionTitle: { letterSpacing: 0.6 },

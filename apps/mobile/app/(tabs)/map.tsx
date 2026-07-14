@@ -3,6 +3,7 @@ import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { Platform, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
+import { Note } from '@/components/note';
 import { ScotlandMap } from '@/components/scotland-map';
 import { ThemedText } from '@/components/themed-text';
 import { usePalette } from '@/hooks/use-theme-color';
@@ -184,9 +185,7 @@ export default function MapScreen() {
         <ThemedText type="caption" style={[styles.groupTitle, { color: palette.muted }]}>
           ◆ TIDAL STREAMS
         </ThemedText>
-        <View
-          style={[styles.warn, { borderColor: palette.low, backgroundColor: `${palette.low}14` }]}
-        >
+        <Note tone="warn" gap={4}>
           <ThemedText type="defaultSemiBold" style={{ color: palette.low }}>
             ⚠ Estimates — not a tidal stream atlas
           </ThemedText>
@@ -195,7 +194,7 @@ export default function MapScreen() {
             direction are approximate. Verify against the pilot/atlas before committing — these
             races can kill.
           </ThemedText>
-        </View>
+        </Note>
         <View
           style={[styles.card, { backgroundColor: palette.surface, borderColor: palette.border }]}
         >
@@ -261,7 +260,6 @@ const styles = StyleSheet.create({
   group: { gap: 8 },
   groupTitle: { letterSpacing: 0.6 },
   card: { borderRadius: 16, borderWidth: StyleSheet.hairlineWidth, paddingHorizontal: 14 },
-  warn: { borderRadius: 12, borderWidth: StyleSheet.hairlineWidth, padding: 14, gap: 4 },
   row: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 14 },
   star: { paddingRight: 2 },
   pin: { width: 22, height: 22, borderRadius: 11, alignItems: 'center', justifyContent: 'center' },

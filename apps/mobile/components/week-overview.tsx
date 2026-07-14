@@ -3,6 +3,7 @@
 
 import { Pressable, StyleSheet, View } from 'react-native';
 
+import { Card } from '@/components/card';
 import { ThemedText } from '@/components/themed-text';
 import { usePalette } from '@/hooks/use-theme-color';
 import { formatDay, ukDayStartFromYmd, ymdAddDays, ymdInUk } from '@/lib/datetime';
@@ -40,7 +41,7 @@ export function WeekOverview({
       : `${formatDay(days[0].start)} – ${formatDay(days[6].start)}`;
 
   return (
-    <View style={[styles.card, { backgroundColor: palette.surface, borderColor: palette.border }]}>
+    <Card gap={8}>
       <View style={styles.heading}>
         <ThemedText type="defaultSemiBold">{title}</ThemedText>
         <ThemedText type="caption" style={{ color: palette.muted }}>
@@ -87,12 +88,11 @@ export function WeekOverview({
           </Pressable>
         );
       })}
-    </View>
+    </Card>
   );
 }
 
 const styles = StyleSheet.create({
-  card: { borderRadius: 16, borderWidth: StyleSheet.hairlineWidth, padding: 16, gap: 8 },
   heading: { gap: 2 },
   row: {
     flexDirection: 'row',
