@@ -59,8 +59,10 @@ Gates: `tsc` clean · `npm run test:engine` 22/22 · `npm run test:e2e` 8/8 (run
 - [ ] Re-run `tools/gen-reference.py` if any station JSON changes (keeps the parity test honest).
 
 ## 5. Native (currently web-first)
-- [ ] **Geolocation is web-only** (`navigator.geolocation`, gated to `Platform.OS === 'web'`).
-      For native builds add `expo-location`.
+- [x] **Geolocation works on native** — `map.tsx` uses `expo-location`
+      (`requestForegroundPermissionsAsync` + `getCurrentPositionAsync`) on native and keeps the
+      browser `navigator.geolocation` path on web. `expo-location` config plugin + permission
+      string are in `app.json` (takes effect on the next native build).
 - [ ] Set up **EAS build** config if native iOS/Android binaries are wanted (app.json has the
       package id `com.robertplant.scottishtides`).
 
