@@ -10,6 +10,7 @@
     "web": "expo start --web",
     "lint": "expo lint",
     "test:engine": "node --import tsx --test lib/tides/*.test.ts",
+    "test:unit": "node --import tsx --test lib/*.test.ts",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui"
   },
