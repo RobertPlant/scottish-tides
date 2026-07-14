@@ -100,8 +100,12 @@ export function TideCurve({ series, events, now, height = 200, scrubbable = fals
       const s1 = Math.min(ss, t1);
       if (s1 > s0) {
         dayBand = { x0: x(s0), x1: x(s1) };
-        if (sr > t0 && sr < t1) dayEdges.push(x(sr));
-        if (ss > t0 && ss < t1) dayEdges.push(x(ss));
+        if (sr > t0 && sr < t1) {
+          dayEdges.push(x(sr));
+        }
+        if (ss > t0 && ss < t1) {
+          dayEdges.push(x(ss));
+        }
       }
     }
   }
