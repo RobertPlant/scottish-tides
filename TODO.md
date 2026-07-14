@@ -1,7 +1,7 @@
 # Scottish Tides — TODO / handoff
 
 Status snapshot (for picking up cold). Repo: https://github.com/RobertPlant/scottish-tides
-Stack: Expo SDK 54 universal app (web/iOS/Android), GPL-3.0, no backend, offline PWA.
+Stack: Expo SDK 57 universal app (web/iOS/Android), GPL-3.0, no backend, offline PWA.
 Gates: `tsc` clean · `npm run test:engine` 22/22 · `npm run test:e2e` 8/8 (run e2e in `devenv shell`).
 
 ## Done (so you don't redo it)
@@ -21,7 +21,11 @@ Gates: `tsc` clean · `npm run test:engine` 22/22 · `npm run test:e2e` 8/8 (run
       https://robertplant.github.io/scottish-tides/ (Settings → Pages → source "GitHub Actions";
       the workflow self-enables via `configure-pages`, but verify).
 - [ ] Confirm the **Tests** workflow (`.github/workflows/test.yml`) passes in CI (engine + e2e).
-- [ ] Address the **3 moderate Dependabot** advisories flagged on push (`npm audit`).
+- [x] **Dependabot advisories reviewed** — all (now 13 moderate) trace to a single transitive
+      `uuid <11.1.1` pulled in by the Expo build tooling (`xcode` → `@expo/config-plugins` →
+      `@expo/cli`). It's dev/build-time only (never bundled into the app), and the bug needs an
+      attacker-controlled `buf` that Expo never passes. Non-actionable — `npm audit fix --force`
+      would downgrade Expo to v40/46. Dismiss the GitHub alert as "not used at runtime".
 
 ## 2. Streams — refinements (timing is calibrated; these are the known gaps)
 - [ ] **Rate magnitudes (knots) are uncalibrated** — neither XTide/fallsoflora nor the free
@@ -49,8 +53,10 @@ Gates: `tsc` clean · `npm run test:engine` 22/22 · `npm run test:e2e` 8/8 (run
       doesn't expose (`TypeError: Cannot read properties of undefined (reading 'Intrinsic')`).
       CI is unaffected (it doesn't run `tsc`). Revisit when typescript-eslint ships a TS7-compatible
       release, then it should be a clean bump.
-- [ ] Add an **About/Settings** screen: data attribution (BODC, Natural Earth, fallsoflora),
-      GPL source link, and unit toggles (metres/feet, 12/24 h).
+- [x] **About screen** done (`app/about.tsx`, linked from the Map tab): data attribution (BODC,
+      Natural Earth, pytides, fallsoflora), GPL source link, app version, and disclaimer.
+- [ ] **Unit toggles** (metres/feet, 12/24 h) — still to build. Needs a small settings store
+      (AsyncStorage, like `selected-station`) and a Settings entry to surface them.
 
 ## 4. Data / stations
 - [ ] Add more BODC station fits (needs Rob to download zips from the BODC picker, as before).
