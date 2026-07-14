@@ -127,7 +127,7 @@ export function StationDayView({
         {header}
 
         {isToday ? (
-          <NowNext station={station} state={state} now={now} showName={showStationName} />
+          <NowNext station={station} state={state} showName={showStationName} />
         ) : null}
 
         <View style={styles.navRow}>
