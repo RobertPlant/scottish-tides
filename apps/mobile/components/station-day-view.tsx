@@ -8,7 +8,6 @@ import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } fro
 import { PanResponder, Platform, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
 import { DateField } from '@/components/date-field';
-import { NowNext } from '@/components/now-next';
 import { SunMoonCard } from '@/components/sun-moon-card';
 import { ThemedText } from '@/components/themed-text';
 import { TideCurve } from '@/components/tide-curve';
@@ -18,14 +17,7 @@ import { usePalette } from '@/hooks/use-theme-color';
 import { sunTimes } from '@/lib/astronomy';
 import { formatLongDay, ukDayStartFromYmd, ymdAddDays, ymdInUk } from '@/lib/datetime';
 import type { Station } from '@/lib/stations';
-import {
-  classifyTide,
-  dayEvents,
-  dayHeightSeries,
-  dayRange,
-  nowState,
-  tidalStats,
-} from '@/lib/tide-day';
+import { classifyTide, dayEvents, dayHeightSeries, dayRange, tidalStats } from '@/lib/tide-day';
 
 const YMD_RE = /^\d{4}-\d{2}-\d{2}$/;
 
@@ -34,7 +26,6 @@ export function StationDayView({
   initialYmd,
   syncUrl = false,
   header,
-  showStationName = true,
 }: {
   station: Station;
   /** Optional starting day from a shareable ?d=YYYY-MM-DD link. */
@@ -43,8 +34,6 @@ export function StationDayView({
   syncUrl?: boolean;
   /** Screen-specific identity header rendered above the day view. */
   header?: ReactNode;
-  /** Show the station name inside the now/next card (off when the header already names it). */
-  showStationName?: boolean;
 }) {
   const palette = usePalette();
   const router = useRouter();
@@ -110,7 +99,6 @@ export function StationDayView({
     [dayStart, station.lat, station.lon],
   );
   const isToday = ymd === todayYmd;
-  const state = useMemo(() => nowState(station, now), [station, now]);
 
   const stats = useMemo(() => tidalStats(station), [station]);
   const tideClass = useMemo(() => classifyTide(dayRange(events), stats), [stats, events]);
@@ -129,8 +117,6 @@ export function StationDayView({
     >
       <View style={styles.inner} {...swipe.panHandlers}>
         {header}
-
-        {isToday ? <NowNext station={station} state={state} showName={showStationName} /> : null}
 
         <View style={styles.navRow}>
           <Pressable

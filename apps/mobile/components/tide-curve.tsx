@@ -126,9 +126,12 @@ export function TideCurve({ series, events, now, height = 200, scrubbable = fals
     }
   }
 
-  // Interpolated height at `now` for the marker dot.
+  // Interpolated height (and rising/falling trend) at `now` for the marker dot
+  // and the current-level readout.
   let nowX: number | null = null;
   let nowY: number | null = null;
+  let nowH: number | null = null;
+  let nowRising = false;
   if (now && now.getTime() >= t0 && now.getTime() <= t1) {
     nowX = x(now.getTime());
     let h = merged[0].h;
@@ -138,9 +141,11 @@ export function TideCurve({ series, events, now, height = 200, scrubbable = fals
         const b = merged[i];
         const f = (now.getTime() - a.t) / (b.t - a.t || 1);
         h = a.h + f * (b.h - a.h);
+        nowRising = b.h >= a.h;
         break;
       }
     }
+    nowH = h;
     nowY = y(h);
   }
 
@@ -273,6 +278,31 @@ export function TideCurve({ series, events, now, height = 200, scrubbable = fals
           {now && nowX !== null && nowY !== null && (
             <Circle cx={nowX} cy={nowY} r={4} fill={palette.text} />
           )}
+          {/* Current-level readout at the top of the now line (today only) */}
+          {now &&
+            nowX !== null &&
+            nowH !== null &&
+            (() => {
+              const label = `${nowH.toFixed(2)} m ${nowRising ? '▲' : '▼'}`;
+              const w = label.length * 6.2 + 12;
+              const lx = Math.min(Math.max(nowX - w / 2, PAD_LEFT), width - PAD_RIGHT - w);
+              const color = nowRising ? palette.high : palette.low;
+              return (
+                <G>
+                  <Rect x={lx} y={1} width={w} height={16} rx={4} fill={color} />
+                  <SvgText
+                    x={lx + w / 2}
+                    y={12.5}
+                    fill="#ffffff"
+                    fontSize={10}
+                    fontWeight="700"
+                    textAnchor="middle"
+                  >
+                    {label}
+                  </SvgText>
+                </G>
+              );
+            })()}
 
           {/* High/low water markers */}
           {events.map((e) => {

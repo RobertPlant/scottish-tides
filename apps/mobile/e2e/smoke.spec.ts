@@ -12,15 +12,15 @@ async function assertNoErrorOverlay(page: Page): Promise<void> {
   expect(text, 'uncaught error rendered').not.toContain('Uncaught');
 }
 
-test('home shows the now/next summary and station chips', async ({ page }) => {
+test('home shows the current level on the chart and station chips', async ({ page }) => {
   const errors: string[] = [];
   page.on('pageerror', (e) => errors.push(e.message));
 
   await page.goto('/');
   await expect(page.getByText('Oban').first()).toBeAttached();
-  // The now/next card always shows a rising/falling trend and a "m now" level.
-  await expect(page.getByText(/Rising|Falling/).first()).toBeAttached();
-  await expect(page.getByText(/m now/).first()).toBeAttached();
+  // The current level + rising/falling trend now render on the chart's
+  // now-marker (today only), e.g. "0.92 m ▼".
+  await expect(page.getByText(/\d+\.\d\d m [▲▼]/).first()).toBeAttached();
 
   await assertNoErrorOverlay(page);
   expect(errors, errors.join('\n')).toEqual([]);

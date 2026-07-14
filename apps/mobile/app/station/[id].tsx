@@ -27,7 +27,6 @@ export default function StationDetail() {
         station={station}
         initialYmd={d}
         syncUrl
-        showStationName={false}
         header={
           <View style={styles.headerRow}>
             <View style={{ flex: 1 }}>

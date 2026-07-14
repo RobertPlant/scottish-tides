@@ -3,7 +3,7 @@
 import coefficientRefs from '@/assets/data/coefficient-refs.json';
 import { addDays } from '@/lib/datetime';
 import type { Station } from '@/lib/stations';
-import { heightSeries, predictExtrema, type TideEvent, Tide } from '@/lib/tides';
+import { heightSeries, predictExtrema, type TideEvent } from '@/lib/tides';
 
 const COEF_REFS = coefficientRefs as Record<string, { springRef: number; neapRef: number }>;
 
@@ -137,31 +137,4 @@ export function seaLevelSeries(
     time: new Date(s.time.getTime() + dtMin * 60_000),
     height: s.height + dh,
   }));
-}
-
-export interface NowState {
-  heightNow: number;
-  rising: boolean;
-  prev?: TideEvent;
-  next?: TideEvent;
-  afterNext?: TideEvent;
-}
-
-/** Current level + the surrounding high/low waters. */
-export function nowState(station: Station, now: Date = new Date()): NowState {
-  const from = new Date(now.getTime() - 15 * 3600_000);
-  const to = new Date(now.getTime() + 24 * 3600_000);
-  const events = predictExtrema(station.data, from, to, station.shift);
-
-  const tide = new Tide(station.data);
-  const { dh } = meanShift(station);
-  const heightNow = tide.heightAt(now) + dh;
-
-  const prev = [...events].reverse().find((e) => e.time.getTime() <= now.getTime());
-  const nextIdx = events.findIndex((e) => e.time.getTime() > now.getTime());
-  const next = nextIdx >= 0 ? events[nextIdx] : undefined;
-  const afterNext = nextIdx >= 0 ? events[nextIdx + 1] : undefined;
-  const rising = next ? next.type === 'high' : false;
-
-  return { heightNow, rising, prev, next, afterNext };
 }
