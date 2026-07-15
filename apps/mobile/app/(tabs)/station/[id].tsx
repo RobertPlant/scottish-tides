@@ -1,7 +1,8 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useEffect, useMemo } from 'react';
-import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { useEffect } from 'react';
+import { Pressable, StyleSheet, View } from 'react-native';
 
+import { StationChips } from '@/components/station-chips';
 import { StationDayView } from '@/components/station-day-view';
 import { ThemedText } from '@/components/themed-text';
 import { usePalette } from '@/hooks/use-theme-color';
@@ -33,12 +34,6 @@ export default function StationScreen() {
     }
   }, [station.id, stationId, setStationId]);
 
-  // Favourite stations first in the chip row.
-  const chipStations = useMemo(
-    () => [...STATIONS].sort((a, b) => Number(isFavourite(b.id)) - Number(isFavourite(a.id))),
-    [isFavourite],
-  );
-
   const switchStation = (sid: string) => {
     setStationId(sid);
     router.replace({ pathname: '/station/[id]', params: { id: sid } });
@@ -51,47 +46,7 @@ export default function StationScreen() {
       syncUrl
       header={
         <View style={styles.header}>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.chips}
-          >
-            {chipStations.map((s) => {
-              const active = s.id === station.id;
-              const favd = isFavourite(s.id);
-              return (
-                <Pressable
-                  key={s.id}
-                  onPress={() => switchStation(s.id)}
-                  accessibilityRole="button"
-                  accessibilityState={{ selected: active }}
-                  accessibilityLabel={favd ? `${s.name} (favourite)` : s.name}
-                  style={[
-                    styles.chip,
-                    {
-                      backgroundColor: active ? palette.tint : palette.surface,
-                      borderColor: active ? palette.tint : palette.border,
-                    },
-                  ]}
-                >
-                  {favd ? (
-                    <ThemedText
-                      accessibilityElementsHidden
-                      importantForAccessibility="no"
-                      style={{ color: active ? palette.background : palette.accent }}
-                    >
-                      ★
-                    </ThemedText>
-                  ) : null}
-                  <ThemedText
-                    style={{ color: active ? palette.background : palette.text, fontWeight: '600' }}
-                  >
-                    {s.name}
-                  </ThemedText>
-                </Pressable>
-              );
-            })}
-          </ScrollView>
+          <StationChips activeId={station.id} onSelect={switchStation} />
 
           <View style={styles.nameRow}>
             <View style={{ flex: 1 }}>
@@ -122,16 +77,6 @@ export default function StationScreen() {
 
 const styles = StyleSheet.create({
   header: { gap: 12 },
-  chips: { gap: 8, paddingVertical: 2 },
-  chip: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 5,
-    borderRadius: 999,
-    borderWidth: 1,
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-  },
   nameRow: { flexDirection: 'row', alignItems: 'flex-start' },
   star: { paddingLeft: 8, paddingTop: 2 },
 });

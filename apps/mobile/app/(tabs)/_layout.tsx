@@ -34,6 +34,17 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
+        name="plan/[id]"
+        options={{
+          title: 'Plan',
+          // Like the Tides tab, the Plan tab tracks the selected station.
+          href: { pathname: '/plan/[id]', params: { id: stationId } },
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="calendar-outline" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
         name="map"
         options={{
           title: 'Map',
