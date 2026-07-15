@@ -78,7 +78,13 @@ Gates: `tsc` clean · `npm run test:engine` 22/22 · `npm run test:e2e` 8/8 (run
 
 ## 6. Feature roadmap (offered, not started)
 - [ ] **Slack & best-window planner** — daylight ∩ gentle stream ∩ range → suggested paddle window.
-- [ ] **Month planner** — extend the 7-day strip to a month grid coloured by spring/neap.
+- [x] **Month planner** — done. New **Plan** tab (`app/(tabs)/plan/[id].tsx` → `components/
+      trip-planner.tsx`, `lib/planner.ts`): a month calendar + compact 12-row year heatmap,
+      every day shaded on the station's neap↔spring scale (sequential teal ramp, contrast-aware
+      ink, theme-selected). Weekends outlined, today marked; tap a day → `/station/[id]?d=`.
+      Station switcher extracted to `components/station-chips.tsx` (shared with the Tides tab).
+      Tests: `lib/planner.test.ts` + `e2e/planner.spec.ts`. Neutral by design — no good/bad
+      judgement (see the roadmap "best-window planner" below for an opinionated layer on top).
 - [ ] **Weather overlay (optional, online)** — wind/swell from a free marine API (open-meteo),
       clearly marked "needs signal" (breaks the offline promise — deliberate opt-in).
 
