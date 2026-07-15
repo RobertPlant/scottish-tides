@@ -196,12 +196,14 @@ export function TripPlanner({ station, header }: { station: Station; header?: Re
             scheme={scheme}
             todayYmd={todayYmd}
             mutedInk={palette.muted}
+            weekendRing={palette.low}
             todayRing={palette.text}
+            gridLine={palette.surface}
             onPick={openDay}
           />
         ) : null}
 
-        <Legend scheme={scheme} palette={palette} showWeekend={mode === 'month'} />
+        <Legend scheme={scheme} palette={palette} />
 
         <Note>
           <ThemedText type="caption" style={{ color: palette.muted }}>
@@ -316,46 +318,90 @@ function YearGrid({
   scheme,
   todayYmd,
   mutedInk,
+  weekendRing,
   todayRing,
+  gridLine,
   onPick,
 }: {
   months: { month: number; days: DayCell[] }[];
   scheme: Scheme;
   todayYmd: string;
   mutedInk: string;
+  weekendRing: string;
   todayRing: string;
+  gridLine: string;
   onPick: (ymd: string) => void;
 }) {
   return (
-    <Card gap={4}>
-      {months.map(({ month, days }) => (
-        <View key={month} style={styles.yearRow}>
-          <ThemedText type="caption" style={[styles.yearLabel, { color: mutedInk }]}>
-            {MONTHS_SHORT[month - 1]}
-          </ThemedText>
-          <View style={styles.yearCells}>
-            {days.map((d) => {
-              const { bg } = coeffFill(d.cls.fraction, scheme);
-              const isToday = d.ymd === todayYmd;
-              return (
-                <Pressable
-                  key={d.ymd}
-                  onPress={() => onPick(d.ymd)}
-                  hitSlop={3}
-                  accessibilityRole="button"
-                  accessibilityLabel={`${d.ymd}: ${d.cls.label}`}
-                  style={[
-                    styles.yearCell,
-                    { backgroundColor: bg },
-                    isToday && { borderColor: todayRing, borderWidth: 1.5 },
-                  ]}
-                />
-              );
-            })}
+    <Card gap={3}>
+      {months.map(({ month, days }) => {
+        // Pad to 31 columns so every month row lines up (short months trail
+        // blank) and the cells stay a uniform, tappable width.
+        const slots: (DayCell | null)[] = [...days];
+        while (slots.length < 31) {
+          slots.push(null);
+        }
+        return (
+          <View key={month} style={styles.yearRow}>
+            <ThemedText type="caption" style={[styles.yearLabel, { color: mutedInk }]}>
+              {MONTHS_SHORT[month - 1]}
+            </ThemedText>
+            <View style={styles.yearCells}>
+              {slots.map((d, i) =>
+                d ? (
+                  <YearCell
+                    key={d.ymd}
+                    cell={d}
+                    scheme={scheme}
+                    isToday={d.ymd === todayYmd}
+                    weekendRing={weekendRing}
+                    todayRing={todayRing}
+                    gridLine={gridLine}
+                    onPick={onPick}
+                  />
+                ) : (
+                  <View key={`pad-${i}`} style={styles.yearPad} />
+                ),
+              )}
+            </View>
           </View>
-        </View>
-      ))}
+        );
+      })}
     </Card>
+  );
+}
+
+function YearCell({
+  cell,
+  scheme,
+  isToday,
+  weekendRing,
+  todayRing,
+  gridLine,
+  onPick,
+}: {
+  cell: DayCell;
+  scheme: Scheme;
+  isToday: boolean;
+  weekendRing: string;
+  todayRing: string;
+  gridLine: string;
+  onPick: (ymd: string) => void;
+}) {
+  const { bg } = coeffFill(cell.cls.fraction, scheme);
+  // Cells are flush (no gaps → no dead zones between them); a surface-coloured
+  // hairline border separates neighbours, and weekends/today recolour it.
+  const border = isToday ? todayRing : cell.isWeekend ? weekendRing : gridLine;
+  return (
+    <Pressable
+      onPress={() => onPick(cell.ymd)}
+      accessibilityRole="button"
+      accessibilityLabel={`${cell.ymd}: ${cell.cls.label}, ${cell.range.toFixed(1)} metres range`}
+      style={[
+        styles.yearCell,
+        { backgroundColor: bg, borderColor: border, borderWidth: isToday ? 1.5 : 1 },
+      ]}
+    />
   );
 }
 
@@ -364,11 +410,9 @@ function YearGrid({
 function Legend({
   scheme,
   palette,
-  showWeekend,
 }: {
   scheme: Scheme;
   palette: ReturnType<typeof usePalette>;
-  showWeekend: boolean;
 }) {
   const stops = Array.from({ length: 24 }, (_, i) => i / 23);
   return (
@@ -389,14 +433,12 @@ function Legend({
           Springs
         </ThemedText>
       </View>
-      {showWeekend ? (
-        <View style={styles.legendRow}>
-          <View style={[styles.legendSwatch, { borderColor: palette.low }]} />
-          <ThemedText type="caption" style={{ color: palette.muted }}>
-            Weekends are outlined. Today has a bold outline.
-          </ThemedText>
-        </View>
-      ) : null}
+      <View style={styles.legendRow}>
+        <View style={[styles.legendSwatch, { borderColor: palette.low }]} />
+        <ThemedText type="caption" style={{ color: palette.muted }}>
+          Weekends are outlined. Today has a bold outline.
+        </ThemedText>
+      </View>
     </Card>
   );
 }
@@ -432,8 +474,10 @@ const styles = StyleSheet.create({
 
   yearRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   yearLabel: { width: 28, fontSize: 11 },
-  yearCells: { flex: 1, flexDirection: 'row', gap: 1 },
-  yearCell: { flex: 1, height: 16, borderRadius: 2 },
+  // Cells are flush (no gap) so there are no dead zones between tap targets.
+  yearCells: { flex: 1, flexDirection: 'row' },
+  yearCell: { flex: 1, height: 18, borderRadius: 2 },
+  yearPad: { flex: 1, height: 18 },
 
   legendRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   legendBar: {

@@ -36,6 +36,23 @@ test('planner toggles to the year heatmap', async ({ page }) => {
   await assertNoErrorOverlay(page);
 });
 
+test('tapping a day in the year heatmap opens it', async ({ page }) => {
+  const now = new Date();
+  const the15th = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-15`;
+
+  await page.goto('/plan/oban');
+  await page.waitForTimeout(1500);
+  await page.getByRole('button', { name: 'year' }).click();
+  // Year cells carry the same "<ymd>: …" aria-label as the month grid.
+  await page
+    .getByRole('button', { name: new RegExp(`^${the15th}:`) })
+    .first()
+    .click();
+  await expect(page).toHaveURL(new RegExp(`d=${the15th}`));
+
+  await assertNoErrorOverlay(page);
+});
+
 test('tapping a day opens it on the Tides tab', async ({ page }) => {
   // The planner opens on the current month, so target the 15th of it (always a
   // valid mid-month day, no timezone edge). Long-date form for the assertion.
