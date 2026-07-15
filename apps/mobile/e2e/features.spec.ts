@@ -47,7 +47,9 @@ test('swipe left/right changes the day', async ({ page }) => {
     const card = page.getByText('Daylight', { exact: false }).first();
     await card.scrollIntoViewIfNeeded();
     const b = await card.boundingBox();
-    if (!b) throw new Error('sun/moon card not found');
+    if (!b) {
+      throw new Error('sun/moon card not found');
+    }
     const y = b.y + b.height / 2;
     const [fromX, toX] = dir === 'left' ? [340, 110] : [110, 340];
     await page.mouse.move(fromX, y);
@@ -78,7 +80,9 @@ test('tapping the chart shows the scrub readout', async ({ page }) => {
 
   const chart = page.locator('svg').first();
   const box = await chart.boundingBox();
-  if (!box) throw new Error('chart svg not found');
+  if (!box) {
+    throw new Error('chart svg not found');
+  }
   const x = box.x + box.width * 0.5;
   const y = box.y + box.height * 0.55;
   await page.mouse.move(x, y);
@@ -139,7 +143,9 @@ test('map: zoom buttons and wheel zoom, with reset', async ({ page }) => {
   // Scroll-wheel over the map also zooms (web wheel listener).
   const svg = page.locator('svg').first();
   const box = await svg.boundingBox();
-  if (!box) throw new Error('map svg not found');
+  if (!box) {
+    throw new Error('map svg not found');
+  }
   await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
   await page.mouse.wheel(0, -300); // wheel up → zoom in
   await expect(reset).toHaveCount(1);
@@ -159,7 +165,9 @@ test('map: drag pans the view when zoomed in', async ({ page }) => {
 
   const svg = page.locator('svg').first();
   const box = await svg.boundingBox();
-  if (!box) throw new Error('map svg not found');
+  if (!box) {
+    throw new Error('map svg not found');
+  }
   const x = box.x + box.width * 0.5;
   const y = box.y + box.height * 0.4;
   await page.mouse.move(x, y);
