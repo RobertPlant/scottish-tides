@@ -3,14 +3,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
-import {
-  coeffFill,
-  type DayCell,
-  daysInMonth,
-  monthDays,
-  monthMatrix,
-  yearMonths,
-} from './planner';
+import { coeffFill, daysInMonth, monthDays, yearMonths } from './planner';
 import { STATIONS } from './stations';
 
 const station = STATIONS[0];
@@ -42,29 +35,6 @@ test('monthDays returns every day in order with correct fields', () => {
   // 2026-07-06 is a Monday again.
   assert.equal(days[5].weekday, 0);
   assert.equal(days[5].isWeekend, false);
-});
-
-test('monthMatrix pads to whole Monday-first weeks', () => {
-  const days = monthDays(station, 2026, 7);
-  const weeks = monthMatrix(days);
-  // July 2026 starts Wed (2 leading blanks) + 31 days = 33 → 5 weeks (35 cells).
-  assert.equal(weeks.length, 5);
-  for (const w of weeks) {
-    assert.equal(w.length, 7);
-  }
-  assert.deepEqual(weeks[0].slice(0, 2), [null, null]);
-  assert.equal(weeks[0][2]?.day, 1);
-  // Trailing pad is null; the real days, read left→right, are 1..31 in order.
-  const flat = weeks.flat().filter((c): c is DayCell => c !== null);
-  assert.equal(flat.length, 31);
-  assert.deepEqual(
-    flat.map((d) => d.day),
-    days.map((d) => d.day),
-  );
-});
-
-test('monthMatrix of an empty month is empty', () => {
-  assert.deepEqual(monthMatrix([]), []);
 });
 
 test('yearMonths covers all twelve months with correct day counts', () => {

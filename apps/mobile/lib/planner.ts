@@ -63,25 +63,6 @@ export function monthDays(
   );
 }
 
-/**
- * A month's days laid out as Monday-first calendar weeks, padded with `null`
- * for the leading/trailing blanks so every row has seven slots.
- */
-export function monthMatrix(days: DayCell[]): (DayCell | null)[][] {
-  if (days.length === 0) {
-    return [];
-  }
-  const cells: (DayCell | null)[] = Array<DayCell | null>(days[0].weekday).fill(null).concat(days);
-  while (cells.length % 7 !== 0) {
-    cells.push(null);
-  }
-  const weeks: (DayCell | null)[][] = [];
-  for (let i = 0; i < cells.length; i += 7) {
-    weeks.push(cells.slice(i, i + 7));
-  }
-  return weeks;
-}
-
 /** All twelve months of a year, each with its ordered days. */
 export function yearMonths(
   station: Station,
