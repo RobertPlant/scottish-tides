@@ -11,15 +11,34 @@ function dayWindow(dayStart: Date): { from: Date; to: Date } {
   return { from: dayStart, to: addDays(dayStart, 1) };
 }
 
-/** Mean of the high- and low-water offsets — used to approximate a shifted curve. */
-function meanShift(station: Station): { dtMin: number; dh: number } {
-  if (!station.shift) {
-    return { dtMin: 0, dh: 0 };
+/**
+ * Apply a secondary-port correction to a continuous curve. The time uses the
+ * mean of the HW/LW offsets (they differ by only a few minutes, and the curve is
+ * near-flat at the turns, so the error is sub-pixel). The *height* offset is
+ * interpolated between the low-water offset (at the window trough) and the
+ * high-water offset (at the window peak). A single mean height offset instead
+ * detaches every HW/LW marker from the curve by half the HW−LW offset spread —
+ * the "bumps" where each marker's stalk pokes through the line — because the
+ * markers (see `applyShift`) use the exact per-event offset. Interpolating by
+ * height lands the peaks and troughs back on their markers.
+ */
+function shiftCurve(
+  base: { time: Date; height: number }[],
+  shift: NonNullable<Station['shift']>,
+): { time: Date; height: number }[] {
+  const dtMs = ((shift.hw_time_min + shift.lw_time_min) / 2) * 60_000;
+  let min = Number.POSITIVE_INFINITY;
+  let max = Number.NEGATIVE_INFINITY;
+  for (const s of base) {
+    if (s.height < min) min = s.height;
+    if (s.height > max) max = s.height;
   }
-  return {
-    dtMin: (station.shift.hw_time_min + station.shift.lw_time_min) / 2,
-    dh: (station.shift.hw_height_m + station.shift.lw_height_m) / 2,
-  };
+  const span = max - min;
+  return base.map((s) => {
+    const frac = span > 0 ? (s.height - min) / span : 0.5;
+    const dh = shift.lw_height_m + frac * (shift.hw_height_m - shift.lw_height_m);
+    return { time: new Date(s.time.getTime() + dtMs), height: s.height + dh };
+  });
 }
 
 /** High/low waters for the UK civil day starting at `dayStart`. */
@@ -29,9 +48,9 @@ export function dayEvents(station: Station, dayStart: Date): TideEvent[] {
 }
 
 /**
- * Continuous height samples for charting the day. Secondary-port stations are
- * approximated by a uniform time+height offset (the curve *shape* is the base
- * gauge's); the high/low markers from `dayEvents` remain exact.
+ * Continuous height samples for charting the day. Secondary-port stations warp
+ * the base gauge's curve *shape* by the secondary-port offset (see `shiftCurve`);
+ * the high/low markers from `dayEvents` remain exact and sit on the curve.
  */
 export function dayHeightSeries(
   station: Station,
@@ -40,14 +59,7 @@ export function dayHeightSeries(
 ): { time: Date; height: number }[] {
   const { from, to } = dayWindow(dayStart);
   const base = heightSeries(station.data, from, to, stepMinutes);
-  if (!station.shift) {
-    return base;
-  }
-  const { dtMin, dh } = meanShift(station);
-  return base.map((s) => ({
-    time: new Date(s.time.getTime() + dtMin * 60_000),
-    height: s.height + dh,
-  }));
+  return station.shift ? shiftCurve(base, station.shift) : base;
 }
 
 export interface TidalStats {
@@ -120,7 +132,7 @@ export function classifyTide(range: number, stats: TidalStats): TideClass {
 
 /**
  * Continuous sea level for a station over an arbitrary window (secondary ports
- * get the uniform shift). Used by the Falls-of-Lora sill model.
+ * get the warped shift, see `shiftCurve`). Used by the Falls-of-Lora sill model.
  */
 export function seaLevelSeries(
   station: Station,
@@ -129,12 +141,5 @@ export function seaLevelSeries(
   stepMinutes = 10,
 ): { time: Date; height: number }[] {
   const base = heightSeries(station.data, from, to, stepMinutes);
-  if (!station.shift) {
-    return base;
-  }
-  const { dtMin, dh } = meanShift(station);
-  return base.map((s) => ({
-    time: new Date(s.time.getTime() + dtMin * 60_000),
-    height: s.height + dh,
-  }));
+  return station.shift ? shiftCurve(base, station.shift) : base;
 }
