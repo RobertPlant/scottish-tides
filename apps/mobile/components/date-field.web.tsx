@@ -18,6 +18,9 @@ export function DateField({ value, onChange, min, max }: DateFieldProps) {
   return (
     <input
       type="date"
+      // No visible <label> in the picker row, so name it explicitly — otherwise
+      // this is an unlabelled form control on the web build.
+      aria-label="Date"
       value={value}
       min={min}
       max={max}

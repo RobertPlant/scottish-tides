@@ -70,6 +70,11 @@ export function WeekOverview({
           <Pressable
             key={d.ymd}
             onPress={() => onSelectDay(d.ymd)}
+            accessibilityRole="button"
+            // One composite label: read as a sentence rather than as five
+            // disconnected cells ("Fri 3 Jul", "3.9 m", "72", "Springs").
+            accessibilityLabel={`${formatDay(d.start)}: ${d.cls.label}, ${d.range.toFixed(1)} metres range, coefficient ${d.cls.coefficient}`}
+            accessibilityState={{ selected }}
             style={[
               styles.row,
               { borderColor: palette.border },

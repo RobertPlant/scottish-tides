@@ -27,6 +27,8 @@ export function DayNav({
       <View style={styles.navRow}>
         <Pressable
           onPress={() => setDay(ymdAddDays(ymd, -1))}
+          accessibilityRole="button"
+          accessibilityLabel="Previous day"
           style={[styles.navButton, { borderColor: palette.border }]}
         >
           <ThemedText style={{ color: palette.accent }}>‹ Prev</ThemedText>
@@ -36,6 +38,8 @@ export function DayNav({
         </ThemedText>
         <Pressable
           onPress={() => setDay(ymdAddDays(ymd, 1))}
+          accessibilityRole="button"
+          accessibilityLabel="Next day"
           style={[styles.navButton, { borderColor: palette.border }]}
         >
           <ThemedText style={{ color: palette.accent }}>Next ›</ThemedText>
@@ -45,7 +49,12 @@ export function DayNav({
       <View style={styles.pickerRow}>
         <DateField value={ymd} onChange={setDay} min={minYmd} max={maxYmd} />
         {!isToday ? (
-          <Pressable onPress={() => setDay(todayYmd)} style={styles.todayLink}>
+          <Pressable
+            onPress={() => setDay(todayYmd)}
+            accessibilityRole="button"
+            accessibilityLabel="Jump to today"
+            style={styles.todayLink}
+          >
             <ThemedText style={{ color: palette.accent }}>Today</ThemedText>
           </Pressable>
         ) : null}

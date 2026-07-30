@@ -284,16 +284,23 @@ export function ScotlandMap({
       <View style={styles.zoomBar}>
         <ZoomButton
           label="+"
+          a11yLabel="Zoom in"
           onPress={() => zoomAround(1.6, width / 2, height / 2)}
           palette={palette}
         />
         <ZoomButton
           label="−"
+          a11yLabel="Zoom out"
           onPress={() => zoomAround(1 / 1.6, width / 2, height / 2)}
           palette={palette}
         />
         {canReset ? (
-          <ZoomButton label="1×" onPress={() => setView({ k: 1, x: 0, y: 0 })} palette={palette} />
+          <ZoomButton
+            label="1×"
+            a11yLabel="Reset zoom"
+            onPress={() => setView({ k: 1, x: 0, y: 0 })}
+            palette={palette}
+          />
         ) : null}
       </View>
 
@@ -306,16 +313,21 @@ export function ScotlandMap({
 
 function ZoomButton({
   label,
+  a11yLabel,
   onPress,
   palette,
 }: {
   label: string;
+  /** Spoken name — the visible label is a bare glyph ("+", "−", "1×"). */
+  a11yLabel: string;
   onPress: () => void;
   palette: ReturnType<typeof usePalette>;
 }) {
   return (
     <Pressable
       onPress={onPress}
+      accessibilityRole="button"
+      accessibilityLabel={a11yLabel}
       style={[styles.zoomBtn, { backgroundColor: palette.surface, borderColor: palette.border }]}
     >
       <Text style={[styles.zoomBtnText, { color: palette.text }]}>{label}</Text>

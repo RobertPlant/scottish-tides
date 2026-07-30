@@ -44,6 +44,8 @@ export function DateField({ value, onChange, min, max }: DateFieldProps) {
     <>
       <Pressable
         onPress={() => setShow(true)}
+        accessibilityRole="button"
+        accessibilityLabel={`Pick a date, currently ${value}`}
         style={[styles.button, { borderColor: palette.border, backgroundColor: palette.surface }]}
       >
         <ThemedText style={{ color: palette.accent, fontWeight: '600' }}>📅 Pick a date</ThemedText>

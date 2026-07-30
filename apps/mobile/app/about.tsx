@@ -83,7 +83,16 @@ export default function About() {
             Free software under the GNU General Public License v3.0. You can use, study, share and
             improve it.
           </ThemedText>
-          <Pressable onPress={() => open(REPO)} style={styles.linkRow}>
+          <Pressable
+            onPress={() => open(REPO)}
+            // "button", not "link": RNW renders role=link as an <a>, and this
+            // repo has a documented crash class around <a> DOM nodes receiving
+            // RN style arrays (see AGENTS.md). These open via Linking.openURL
+            // rather than navigating, so button is honest anyway.
+            accessibilityRole="button"
+            accessibilityLabel="View the source on GitHub"
+            style={styles.linkRow}
+          >
             <ThemedText type="link">View the source on GitHub →</ThemedText>
           </Pressable>
         </Card>
@@ -98,6 +107,12 @@ export default function About() {
                 key={c.what}
                 onPress={() => open(c.url)}
                 disabled={!c.url}
+                // Only the rows that actually open something are actionable;
+                // the rest are plain text and shouldn't announce as buttons.
+                accessibilityRole={c.url ? 'button' : undefined}
+                accessibilityLabel={
+                  c.url ? `${c.what}. ${c.detail} Opens in your browser.` : undefined
+                }
                 style={[
                   styles.creditRow,
                   i < CREDITS.length - 1 && {
