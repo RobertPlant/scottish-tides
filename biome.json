@@ -1,5 +1,5 @@
 {
-  "$schema": "https://biomejs.dev/schemas/2.3.6/schema.json",
+  "$schema": "https://biomejs.dev/schemas/2.4.16/schema.json",
   "files": {
     "includes": [
       "**",
@@ -12,6 +12,7 @@
       "!**/*.min.js",
       "!**/assets/data/*.json",
       "!**/lib/tides/__fixtures__/*.json",
+      "!**/expo-env.d.ts",
       "!**/package-lock.json"
     ]
   },
