@@ -30,8 +30,12 @@ function shiftCurve(
   let min = Number.POSITIVE_INFINITY;
   let max = Number.NEGATIVE_INFINITY;
   for (const s of base) {
-    if (s.height < min) min = s.height;
-    if (s.height > max) max = s.height;
+    if (s.height < min) {
+      min = s.height;
+    }
+    if (s.height > max) {
+      max = s.height;
+    }
   }
   const span = max - min;
   return base.map((s) => {

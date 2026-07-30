@@ -99,7 +99,11 @@ export function TripPlanner({ station, header }: { station: Station; header?: Re
           </Pressable>
         </View>
         {year !== nowY ? (
-          <Pressable onPress={() => setYear(nowY)} accessibilityRole="button" style={styles.todayLink}>
+          <Pressable
+            onPress={() => setYear(nowY)}
+            accessibilityRole="button"
+            style={styles.todayLink}
+          >
             <ThemedText style={{ color: palette.accent }}>This year</ThemedText>
           </Pressable>
         ) : null}
@@ -116,10 +120,7 @@ export function TripPlanner({ station, header }: { station: Station; header?: Re
                 <ThemedText type="caption" style={[styles.yearLabel, { color: palette.muted }]}>
                   {MONTHS_SHORT[month - 1]}
                 </ThemedText>
-                <View
-                  style={styles.yearCells}
-                  onLayout={month === 1 ? onCellsLayout : undefined}
-                >
+                <View style={styles.yearCells} onLayout={month === 1 ? onCellsLayout : undefined}>
                   {slots.map((d, i) =>
                     d ? (
                       <DayBlock
@@ -198,13 +199,7 @@ function DayBlock({
   );
 }
 
-function Legend({
-  scheme,
-  palette,
-}: {
-  scheme: Scheme;
-  palette: ReturnType<typeof usePalette>;
-}) {
+function Legend({ scheme, palette }: { scheme: Scheme; palette: ReturnType<typeof usePalette> }) {
   const stops = Array.from({ length: 24 }, (_, i) => i / 23);
   return (
     <Card gap={8}>
