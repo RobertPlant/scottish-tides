@@ -1,6 +1,7 @@
 // Seven-day tide overview: per-day range with a neap↔spring bar, tappable to
 // jump to that day. Helps plan ahead (springs = bigger range, stronger streams).
 
+import { useMemo } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { Card } from '@/components/card';
@@ -22,16 +23,24 @@ export function WeekOverview({
   onSelectDay: (ymd: string) => void;
 }) {
   const palette = usePalette();
-  const stats = tidalStats(station);
+  const stats = useMemo(() => tidalStats(station), [station]);
 
-  const days = Array.from({ length: 7 }, (_, i) => {
-    const ymd = ymdAddDays(fromYmd, i);
-    const start = ukDayStartFromYmd(ymd);
-    const events = dayEvents(station, start);
-    const range = dayRange(events);
-    const cls = classifyTide(range, stats);
-    return { ymd, start, range, cls };
-  });
+  // Memoised: this is seven harmonic extrema solves (~3-4 ms on a desktop, more
+  // on a phone). The parent re-renders on its 60-second "now" tick and on chart
+  // hover, and the week only actually changes when the station or anchor day
+  // does — without this it was recomputed on every one of those renders.
+  const days = useMemo(
+    () =>
+      Array.from({ length: 7 }, (_, i) => {
+        const ymd = ymdAddDays(fromYmd, i);
+        const start = ukDayStartFromYmd(ymd);
+        const events = dayEvents(station, start);
+        const range = dayRange(events);
+        const cls = classifyTide(range, stats);
+        return { ymd, start, range, cls };
+      }),
+    [station, fromYmd, stats],
+  );
 
   // The window is anchored to the selected day, not always today — so only call
   // it "Next 7 days" when it really starts today; otherwise show the date range.
