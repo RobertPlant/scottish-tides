@@ -83,8 +83,8 @@ export function StationDayView({
   );
 
   const stats = useMemo(() => tidalStats(station), [station]);
-  const tideClass = useMemo(() => classifyTide(dayRange(events), stats), [stats, events]);
-  const range = dayRange(events);
+  const range = useMemo(() => dayRange(events), [events]);
+  const tideClass = useMemo(() => classifyTide(range, stats), [range, stats]);
   const classColor =
     tideClass.label === 'Springs'
       ? palette.accent

@@ -100,11 +100,10 @@ const clamp01 = (t: number) => Math.min(Math.max(t, 0), 1);
 export function coeffFill(t: number, scheme: Scheme): { bg: string; ink: string } {
   const { lo, hi } = RAMP[scheme];
   const f = clamp01(t);
-  const c = lo.map((l, i) => Math.round(l + (hi[i] - l) * f)) as unknown as [
-    number,
-    number,
-    number,
-  ];
-  const lum = (0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]) / 255;
-  return { bg: `rgb(${c[0]}, ${c[1]}, ${c[2]})`, ink: lum > 0.6 ? '#0c1722' : '#ffffff' };
+  // Built as an explicit tuple: Array.prototype.map widens to number[], which
+  // then needed a double cast back to a 3-tuple to index safely.
+  const mix = (i: number) => Math.round(lo[i] + (hi[i] - lo[i]) * f);
+  const [r, g, b] = [mix(0), mix(1), mix(2)];
+  const lum = (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
+  return { bg: `rgb(${r}, ${g}, ${b})`, ink: lum > 0.6 ? '#0c1722' : '#ffffff' };
 }

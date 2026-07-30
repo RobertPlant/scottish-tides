@@ -46,6 +46,12 @@ export function TripPlanner({ station, header }: { station: Station; header?: Re
 
   const [year, setYear] = useState(nowY);
   const stats = useMemo(() => tidalStats(station), [station]);
+  // 365 harmonic extrema solves: ~130 ms on a desktop, so plausibly several
+  // times that under Hermes on a phone. Memoised, so it's paid once per
+  // station/year rather than per render -- but it is still one synchronous
+  // block on mount and on every ‹ › press. If this grows (e.g. the opinionated
+  // "best window" layer in TODO.md, which would add stream/daylight solves on
+  // top), it needs deferring off the first paint rather than more memoising.
   const months = useMemo(() => yearMonths(station, year, stats), [station, year, stats]);
 
   const minYear = nowY - YEAR_SPAN;
