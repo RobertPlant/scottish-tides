@@ -2,7 +2,9 @@
 
 Status snapshot (for picking up cold). Repo: https://github.com/RobertPlant/scottish-tides
 Stack: Expo SDK 57 universal app (web/iOS/Android), GPL-3.0, no backend, offline PWA.
-Gates: `tsc` clean · `npm run test:engine` 22/22 · `npm run test:e2e` 8/8 (run e2e in `devenv shell`).
+Gates: `tsc` clean · `npm run test:unit` 36/36 · `npm run test:engine` 22/22 ·
+`npm run test:e2e` 16/16 (run e2e in `devenv shell`) · `biome ci` clean.
+All of these are enforced in CI.
 
 ## Done (so you don't redo it)
 - Offline harmonic tide engine (TS port of pytides/`~/org/scripts/tides.py`), validated to ~5e-5 m.
@@ -55,8 +57,10 @@ Gates: `tsc` clean · `npm run test:engine` 22/22 · `npm run test:e2e` 8/8 (run
       Tried `typescript@7.0.2`: `tsc --noEmit` is clean and `test:engine` passes, but `expo lint`
       crashes at load — `@typescript-eslint`/`ts-api-utils` read internal TS APIs the Go port
       doesn't expose (`TypeError: Cannot read properties of undefined (reading 'Intrinsic')`).
-      CI is unaffected (it doesn't run `tsc`). Revisit when typescript-eslint ships a TS7-compatible
-      release, then it should be a clean bump.
+      CI now *does* run `tsc --noEmit` (the `lint` job), so a TS7 bump has to keep that green —
+      it did when tried. `expo lint` is still not in CI, so the crash wouldn't block a merge, but
+      it would break local linting. Revisit when typescript-eslint ships a TS7-compatible release,
+      then it should be a clean bump.
 - [x] **About screen** done (`app/about.tsx`, linked from the Map tab): data attribution (BODC,
       Natural Earth, pytides, fallsoflora), GPL source link, app version, and disclaimer.
 - [ ] **Unit toggles** (metres/feet, 12/24 h) — still to build. Needs a small settings store

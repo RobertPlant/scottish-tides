@@ -11,7 +11,7 @@ let
     };
   };
 
-  # Toolchain versions match Expo SDK 54 / React Native 0.81 (compileSdk/target
+  # Toolchain versions match Expo SDK 57 / React Native 0.86 (compileSdk/target
   # 36, NDK 27, cmake 3.22.1). android-35/34 kept for older transitive modules.
   androidComposition = androidPkgs.androidenv.composeAndroidPackages {
     platformToolsVersion = "35.0.2";

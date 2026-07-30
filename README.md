@@ -68,8 +68,11 @@ The repo uses [devenv](https://devenv.sh) (Nix) for a reproducible toolchain
 ```sh
 cd apps/mobile
 npm install
-npm run web        # or: npm run ios / npm run android
+npm run web           # or: npm run ios / npm run android
+npm run test:unit     # pure helpers (datetime, tide-day, planner, streams, …)
 npm run test:engine   # validate the TS engine against the Python reference
+npm run test:e2e      # Playwright against the web build (run inside devenv shell)
+npx tsc --noEmit      # typecheck
 ```
 
 Formatting / linting is [Biome](https://biomejs.dev) from the repo root:
@@ -77,6 +80,8 @@ Formatting / linting is [Biome](https://biomejs.dev) from the repo root:
 ```sh
 npm run check
 ```
+
+CI runs all of the above on every push and pull request.
 
 ## Licence
 

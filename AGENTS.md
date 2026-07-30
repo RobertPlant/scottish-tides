@@ -7,7 +7,7 @@ helpers), `docs/`. Toolchain is pinned via `devenv.nix` at the repo root
 
 ## Stack
 
-Expo SDK 54, Expo Router 6, React Native 0.81, react-native-web. Styling is
+Expo SDK 57, Expo Router 57, React Native 0.86, react-native-web. Styling is
 plain `StyleSheet` + a light/dark `Colors` palette in `constants/theme.ts`
 (`ThemedText` / `ThemedView` / `useThemeColor`), matching the sibling OtterPool
 project. No backend, no auth, no network calls at runtime — everything the app
@@ -42,8 +42,11 @@ port (e.g. Oban is derived from Tobermory by a constant offset). See
 
 ## Tests
 
-Two layers, both in CI (`.github/workflows/test.yml`):
+Three layers, all in CI (`.github/workflows/test.yml`), alongside a `lint` job
+that gates Biome (`biome ci`) and `tsc --noEmit`:
 
+- **Unit** — `npm run test:unit` (node --test + tsx) covers the pure helpers:
+  datetime, tide-day, planner, streams, astronomy, geo.
 - **Engine parity** — `npm run test:engine` (node --test + tsx) checks the TS
   engine against the committed pytides reference (`lib/tides/__fixtures__/`).
 - **e2e** — `npm run test:e2e` (Playwright) drives the web build: routes render
