@@ -103,3 +103,14 @@ All of these are enforced in CI.
   `PLAYWRIGHT_BROWSERS_PATH` is set; run inside `devenv shell`.
 - `npx expo` misfires in this environment — use `./node_modules/.bin/expo`.
 - Engine parity is the spine: any engine change must keep `npm run test:engine` green.
+- **Never put `//` comments in `biome.json`.** Biome does not error — it silently falls back to
+  its defaults, so `recommended: false` stops applying and the whole `includes` exclude list is
+  discarded. Symptom: a sudden flood of lint errors from rules this repo doesn't enable, in
+  `dist/` and `android/build/` files that should never be scanned. Rename to `biome.jsonc` if
+  comments are ever genuinely needed.
+- `biome.json`'s `includes` list can **not** be replaced by `vcs.useIgnoreFile`. Biome reads
+  `.gitignore` relative to the config root (repo root); the entries that matter — `android`,
+  `ios`, `dist`, `.expo`, `expo-env.d.ts` — live in the *nested* `apps/mobile/.gitignore`, which
+  it does not consult. Keep the excludes explicit, and keep them in step with CI: `biome ci
+  apps/mobile` must report the same file count locally as in the CI log (67 at the time of
+  writing). A mismatch means a local pass and a CI pass don't mean the same thing.
