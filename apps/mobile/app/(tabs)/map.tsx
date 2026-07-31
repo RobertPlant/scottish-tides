@@ -1,4 +1,3 @@
-import * as Location from 'expo-location';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { Platform, Pressable, ScrollView, StyleSheet, View } from 'react-native';
@@ -8,6 +7,7 @@ import { ScotlandMap } from '@/components/scotland-map';
 import { ThemedText } from '@/components/themed-text';
 import { usePalette } from '@/hooks/use-theme-color';
 import { nearestStation } from '@/lib/geo';
+import { getCurrentCoords } from '@/lib/native-location';
 import { useSelectedStation } from '@/lib/selected-station';
 import { REGION_ORDER, type Station, STATIONS, stationById } from '@/lib/stations';
 import { RACES } from '@/lib/streams';
@@ -55,15 +55,14 @@ export default function MapScreen() {
     // Native: ask for foreground location permission, then locate.
     setLocating(true);
     try {
-      const { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== 'granted') {
+      const coords = await getCurrentCoords();
+      if (!coords) {
         setLocating(false);
         setLocErr('Location permission denied — enable it in Settings to use this.');
         return;
       }
-      const pos = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Low });
       setLocating(false);
-      const { station } = nearestStation(pos.coords.latitude, pos.coords.longitude);
+      const { station } = nearestStation(coords.latitude, coords.longitude);
       open(station.id);
     } catch {
       setLocating(false);

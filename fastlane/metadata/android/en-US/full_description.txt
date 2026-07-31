@@ -1,0 +1,18 @@
+Tide times, heights and curves for Scottish ports, predicted on your device from harmonic constituents. No account, no network, no tracking — everything the app needs is bundled, so it works on the water where there is no signal.
+
+Features:
+
+* Tide curve for any day, with tap-to-scrub to read the height at a given time
+* High and low water tables, with spring/neap classification and the day's range
+* A whole-year planner heat map, so you can find the big spring tides months ahead
+* Sunrise, sunset and moon phase
+* Water-level threshold windows — when will there be at least N metres?
+* Tidal stream estimates for the major races: Pentland Firth, Corryvreckan, Grey Dogs, Falls of Lora, Dorus Mòr and the Sound of Islay
+* Nearest-station lookup, using the device's own location services (no Google Play Services anywhere in this app)
+* Favourite stations, shareable links to a specific day, and a dark theme
+
+Stations: Oban, Tobermory, Leith, Ullapool, Wick, Aberdeen, Lerwick, Millport, Portpatrick, Port Ellen (Islay), Kinlochbervie and Stornoway.
+
+The prediction engine is a port of the pytides harmonic predictor and is checked against it automatically, agreeing to well under a millimetre on heights. Constituents are fitted from British Oceanographic Data Centre sea-level records.
+
+These predictions are estimates. Tidal stream figures in particular are modelled, not measured, and are not derived from a tidal atlas. Do not use this app for navigation — verify against an official tide table, pilot or atlas. The tidal races it covers can kill.

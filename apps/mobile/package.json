@@ -5,15 +5,28 @@
   "license": "GPL-3.0-only",
   "scripts": {
     "start": "expo start",
-    "android": "expo start --android",
-    "ios": "expo start --ios",
+    "android": "expo run:android",
+    "ios": "expo run:ios",
     "web": "expo start --web",
     "//lint": "`expo lint` (the wrapper) broke in expo 57.0.9: it resolves @typescript-eslint/parser from its own module context and fails, producing ~104 bogus `Parse errors in imported module` / import/namespace errors. Calling eslint directly is what the wrapper does anyway, and reports the real findings. Retry `expo lint` after a future SDK bump.",
     "lint": "eslint .",
     "test:engine": "node --import tsx --test lib/tides/*.test.ts",
     "test:unit": "node --import tsx --test lib/*.test.ts",
     "test:e2e": "playwright test",
-    "test:e2e:ui": "playwright test --ui"
+    "test:e2e:ui": "playwright test --ui",
+    "//build:android": "Release APK. The script enters devenv itself, prebuilds if android/ is missing, and fixes the NixOS aapt2. Env: PREBUILD=clean to regenerate android/, ABI=arm64-v8a for a much smaller/faster build.",
+    "build:android": "scripts/build-android.sh",
+    "screenshots": "node scripts/gen-screenshots.mjs"
+  },
+  "expo": {
+    "autolinking": {
+      "android": {
+        "//exclude": "expo-location pulls in the proprietary play-services-location, which F-Droid forbids. Android uses modules/platform-location instead; iOS still links expo-location.",
+        "exclude": [
+          "expo-location"
+        ]
+      }
+    }
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "2.2.0",

@@ -73,12 +73,21 @@ All of these are enforced in CI.
 - [ ] Re-run `tools/gen-reference.py` if any station JSON changes (keeps the parity test honest).
 
 ## 5. Native (currently web-first)
-- [x] **Geolocation works on native** — `map.tsx` uses `expo-location`
-      (`requestForegroundPermissionsAsync` + `getCurrentPositionAsync`) on native and keeps the
-      browser `navigator.geolocation` path on web. `expo-location` config plugin + permission
-      string are in `app.json` (takes effect on the next native build).
-- [ ] Set up **EAS build** config if native iOS/Android binaries are wanted (app.json has the
-      package id `com.robertplant.scottishtides`).
+- [x] **Geolocation works on native** — `map.tsx` calls `lib/native-location.ts`, which keeps the
+      browser `navigator.geolocation` path on web, `expo-location` on iOS, and our own
+      `modules/platform-location` on Android (see below).
+- [x] **Android release APK builds locally** — `npm run build:android` inside `devenv shell`
+      (prebuild + `gradlew assembleRelease`). Toolchain is pinned in `devenv.nix`; `android/` stays
+      generated and gitignored. See `docs/android-build.md`.
+- [x] **F-Droid-eligible** — no Play Services anywhere in the APK. `expo-location` hard-depends on
+      `play-services-location`, which F-Droid forbids outright, and every drop-in alternative is the
+      same or abandoned (`expo-get-location` died at SDK 49). Android instead uses a ~60-line local
+      Expo module over the platform `LocationManager`, plus `expo.autolinking.android.exclude` and a
+      Metro platform split to keep `expo-location` out of the Android build entirely. Submission
+      recipe: `fdroid/com.robertplant.scottishtides.yml`.
+- [ ] Actually submit the fdroiddata MR (needs a `v0.1.0` tag first, and a
+      screenshots/description drop under `metadata/en-US/`).
+- [ ] iOS binaries still need a Mac or EAS — untried.
 
 ## 6. Feature roadmap (offered, not started)
 - [ ] **Slack & best-window planner** — daylight ∩ gentle stream ∩ range → suggested paddle window.
@@ -101,6 +110,9 @@ All of these are enforced in CI.
   `useRouter().push()`.
 - e2e on NixOS: `playwright.config.ts` points at the nix `chrome-headless-shell` when
   `PLAYWRIGHT_BROWSERS_PATH` is set; run inside `devenv shell`.
+- e2e on the 3.8 GB builder box: Metro + Chrome together get OOM-killed (the run dies with no
+  output at all). Run it as `NODE_OPTIONS=--max-old-space-size=1024 npx playwright test` there.
+  The Android build is already capped separately by `plugins/with-low-memory-gradle.js`.
 - `npx expo` misfires in this environment — use `./node_modules/.bin/expo`.
 - Engine parity is the spine: any engine change must keep `npm run test:engine` green.
 - **Never put `//` comments in `biome.json`.** Biome does not error — it silently falls back to

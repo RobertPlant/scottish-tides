@@ -63,7 +63,8 @@ against the Python reference to < 2 min / < 0.03 m (see
 ## Develop
 
 The repo uses [devenv](https://devenv.sh) (Nix) for a reproducible toolchain
-(Node, Biome, Playwright browsers). With `direnv` the environment loads on `cd`.
+(Node, Biome, Playwright browsers, JDK + Android SDK). With `direnv` the
+environment loads on `cd`.
 
 ```sh
 cd apps/mobile
@@ -82,6 +83,19 @@ npm run check
 ```
 
 CI runs all of the above on every push and pull request.
+
+## Android
+
+```sh
+cd apps/mobile
+npm run build:android   # inside `devenv shell` — prebuild + gradlew assembleRelease
+```
+
+The app carries no Google Play Services, so it is eligible for F-Droid's main
+repo; the submission recipe is in
+[`fdroid/com.robertplant.scottishtides.yml`](fdroid/com.robertplant.scottishtides.yml).
+See [`docs/android-build.md`](docs/android-build.md) for the build, the signing
+notes, and why Android has its own location module.
 
 ## Licence
 

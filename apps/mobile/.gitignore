@@ -41,6 +41,9 @@ example
 # generated native folders
 /ios
 /android
+# local modules keep their source, but Gradle's output is generated
+modules/*/android/build/
+modules/*/android/.gradle/
 
 # playwright
 /test-results/

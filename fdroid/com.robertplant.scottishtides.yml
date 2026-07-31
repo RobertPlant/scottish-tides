@@ -1,0 +1,50 @@
+# F-Droid build metadata for Scottish Tides.
+#
+# This file is not read by anything in this repo — it is the recipe to submit as
+# a merge request to https://gitlab.com/fdroid/fdroiddata (as
+# metadata/com.robertplant.scottishtides.yml). It lives here so it stays in step
+# with the app, and so anyone can reproduce F-Droid's build locally.
+#
+# See docs/android-build.md for what makes this app F-Droid-eligible.
+
+Categories:
+  - Navigation
+  - Sports & Health
+License: GPL-3.0-only
+AuthorName: Robert Plant
+SourceCode: https://github.com/RobertPlant/scottish-tides
+IssueTracker: https://github.com/RobertPlant/scottish-tides/issues
+
+AutoName: Scottish Tides
+
+# Name, summary, description and screenshots are NOT repeated here — they come
+# from fastlane/metadata/android/en-US/ in the app repo, which fdroidserver
+# reads directly. Keep them there so there's one copy to update.
+
+RepoType: git
+Repo: https://github.com/RobertPlant/scottish-tides.git
+
+Builds:
+  - versionName: 0.1.0
+    versionCode: 1
+    commit: v0.1.0
+    sudo:
+      - curl -fsSL https://deb.nodesource.com/setup_22.x | bash -
+      - apt-get install -y nodejs
+    build:
+      - npm ci --prefix apps/mobile
+      # The android/ project is generated (Expo CNG), not committed.
+      - cd apps/mobile && npx expo prebuild --platform android --no-install
+      # The Expo template signs release builds with its checked-in debug
+      # keystore; strip that so the APK comes out unsigned for fdroid to sign.
+      - sed -i '/signingConfig signingConfigs.debug/d' apps/mobile/android/app/build.gradle
+      - cd apps/mobile/android && ./gradlew assembleRelease
+    output: apps/mobile/android/app/build/outputs/apk/release/app-release-unsigned.apk
+    ndk: r27b
+
+AllowedAPKSigningKeys: ~
+
+AutoUpdateMode: Version v%v
+UpdateCheckMode: Tags
+CurrentVersion: 0.1.0
+CurrentVersionCode: 1

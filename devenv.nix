@@ -46,6 +46,19 @@ in
     PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD = "1";
     PLAYWRIGHT_SKIP_VALIDATE_HOST_REQUIREMENTS = "true";
 
+    # This box has no fonts of its own, so headless Chrome rendered the 📍 on
+    # the "Tides near me" button as a tofu box — which then landed in the
+    # F-Droid screenshots. Roboto is what Android actually renders with, so
+    # pinning it here makes the captures MORE faithful to the phone, not less.
+    FONTCONFIG_FILE = pkgs.makeFontsConf {
+      fontDirectories = [
+        pkgs.roboto
+        pkgs.noto-fonts
+        pkgs.noto-fonts-color-emoji
+        pkgs.dejavu_fonts
+      ];
+    };
+
     # Android SDK / JDK for `expo prebuild` + Gradle.
     JAVA_HOME = "${pkgs.jdk17}";
     ANDROID_HOME = androidSdkRoot;
