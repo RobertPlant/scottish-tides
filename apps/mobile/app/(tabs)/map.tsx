@@ -82,12 +82,10 @@ export default function MapScreen() {
   const Row = ({ s, last }: { s: Station; last: boolean }) => {
     const favd = isFavourite(s.id);
     return (
-      <Pressable
-        onPress={() => open(s.id)}
-        accessibilityRole="button"
-        accessibilityLabel={`${s.name}${s.subtitle ? `, ${s.subtitle}` : ''}${
-          !s.standardPort ? ', secondary port' : ''
-        }`}
+      // The star sits BESIDE the row button, not inside it: nesting two
+      // Pressables put a <button> inside a <button> on web, which is invalid
+      // HTML and threw a hydration error.
+      <View
         style={[
           styles.row,
           !last && { borderBottomWidth: StyleSheet.hairlineWidth, borderColor: palette.border },
@@ -109,23 +107,32 @@ export default function MapScreen() {
             {favd ? '★' : '☆'}
           </ThemedText>
         </Pressable>
-        <View style={{ flex: 1 }}>
-          <ThemedText type="defaultSemiBold">{s.name}</ThemedText>
-          {s.subtitle ? (
-            <ThemedText type="caption" style={{ color: palette.muted }}>
-              {s.subtitle}
-            </ThemedText>
-          ) : null}
-        </View>
-        {!s.standardPort ? (
-          <View style={[styles.badge, { borderColor: palette.border }]}>
-            <ThemedText type="caption" style={{ color: palette.muted }}>
-              secondary
-            </ThemedText>
+        <Pressable
+          onPress={() => open(s.id)}
+          accessibilityRole="button"
+          accessibilityLabel={`${s.name}${s.subtitle ? `, ${s.subtitle}` : ''}${
+            !s.standardPort ? ', secondary port' : ''
+          }`}
+          style={styles.rowMain}
+        >
+          <View style={{ flex: 1 }}>
+            <ThemedText type="defaultSemiBold">{s.name}</ThemedText>
+            {s.subtitle ? (
+              <ThemedText type="caption" style={{ color: palette.muted }}>
+                {s.subtitle}
+              </ThemedText>
+            ) : null}
           </View>
-        ) : null}
-        <ThemedText style={{ color: palette.muted }}>›</ThemedText>
-      </Pressable>
+          {!s.standardPort ? (
+            <View style={[styles.badge, { borderColor: palette.border }]}>
+              <ThemedText type="caption" style={{ color: palette.muted }}>
+                secondary
+              </ThemedText>
+            </View>
+          ) : null}
+          <ThemedText style={{ color: palette.muted }}>›</ThemedText>
+        </Pressable>
+      </View>
     );
   };
 
@@ -260,6 +267,8 @@ const styles = StyleSheet.create({
   groupTitle: { letterSpacing: 0.6 },
   card: { borderRadius: 16, borderWidth: StyleSheet.hairlineWidth, paddingHorizontal: 14 },
   row: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 14 },
+  // Carries the row's own layout now that the star is a sibling, not a child.
+  rowMain: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 10 },
   star: { paddingRight: 2 },
   pin: { width: 22, height: 22, borderRadius: 11, alignItems: 'center', justifyContent: 'center' },
   pinText: { color: '#ffffff', fontWeight: '700', fontSize: 12 },

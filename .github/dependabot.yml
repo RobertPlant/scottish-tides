@@ -1,0 +1,36 @@
+version: 2
+
+# Without this file Dependabot only ever raises *security* updates (and even
+# those go quiet when no safe path exists — see the uuid override in
+# apps/mobile/package.json). This turns on ordinary version updates too.
+updates:
+  - package-ecosystem: npm
+    # apps/mobile has its own package-lock.json; the repo root isn't an npm project.
+    directory: /apps/mobile
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    groups:
+      # The Expo SDK set is version-locked: expo, react-native and every
+      # expo-*/@expo/* package have to move together or the app won't build.
+      # One PR per package would just be a pile of red CI.
+      expo-sdk:
+        patterns:
+          - expo
+          - expo-*
+          - "@expo/*"
+          - react-native
+          - react-native-*
+          - "@react-native*"
+      dev-tooling:
+        dependency-type: development
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    groups:
+      actions:
+        patterns:
+          - "*"

@@ -30,6 +30,10 @@ const ASPECT = (LAT1 - LAT0) / ((LON1 - LON0) * LON_SCALE);
 
 const MAX_ZOOM = 8;
 
+// Tap slop for marker hit-testing (px). Roughly a fingertip, and wider than
+// the largest marker so the pins aren't fiddly on a phone.
+const HIT_RADIUS = 18;
+
 // Vertical label nudges (px) for stations whose labels would otherwise collide.
 const LABEL_DY: Record<string, number> = {
   kinlochbervie: -7, // raise (it sits just W of and level with Wick)
@@ -133,6 +137,22 @@ export function ScotlandMap({
     return () => el.removeEventListener('wheel', onWheel);
   }, [zoomAround]);
 
+  // Taps are hit-tested here rather than via `onPress` on the SVG shapes:
+  // react-native-svg's web shim reacts to a touchable prop by spreading
+  // onStartShouldSetResponder & friends onto the DOM node (see
+  // web/utils/prepare.js), which React then logs as unknown event handlers on
+  // every mount. Testing against the projected marker positions also gives a
+  // finger-sized target instead of a 5 px circle. The ref keeps the latest
+  // projection so the gesture can be built once.
+  const hitRef = useRef<{
+    stations: Station[];
+    streams: StreamMarker[];
+    sx: (lon: number) => number;
+    sy: (lat: number) => number;
+    onSelect?: (id: string) => void;
+    onSelectStream?: (id: string) => void;
+  } | null>(null);
+
   const start = useRef<ViewState & { fx: number; fy: number }>({ k: 1, x: 0, y: 0, fx: 0, fy: 0 });
   const gesture = useMemo(() => {
     const pan = Gesture.Pan()
@@ -155,13 +175,45 @@ export function ScotlandMap({
         const k = clamp(s.k * e.scale, 1, MAX_ZOOM);
         setView({ k, x: s.fx - (s.fx - s.x) * (k / s.k), y: s.fy - (s.fy - s.y) * (k / s.k) });
       });
-    return Gesture.Race(pinch, pan);
+    // Nearest marker within a finger's width wins; races are drawn on top of
+    // the station pins, so they get first refusal where the two overlap.
+    const tap = Gesture.Tap()
+      .runOnJS(true)
+      .onEnd((e) => {
+        const h = hitRef.current;
+        if (!h) {
+          return;
+        }
+        const near = <T,>(items: T[], at: (i: T) => { x: number; y: number }) => {
+          let best: { item: T; d: number } | null = null;
+          for (const item of items) {
+            const p = at(item);
+            const d = Math.hypot(p.x - e.x, p.y - e.y);
+            if (d <= HIT_RADIUS && (!best || d < best.d)) {
+              best = { item, d };
+            }
+          }
+          return best?.item ?? null;
+        };
+        const race = near(h.streams, (st) => ({ x: h.sx(st.lon), y: h.sy(st.lat) }));
+        if (race) {
+          h.onSelectStream?.(race.id);
+          return;
+        }
+        const station = near(h.stations, (s) => ({ x: h.sx(s.lon), y: h.sy(s.lat) }));
+        if (station) {
+          h.onSelect?.(station.id);
+        }
+      });
+    return Gesture.Race(pinch, pan, tap);
   }, [setView]);
 
   const px = (lon: number) => ((lon - LON0) / (LON1 - LON0)) * width;
   const py = (lat: number) => (1 - (lat - LAT0) / (LAT1 - LAT0)) * height;
   const sx = (lon: number) => px(lon) * view.k + view.x;
   const sy = (lat: number) => py(lat) * view.k + view.y;
+
+  hitRef.current = { stations, streams, sx, sy, onSelect, onSelectStream };
 
   // The coastline is the heavy part (47 rings); it only depends on size + colour,
   // not on the live zoom (which is just a transform on the wrapping <G>).
@@ -194,90 +246,92 @@ export function ScotlandMap({
     >
       {width > 0 && (
         <GestureDetector gesture={gesture}>
-          <Svg width={width} height={height}>
-            <Rect x={0} y={0} width={width} height={height} fill={sea} />
-            <G transform={`translate(${view.x} ${view.y}) scale(${view.k})`}>{coastPaths}</G>
-            {stations.map((s) => {
-              const selected = s.id === selectedId;
-              return (
-                <Circle
-                  key={s.id}
-                  cx={sx(s.lon)}
-                  cy={sy(s.lat)}
-                  r={selected ? 8 : 5}
-                  fill={selected ? palette.accent : palette.tint}
-                  stroke="#ffffff"
-                  strokeWidth={1.5}
-                  onPress={onSelect ? () => onSelect(s.id) : undefined}
-                />
-              );
-            })}
-            {stations.map((s) => {
-              // Flip labels near the right edge so they don't clip.
-              const cx = sx(s.lon);
-              const rightSide = cx > width * 0.66;
-              const dy = LABEL_DY[s.id] ?? 0;
-              const lx = rightSide ? cx - 9 : cx + 9;
-              const ly = sy(s.lat) + 4 + dy;
-              const anchor = rightSide ? 'end' : 'start';
-              const weight = s.id === selectedId ? '700' : '600';
-              return (
-                <G key={`${s.id}-label`}>
-                  {/* Halo "casing" drawn first so the glyphs read on any background. */}
-                  <SvgText
-                    x={lx}
-                    y={ly}
-                    fontSize={11}
-                    fontWeight={weight}
-                    textAnchor={anchor}
-                    fill={halo}
-                    stroke={halo}
-                    strokeWidth={3}
-                    strokeLinejoin="round"
-                  >
-                    {s.name}
-                  </SvgText>
-                  <SvgText
-                    x={lx}
-                    y={ly}
-                    fontSize={11}
-                    fontWeight={weight}
-                    textAnchor={anchor}
-                    fill={palette.text}
-                  >
-                    {s.name}
-                  </SvgText>
-                </G>
-              );
-            })}
-            {streams.map((st, i) => {
-              // Numbered diamonds, tied to the numbered list below the map. A
-              // diamond (vs the round station pins) reads as "race / hazard".
-              const cx = sx(st.lon);
-              const cy = sy(st.lat);
-              const sel = st.id === selectedStreamId;
-              const r = sel ? 11 : 9;
-              const pts = `${cx},${cy - r} ${cx + r},${cy} ${cx},${cy + r} ${cx - r},${cy}`;
-              return (
-                <G
-                  key={`stream-${st.id}`}
-                  onPress={onSelectStream ? () => onSelectStream(st.id) : undefined}
-                >
-                  <Polygon points={pts} fill={palette.low} stroke="#ffffff" strokeWidth={1.5} />
-                  <SvgText
-                    x={cx}
-                    y={cy + 4}
-                    fontSize={11}
-                    fontWeight="700"
-                    textAnchor="middle"
-                    fill="#ffffff"
-                  >
-                    {i + 1}
-                  </SvgText>
-                </G>
-              );
-            })}
-          </Svg>
+          {/* A View, not the Svg directly: gesture-handler hands its touch props
+              to its child, and react-native-svg forwards anything it doesn't
+              recognise onto the DOM <svg>, so React logged "Unknown event
+              handler property" for each responder prop on every mount. */}
+          <View style={{ width, height }}>
+            <Svg width={width} height={height}>
+              <Rect x={0} y={0} width={width} height={height} fill={sea} />
+              <G transform={`translate(${view.x} ${view.y}) scale(${view.k})`}>{coastPaths}</G>
+              {stations.map((s) => {
+                const selected = s.id === selectedId;
+                return (
+                  <Circle
+                    key={s.id}
+                    cx={sx(s.lon)}
+                    cy={sy(s.lat)}
+                    r={selected ? 8 : 5}
+                    fill={selected ? palette.accent : palette.tint}
+                    stroke="#ffffff"
+                    strokeWidth={1.5}
+                  />
+                );
+              })}
+              {stations.map((s) => {
+                // Flip labels near the right edge so they don't clip.
+                const cx = sx(s.lon);
+                const rightSide = cx > width * 0.66;
+                const dy = LABEL_DY[s.id] ?? 0;
+                const lx = rightSide ? cx - 9 : cx + 9;
+                const ly = sy(s.lat) + 4 + dy;
+                const anchor = rightSide ? 'end' : 'start';
+                const weight = s.id === selectedId ? '700' : '600';
+                return (
+                  <G key={`${s.id}-label`}>
+                    {/* Halo "casing" drawn first so the glyphs read on any background. */}
+                    <SvgText
+                      x={lx}
+                      y={ly}
+                      fontSize={11}
+                      fontWeight={weight}
+                      textAnchor={anchor}
+                      fill={halo}
+                      stroke={halo}
+                      strokeWidth={3}
+                      strokeLinejoin="round"
+                    >
+                      {s.name}
+                    </SvgText>
+                    <SvgText
+                      x={lx}
+                      y={ly}
+                      fontSize={11}
+                      fontWeight={weight}
+                      textAnchor={anchor}
+                      fill={palette.text}
+                    >
+                      {s.name}
+                    </SvgText>
+                  </G>
+                );
+              })}
+              {streams.map((st, i) => {
+                // Numbered diamonds, tied to the numbered list below the map. A
+                // diamond (vs the round station pins) reads as "race / hazard".
+                const cx = sx(st.lon);
+                const cy = sy(st.lat);
+                const sel = st.id === selectedStreamId;
+                const r = sel ? 11 : 9;
+                const pts = `${cx},${cy - r} ${cx + r},${cy} ${cx},${cy + r} ${cx - r},${cy}`;
+                return (
+                  <G key={`stream-${st.id}`}>
+                    <Polygon points={pts} fill={palette.low} stroke="#ffffff" strokeWidth={1.5} />
+                    <SvgText
+                      x={cx}
+                      y={cy + 4}
+                      fontSize={11}
+                      fontWeight="700"
+                      textAnchor="middle"
+                      fill="#ffffff"
+                    >
+                      {i + 1}
+                    </SvgText>
+                  </G>
+                );
+              })}
+            </Svg>
+          </View>
         </GestureDetector>
       )}
 

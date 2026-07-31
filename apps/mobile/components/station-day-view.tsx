@@ -4,7 +4,8 @@
 // and the /station/[id] deep-link route so both show the complete picture.
 
 import { type ReactNode, useEffect, useMemo, useRef, useState } from 'react';
-import { PanResponder, Platform, ScrollView, StyleSheet, View } from 'react-native';
+import { Platform, ScrollView, StyleSheet, View } from 'react-native';
+import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 
 import { Card } from '@/components/card';
 import { DayNav } from '@/components/day-nav';
@@ -51,27 +52,32 @@ export function StationDayView({
   const nav = useDayNav({ initialYmd, syncUrl });
   const { ymd, dayStart, isToday } = nav;
 
-  // Swipe left → next day, swipe right → previous day. A non-capturing responder
-  // that only claims clearly-horizontal drags: the chart keeps its own scrub
-  // (it grabs the touch on start) and vertical scrolling falls through to the
-  // ScrollView. Latest ymd/handler are read from a ref so the responder — built
-  // once — never acts on a stale day.
+  // Swipe left → next day, swipe right → previous day. gesture-handler rather
+  // than PanResponder, whose panHandlers spread onStartShouldSetResponder and
+  // friends onto the View — RN-Web 0.21 passes those to the DOM node and React
+  // logs "Unknown event handler property" for each. activeOffsetX/failOffsetY
+  // state the old "clearly-horizontal drags only" rule declaratively, so the
+  // chart keeps its own scrub and vertical scrolling still reaches the
+  // ScrollView. Latest ymd/handler come from a ref so the gesture — built once
+  // — never acts on a stale day.
   const swipeRef = useRef({ ymd, go: nav.setDay });
   swipeRef.current = { ymd, go: nav.setDay };
-  const swipe = useRef(
-    PanResponder.create({
-      onMoveShouldSetPanResponder: (_e, g) =>
-        Math.abs(g.dx) > 24 && Math.abs(g.dx) > Math.abs(g.dy) * 1.8,
-      onPanResponderRelease: (_e, g) => {
-        const { ymd: cur, go } = swipeRef.current;
-        if (g.dx <= -40) {
-          go(ymdAddDays(cur, 1));
-        } else if (g.dx >= 40) {
-          go(ymdAddDays(cur, -1));
-        }
-      },
-    }),
-  ).current;
+  const swipe = useMemo(
+    () =>
+      Gesture.Pan()
+        .runOnJS(true)
+        .activeOffsetX([-24, 24])
+        .failOffsetY([-24, 24])
+        .onEnd((e) => {
+          const { ymd: cur, go } = swipeRef.current;
+          if (e.translationX <= -40) {
+            go(ymdAddDays(cur, 1));
+          } else if (e.translationX >= 40) {
+            go(ymdAddDays(cur, -1));
+          }
+        }),
+    [],
+  );
 
   const events = useMemo(() => dayEvents(station, dayStart), [station, dayStart]);
   const series = useMemo(() => dayHeightSeries(station, dayStart), [station, dayStart]);
@@ -97,66 +103,73 @@ export function StationDayView({
       contentContainerStyle={styles.content}
       style={{ backgroundColor: palette.background }}
     >
-      <View style={styles.inner} {...swipe.panHandlers}>
-        {header}
+      <GestureDetector gesture={swipe}>
+        <View style={styles.inner}>
+          {header}
 
-        <DayNav nav={nav}>
-          <View style={[styles.badge, { backgroundColor: classColor }]}>
-            <ThemedText style={styles.badgeText}>
-              {tideClass.label} · {tideClass.coefficient}
-            </ThemedText>
-          </View>
-          <ThemedText type="caption" style={{ color: palette.muted }}>
-            {range.toFixed(1)} m range
-          </ThemedText>
-        </DayNav>
-
-        <Card
-          onPointerEnter={() => setChartHovered(true)}
-          onPointerLeave={() => setChartHovered(false)}
-        >
-          <TideCurve
-            series={series}
-            events={events}
-            now={isToday ? now : undefined}
-            height={220}
-            scrubbable
-            sun={sun}
-          />
-          <ThemedText
-            type="caption"
-            style={[
-              { color: palette.muted },
-              Platform.OS === 'web' && !chartHovered && styles.hintHidden,
-            ]}
-          >
-            Tap the chart to read the level at any time. Gold band = daylight.
-          </ThemedText>
-          <TideTable events={events} now={isToday ? now : undefined} />
-        </Card>
-
-        <SunMoonCard date={dayStart} lat={station.lat} lon={station.lon} />
-
-        <WeekOverview station={station} fromYmd={ymd} selectedYmd={ymd} onSelectDay={nav.setDay} />
-
-        <Note>
-          <ThemedText type="caption" style={{ color: palette.muted }}>
-            {station.standardPort
-              ? 'Standard port — predicted directly from its own gauge.'
-              : `Secondary port — derived from ${station.shift?.based_on ?? 'a nearby gauge'} by a constant Admiralty offset.`}
-          </ThemedText>
-          {station.data.obs_span ? (
+          <DayNav nav={nav}>
+            <View style={[styles.badge, { backgroundColor: classColor }]}>
+              <ThemedText style={styles.badgeText}>
+                {tideClass.label} · {tideClass.coefficient}
+              </ThemedText>
+            </View>
             <ThemedText type="caption" style={{ color: palette.muted }}>
-              Fitted from gauge data {station.data.obs_span[0]} → {station.data.obs_span[1]}.
+              {range.toFixed(1)} m range
             </ThemedText>
-          ) : null}
-          <ThemedText type="caption" style={{ color: palette.muted }}>
-            Heights vs {station.data.datum?.replace('The data refer to ', '') ?? 'chart datum'}.
-            Astronomical only (no surge). Water levels, not streams — never plan a race transit from
-            these tables.
-          </ThemedText>
-        </Note>
-      </View>
+          </DayNav>
+
+          <Card
+            onPointerEnter={() => setChartHovered(true)}
+            onPointerLeave={() => setChartHovered(false)}
+          >
+            <TideCurve
+              series={series}
+              events={events}
+              now={isToday ? now : undefined}
+              height={220}
+              scrubbable
+              sun={sun}
+            />
+            <ThemedText
+              type="caption"
+              style={[
+                { color: palette.muted },
+                Platform.OS === 'web' && !chartHovered && styles.hintHidden,
+              ]}
+            >
+              Tap the chart to read the level at any time. Gold band = daylight.
+            </ThemedText>
+            <TideTable events={events} now={isToday ? now : undefined} />
+          </Card>
+
+          <SunMoonCard date={dayStart} lat={station.lat} lon={station.lon} />
+
+          <WeekOverview
+            station={station}
+            fromYmd={ymd}
+            selectedYmd={ymd}
+            onSelectDay={nav.setDay}
+          />
+
+          <Note>
+            <ThemedText type="caption" style={{ color: palette.muted }}>
+              {station.standardPort
+                ? 'Standard port — predicted directly from its own gauge.'
+                : `Secondary port — derived from ${station.shift?.based_on ?? 'a nearby gauge'} by a constant Admiralty offset.`}
+            </ThemedText>
+            {station.data.obs_span ? (
+              <ThemedText type="caption" style={{ color: palette.muted }}>
+                Fitted from gauge data {station.data.obs_span[0]} → {station.data.obs_span[1]}.
+              </ThemedText>
+            ) : null}
+            <ThemedText type="caption" style={{ color: palette.muted }}>
+              Heights vs {station.data.datum?.replace('The data refer to ', '') ?? 'chart datum'}.
+              Astronomical only (no surge). Water levels, not streams — never plan a race transit
+              from these tables.
+            </ThemedText>
+          </Note>
+        </View>
+      </GestureDetector>
     </ScrollView>
   );
 }

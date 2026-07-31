@@ -181,6 +181,24 @@ test('map: drag pans the view when zoomed in', async ({ page }) => {
   await expect(page).toHaveURL(/\/map/); // didn't accidentally open a station pin
 });
 
+test('map: tapping a station pin opens that station', async ({ page }) => {
+  await page.goto('/map');
+  await page.waitForTimeout(1000);
+
+  // Pins are hit-tested against the projected marker positions rather than
+  // carrying their own onPress (react-native-svg's web shim would otherwise
+  // spread responder props onto the DOM node), so tap a pin by its circle
+  // coordinates and check we land on a station.
+  const pin = page.locator('svg circle').first();
+  const box = await pin.boundingBox();
+  if (!box) {
+    throw new Error('no station pin found');
+  }
+  await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
+
+  await expect(page).toHaveURL(/\/station\//);
+});
+
 test.describe('tides near me', () => {
   test.use({ geolocation: { latitude: 58.2, longitude: -6.39 }, permissions: ['geolocation'] });
 

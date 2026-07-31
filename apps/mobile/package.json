@@ -28,6 +28,10 @@
       }
     }
   },
+  "//overrides": "uuid is transitive and build-time only (ionicons → @expo/config-plugins → xcode, used by `expo prebuild`), never bundled into the app. Dependabot can't fix it: every path it can take still resolves a vulnerable uuid, so it errors instead of opening a PR. xcode only calls uuid.v4(), which 14.x still exports, so pinning it here is safe. Drop this once xcode ships a modern uuid.",
+  "overrides": {
+    "uuid": "^14.0.1"
+  },
   "dependencies": {
     "@react-native-async-storage/async-storage": "2.2.0",
     "@react-native-community/datetimepicker": "9.1.0",
