@@ -12,14 +12,19 @@ updates:
       day: monday
     open-pull-requests-limit: 5
     groups:
-      # The Expo SDK set is version-locked: expo, react-native and every
-      # expo-*/@expo/* package have to move together or the app won't build.
-      # One PR per package would just be a pile of red CI.
+      # The Expo SDK set is version-locked: expo, react-native, React itself and
+      # every expo-*/@expo/* package have to move together or the app won't
+      # build. One PR per package is just a pile of red CI — the first run
+      # proved it, bumping react to 19.2.8 while react-dom stayed on 19.2.3,
+      # which broke the bundler so hard the dev server never came up.
       expo-sdk:
         patterns:
           - expo
           - expo-*
           - "@expo/*"
+          - react
+          - react-dom
+          - "@types/react"
           - react-native
           - react-native-*
           - "@react-native*"
