@@ -65,7 +65,9 @@ jobs:
         env:
           KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
           KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
-          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          # Not a secret, and deliberately not one: as a secret its value gets
+          # masked everywhere, so the logs showed the APK as "***.apk".
+          KEY_ALIAS: scottish-tides
         run: |
           set -euo pipefail
           BUILD_TOOLS="$(ls -d "$ANDROID_HOME"/build-tools/* | sort -V | tail -1)"
