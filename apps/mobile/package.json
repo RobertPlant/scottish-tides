@@ -3,8 +3,8 @@
   "main": "expo-router/entry",
   "version": "0.1.1",
   "license": "GPL-3.0-only",
-  "//packageManager": "Pin npm to the version node 22 ships, which is what devenv and CI both use. Dependabot runs npm through corepack and honours this: without it, it generated lockfiles a newer npm accepts but npm 10 rejects, so every grouped PR failed `npm ci` with \"Missing: <pkg> from lock file\".",
-  "packageManager": "npm@10.9.8",
+  "//packageManager": "Pin npm to the version node 24 ships, which is what devenv and CI both use. Dependabot runs npm through corepack and honours this. Keep it in step with the node version everywhere else (devenv.nix, the workflows): a lockfile written by npm 11 fails `npm ci` under npm 10 with \"Missing: <pkg> from lock file\", which broke every grouped PR until this pin existed.",
+  "packageManager": "npm@11.16.0",
   "scripts": {
     "start": "expo start",
     "android": "expo run:android",

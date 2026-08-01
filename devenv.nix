@@ -31,7 +31,7 @@ in
   cachix.enable = false;
 
   packages = [
-    pkgs.nodejs_22
+    pkgs.nodejs_24
     pkgs.biome
     pkgs.playwright-driver.browsers
     # Android build toolchain (local APK builds, F-Droid path).
