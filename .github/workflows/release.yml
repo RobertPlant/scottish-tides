@@ -1,0 +1,99 @@
+name: Release APK
+
+# Tag a commit v<version> and this builds, signs and publishes the APK as a
+# public release asset — the download link for people not using F-Droid.
+#
+# Note the two channels are NOT upgrade-compatible: F-Droid signs with its own
+# key, this signs with ours, and Android refuses an update signed by a different
+# key. Someone switching channels has to uninstall first.
+on:
+  push:
+    tags: ['v*']
+  # Manual runs build and sign exactly the same way but publish nothing — the
+  # APK is left as a build artifact, so the signing path can be exercised
+  # without minting a junk release.
+  workflow_dispatch:
+
+permissions:
+  contents: write # needed to create the release
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: apps/mobile/package-lock.json
+
+      - run: npm ci
+        working-directory: apps/mobile
+
+      # android/ is generated (Expo CNG), not committed.
+      - name: Generate the native project
+        run: npx expo prebuild --platform android --no-install
+        working-directory: apps/mobile
+
+      # The Expo template signs release builds with its own debug keystore,
+      # whose password is public. Strip it so Gradle emits an unsigned APK and
+      # we sign with the real key below. Same step the F-Droid recipe uses.
+      - name: Drop the template's debug signing config
+        run: sed -i '/signingConfig signingConfigs.debug/d' apps/mobile/android/app/build.gradle
+
+      - name: Build
+        run: ./gradlew assembleRelease -x lintVitalRelease
+        working-directory: apps/mobile/android
+
+      # F-Droid eligibility is a property of the APK, not of the source: any
+      # dependency can drag Play Services back in. Assert it here so a bad
+      # dependency fails the release rather than shipping quietly.
+      - name: Assert no Google Play Services
+        run: |
+          python3 - <<'EOF'
+          import sys, zipfile
+          apk = 'apps/mobile/android/app/build/outputs/apk/release/app-release-unsigned.apk'
+          z = zipfile.ZipFile(apk)
+          hits = sum(z.read(n).count(b'com/google/android/gms')
+                     for n in z.namelist() if n.endswith('.dex'))
+          print(f'play-services refs: {hits}')
+          sys.exit(1 if hits else 0)
+          EOF
+
+      - name: Sign
+        env:
+          KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+        run: |
+          set -euo pipefail
+          BUILD_TOOLS="$(ls -d "$ANDROID_HOME"/build-tools/* | sort -V | tail -1)"
+          OUT=apps/mobile/android/app/build/outputs/apk/release
+          echo "$KEYSTORE_B64" | base64 -d > /tmp/release.jks
+          # Align before signing: zipalign after apksigner would break the signature.
+          "$BUILD_TOOLS/zipalign" -p -f 4 "$OUT/app-release-unsigned.apk" /tmp/aligned.apk
+          "$BUILD_TOOLS/apksigner" sign \
+            --ks /tmp/release.jks \
+            --ks-pass env:KEYSTORE_PASSWORD \
+            --ks-key-alias "$KEY_ALIAS" \
+            --out scottish-tides.apk \
+            /tmp/aligned.apk
+          "$BUILD_TOOLS/apksigner" verify --print-certs scottish-tides.apk
+          rm -f /tmp/release.jks
+
+      - name: Upload artifact (manual runs)
+        if: github.event_name == 'workflow_dispatch'
+        uses: actions/upload-artifact@v5
+        with:
+          name: scottish-tides-apk
+          path: scottish-tides.apk
+
+      - name: Publish release
+        if: startsWith(github.ref, 'refs/tags/v')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${GITHUB_REF_NAME}" scottish-tides.apk \
+            --title "Scottish Tides ${GITHUB_REF_NAME}" \
+            --generate-notes
