@@ -3,7 +3,7 @@
 // HW/LW table, sun & moon, and the 7-day overview. Shared by the default tab
 // and the /station/[id] deep-link route so both show the complete picture.
 
-import { type ReactNode, useMemo, useRef, useState } from 'react';
+import { type ReactNode, useMemo, useState } from 'react';
 import { Platform, ScrollView, StyleSheet, View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 
@@ -55,10 +55,9 @@ export function StationDayView({
   // logs "Unknown event handler property" for each. activeOffsetX/failOffsetY
   // state the old "clearly-horizontal drags only" rule declaratively, so the
   // chart keeps its own scrub and vertical scrolling still reaches the
-  // ScrollView. Latest ymd/handler come from a ref so the gesture — built once
-  // — never acts on a stale day.
-  const swipeRef = useRef({ ymd, go: nav.setDay });
-  swipeRef.current = { ymd, go: nav.setDay };
+  // ScrollView. Rebuilt when the day changes (rather than reading the latest day
+  // out of a ref during render) — a day only ever changes between gestures.
+  const setDay = nav.setDay;
   const swipe = useMemo(
     () =>
       Gesture.Pan()
@@ -66,14 +65,13 @@ export function StationDayView({
         .activeOffsetX([-24, 24])
         .failOffsetY([-24, 24])
         .onEnd((e) => {
-          const { ymd: cur, go } = swipeRef.current;
           if (e.translationX <= -40) {
-            go(ymdAddDays(cur, 1));
+            setDay(ymdAddDays(ymd, 1));
           } else if (e.translationX >= 40) {
-            go(ymdAddDays(cur, -1));
+            setDay(ymdAddDays(ymd, -1));
           }
         }),
-    [],
+    [ymd, setDay],
   );
 
   const events = useMemo(() => dayEvents(station, dayStart), [station, dayStart]);

@@ -96,7 +96,7 @@ export default function RaceDetail() {
 
         <Note>
           <ThemedText type="caption" style={{ color: palette.muted }}>
-            Timed off HW/LW at {ref?.name ?? 'the reference port'}; rate scaled by today's
+            Timed off HW/LW at {ref?.name ?? 'the reference port'}; rate scaled by today&apos;s
             spring/neap ({Math.round(stream.springNeapFraction * 100)}% towards springs).
           </ThemedText>
           <ThemedText type="caption" style={{ color: palette.muted }}>

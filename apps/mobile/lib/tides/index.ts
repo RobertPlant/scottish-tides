@@ -5,6 +5,8 @@
 // water level at any instant and the high/low waters between two instants,
 // entirely on-device. See README and AGENTS.md.
 
+import { applyShift, type Shift, type StationData, Tide, type TideEvent } from './predict';
+
 export { astro } from './astro';
 export { noaa, NAME2CONST, type Constituent } from './constituents';
 export {
@@ -16,8 +18,6 @@ export {
   type TideEvent,
   type TideEventType,
 } from './predict';
-
-import { applyShift, type Shift, type StationData, Tide, type TideEvent } from './predict';
 
 /**
  * Drop insignificant high/low waters by prominence. Near-amphidromic ports (e.g.

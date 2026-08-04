@@ -30,6 +30,18 @@ updates:
           - "@react-native*"
       dev-tooling:
         dependency-type: development
+    # The lint toolchain is only coherent with the versions eslint-config-expo
+    # was built against, and nothing here pins that for it. A grouped dev-tooling
+    # bump to eslint 10 + typescript 7 (#5) broke `npm run lint` outright — twice
+    # over, since eslint-plugin-react uses APIs eslint 10 removed and no
+    # published typescript-eslint supports typescript 7. CI now runs eslint, so
+    # a repeat would at least go red; keeping majors out of the automatic group
+    # means they arrive as a deliberate upgrade instead.
+    ignore:
+      - dependency-name: eslint
+        update-types: [version-update:semver-major]
+      - dependency-name: typescript
+        update-types: [version-update:semver-major]
 
   - package-ecosystem: github-actions
     directory: /

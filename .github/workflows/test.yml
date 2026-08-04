@@ -33,6 +33,13 @@ jobs:
       - name: Typecheck
         run: npx tsc --noEmit
         working-directory: apps/mobile
+      # Biome and ESLint don't overlap: Biome brings its recommended set, ESLint
+      # brings react-hooks and import rules via eslint-config-expo. This step
+      # exists because ESLint sat broken for days without anyone noticing —
+      # nothing ran it.
+      - name: Lint (ESLint)
+        run: npm run lint
+        working-directory: apps/mobile
 
   test:
     runs-on: ubuntu-latest

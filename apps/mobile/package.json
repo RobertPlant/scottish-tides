@@ -10,6 +10,8 @@
     "android": "expo run:android",
     "ios": "expo run:ios",
     "web": "expo start --web",
+    "//lint": "`expo lint` (the wrapper) resolves eslint-config-expo's nested deps from its own module context and fails; calling eslint directly is what the wrapper does anyway. eslint-import-resolver-typescript and @typescript-eslint/parser are direct devDeps for the same reason — eslint-plugin-import requires both by bare name from the project root, and npm nests them under eslint-config-expo where that lookup misses them (the error is a wall of bogus `Parse errors in imported module`). eslint and typescript are held below their latest majors: see the ignore list in .github/dependabot.yml.",
+    "lint": "eslint .",
     "test:engine": "node --import tsx --test lib/tides/*.test.ts",
     "test:unit": "node --import tsx --test lib/*.test.ts",
     "test:e2e": "playwright test",
@@ -62,8 +64,12 @@
   "devDependencies": {
     "@playwright/test": "^1.62.0",
     "@types/react": "~19.2.10",
+    "@typescript-eslint/parser": "^8.66.0",
+    "eslint": "^9.39.5",
+    "eslint-config-expo": "~57.0.1",
+    "eslint-import-resolver-typescript": "^3.10.1",
     "tsx": "^4.19.2",
-    "typescript": "~7.0.2"
+    "typescript": "~6.0.3"
   },
   "private": true
 }

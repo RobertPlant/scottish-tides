@@ -15,8 +15,7 @@ import { RACES } from '@/lib/streams';
 export default function MapScreen() {
   const palette = usePalette();
   const router = useRouter();
-  const { stationId, setStationId, favourites, isFavourite, toggleFavourite } =
-    useSelectedStation();
+  const { stationId, setStationId, favourites } = useSelectedStation();
   const [locating, setLocating] = useState(false);
   const [locErr, setLocErr] = useState<string | null>(null);
 
@@ -79,78 +78,6 @@ export default function MapScreen() {
     items: STATIONS.filter((s) => s.region === region),
   })).filter((g) => g.items.length > 0);
 
-  const Row = ({ s, last }: { s: Station; last: boolean }) => {
-    const favd = isFavourite(s.id);
-    return (
-      // The star sits BESIDE the row button, not inside it: nesting two
-      // Pressables put a <button> inside a <button> on web, which is invalid
-      // HTML and threw a hydration error.
-      <View
-        style={[
-          styles.row,
-          !last && { borderBottomWidth: StyleSheet.hairlineWidth, borderColor: palette.border },
-        ]}
-      >
-        <Pressable
-          onPress={() => toggleFavourite(s.id)}
-          hitSlop={8}
-          accessibilityRole="button"
-          accessibilityLabel={
-            favd ? `Remove ${s.name} from favourites` : `Add ${s.name} to favourites`
-          }
-          style={styles.star}
-        >
-          <ThemedText
-            importantForAccessibility="no"
-            style={{ fontSize: 18, color: favd ? palette.accent : palette.tabIconDefault }}
-          >
-            {favd ? '★' : '☆'}
-          </ThemedText>
-        </Pressable>
-        <Pressable
-          onPress={() => open(s.id)}
-          accessibilityRole="button"
-          accessibilityLabel={`${s.name}${s.subtitle ? `, ${s.subtitle}` : ''}${
-            !s.standardPort ? ', secondary port' : ''
-          }`}
-          style={styles.rowMain}
-        >
-          <View style={{ flex: 1 }}>
-            <ThemedText type="defaultSemiBold">{s.name}</ThemedText>
-            {s.subtitle ? (
-              <ThemedText type="caption" style={{ color: palette.muted }}>
-                {s.subtitle}
-              </ThemedText>
-            ) : null}
-          </View>
-          {!s.standardPort ? (
-            <View style={[styles.badge, { borderColor: palette.border }]}>
-              <ThemedText type="caption" style={{ color: palette.muted }}>
-                secondary
-              </ThemedText>
-            </View>
-          ) : null}
-          <ThemedText style={{ color: palette.muted }}>›</ThemedText>
-        </Pressable>
-      </View>
-    );
-  };
-
-  const Group = ({ title, items }: { title: string; items: Station[] }) => (
-    <View style={styles.group}>
-      <ThemedText type="caption" style={[styles.groupTitle, { color: palette.muted }]}>
-        {title}
-      </ThemedText>
-      <View
-        style={[styles.card, { backgroundColor: palette.surface, borderColor: palette.border }]}
-      >
-        {items.map((s, i) => (
-          <Row key={s.id} s={s} last={i === items.length - 1} />
-        ))}
-      </View>
-    </View>
-  );
-
   return (
     <ScrollView
       contentContainerStyle={styles.content}
@@ -181,10 +108,18 @@ export default function MapScreen() {
         </ThemedText>
       ) : null}
 
-      {favStations.length > 0 ? <Group title="★ FAVOURITES" items={favStations} /> : null}
+      {favStations.length > 0 ? (
+        <Group title="★ FAVOURITES" items={favStations} palette={palette} onOpen={open} />
+      ) : null}
 
       {byRegion.map(({ region, items }) => (
-        <Group key={region} title={region.toUpperCase()} items={items} />
+        <Group
+          key={region}
+          title={region.toUpperCase()}
+          items={items}
+          palette={palette}
+          onOpen={open}
+        />
       ))}
 
       <View style={styles.group}>
@@ -252,6 +187,105 @@ export default function MapScreen() {
         </ThemedText>
       </Pressable>
     </ScrollView>
+  );
+}
+
+// Hoisted out of MapScreen: a component declared inside another component is a
+// new type on every render, so React unmounts and remounts the whole station
+// list (losing its scroll position and any pressed state) whenever the screen
+// re-renders — e.g. while "Locating…".
+function Row({
+  s,
+  last,
+  palette,
+  onOpen,
+}: {
+  s: Station;
+  last: boolean;
+  palette: ReturnType<typeof usePalette>;
+  onOpen: (id: string) => void;
+}) {
+  const { isFavourite, toggleFavourite } = useSelectedStation();
+  const favd = isFavourite(s.id);
+  return (
+    // The star sits BESIDE the row button, not inside it: nesting two
+    // Pressables put a <button> inside a <button> on web, which is invalid
+    // HTML and threw a hydration error.
+    <View
+      style={[
+        styles.row,
+        !last && { borderBottomWidth: StyleSheet.hairlineWidth, borderColor: palette.border },
+      ]}
+    >
+      <Pressable
+        onPress={() => toggleFavourite(s.id)}
+        hitSlop={8}
+        accessibilityRole="button"
+        accessibilityLabel={
+          favd ? `Remove ${s.name} from favourites` : `Add ${s.name} to favourites`
+        }
+        style={styles.star}
+      >
+        <ThemedText
+          importantForAccessibility="no"
+          style={{ fontSize: 18, color: favd ? palette.accent : palette.tabIconDefault }}
+        >
+          {favd ? '★' : '☆'}
+        </ThemedText>
+      </Pressable>
+      <Pressable
+        onPress={() => onOpen(s.id)}
+        accessibilityRole="button"
+        accessibilityLabel={`${s.name}${s.subtitle ? `, ${s.subtitle}` : ''}${
+          !s.standardPort ? ', secondary port' : ''
+        }`}
+        style={styles.rowMain}
+      >
+        <View style={{ flex: 1 }}>
+          <ThemedText type="defaultSemiBold">{s.name}</ThemedText>
+          {s.subtitle ? (
+            <ThemedText type="caption" style={{ color: palette.muted }}>
+              {s.subtitle}
+            </ThemedText>
+          ) : null}
+        </View>
+        {!s.standardPort ? (
+          <View style={[styles.badge, { borderColor: palette.border }]}>
+            <ThemedText type="caption" style={{ color: palette.muted }}>
+              secondary
+            </ThemedText>
+          </View>
+        ) : null}
+        <ThemedText style={{ color: palette.muted }}>›</ThemedText>
+      </Pressable>
+    </View>
+  );
+}
+
+function Group({
+  title,
+  items,
+  palette,
+  onOpen,
+}: {
+  title: string;
+  items: Station[];
+  palette: ReturnType<typeof usePalette>;
+  onOpen: (id: string) => void;
+}) {
+  return (
+    <View style={styles.group}>
+      <ThemedText type="caption" style={[styles.groupTitle, { color: palette.muted }]}>
+        {title}
+      </ThemedText>
+      <View
+        style={[styles.card, { backgroundColor: palette.surface, borderColor: palette.border }]}
+      >
+        {items.map((s, i) => (
+          <Row key={s.id} s={s} last={i === items.length - 1} palette={palette} onOpen={onOpen} />
+        ))}
+      </View>
+    </View>
   );
 }
 

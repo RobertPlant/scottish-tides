@@ -154,6 +154,11 @@ export function ScotlandMap({
   } | null>(null);
 
   const start = useRef<ViewState & { fx: number; fy: number }>({ k: 1, x: 0, y: 0, fx: 0, fy: 0 });
+  /* eslint-disable react-hooks/refs -- These are gesture callbacks, not render
+     code: they run on touch, long after the render that built them. Reading the
+     live view/projection out of a ref is the point — rebuilding the gesture on
+     every frame of a pan (which is what a dependency on `view` would mean) is
+     exactly what this avoids. */
   const gesture = useMemo(() => {
     const pan = Gesture.Pan()
       .minDistance(8)
@@ -207,13 +212,18 @@ export function ScotlandMap({
       });
     return Gesture.Race(pinch, pan, tap);
   }, [setView]);
+  /* eslint-enable react-hooks/refs */
 
   const px = (lon: number) => ((lon - LON0) / (LON1 - LON0)) * width;
   const py = (lat: number) => (1 - (lat - LAT0) / (LAT1 - LAT0)) * height;
   const sx = (lon: number) => px(lon) * view.k + view.x;
   const sy = (lat: number) => py(lat) * view.k + view.y;
 
-  hitRef.current = { stations, streams, sx, sy, onSelect, onSelectStream };
+  // Published after paint rather than during render (a render must stay pure);
+  // the tap handler can only fire once the user has seen the frame anyway.
+  useEffect(() => {
+    hitRef.current = { stations, streams, sx, sy, onSelect, onSelectStream };
+  });
 
   // The coastline is the heavy part (47 rings); it only depends on size + colour,
   // not on the live zoom (which is just a transform on the wrapping <G>).
