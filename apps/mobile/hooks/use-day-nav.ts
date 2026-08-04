@@ -10,6 +10,11 @@ import { ukDayStartFromYmd, ymdAddDays, ymdInUk } from '@/lib/datetime';
 
 const YMD_RE = /^\d{4}-\d{2}-\d{2}$/;
 
+// Module-level so `setDay` can use it without taking a per-render closure as a
+// hook dependency — the initial-day clamp and the setter had a copy each.
+// ISO YYYY-MM-DD compares correctly as a string.
+const clamp = (d: string, min: string, max: string) => (d < min ? min : d > max ? max : d);
+
 export interface DayNavState {
   ymd: string;
   dayStart: Date;
@@ -40,18 +45,15 @@ export function useDayNav({
   // Clamped here rather than in the UI so every route in — Prev/Next, the swipe
   // gesture, the week strip, a hand-edited ?d= — obeys the same bounds. The date
   // field already refuses out-of-range input; the others used to walk past it.
-  // ISO YYYY-MM-DD compares correctly as a string.
-  const clamp = (d: string) => (d < minYmd ? minYmd : d > maxYmd ? maxYmd : d);
-
   const [ymd, setYmd] = useState(() =>
-    initialYmd && YMD_RE.test(initialYmd) ? clamp(initialYmd) : todayYmd,
+    initialYmd && YMD_RE.test(initialYmd) ? clamp(initialYmd, minYmd, maxYmd) : todayYmd,
   );
 
   const dayStart = useMemo(() => ukDayStartFromYmd(ymd), [ymd]);
 
   const setDay = useCallback(
     (next: string) => {
-      const clamped = next < minYmd ? minYmd : next > maxYmd ? maxYmd : next;
+      const clamped = clamp(next, minYmd, maxYmd);
       setYmd(clamped);
       if (syncUrl) {
         router.setParams({ d: clamped });

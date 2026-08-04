@@ -62,8 +62,7 @@ export function dayHeightSeries(
   stepMinutes = 10,
 ): { time: Date; height: number }[] {
   const { from, to } = dayWindow(dayStart);
-  const base = heightSeries(station.data, from, to, stepMinutes);
-  return station.shift ? shiftCurve(base, station.shift) : base;
+  return seaLevelSeries(station, from, to, stepMinutes);
 }
 
 export interface TidalStats {
@@ -122,6 +121,15 @@ export interface TideClass {
    * this stays a purely astronomical quantity.
    */
   coefficient: number;
+}
+
+/**
+ * Which palette colour a tide class is drawn in — the key, not the colour, so
+ * this stays in the pure layer. Shared by the day badge and the week strip,
+ * which had the same three-way ternary each.
+ */
+export function tideClassKey(label: TideClass['label']): 'accent' | 'muted' | 'tint' {
+  return label === 'Springs' ? 'accent' : label === 'Neaps' ? 'muted' : 'tint';
 }
 
 /** Classify a day's range between the station's neap and spring ranges. */

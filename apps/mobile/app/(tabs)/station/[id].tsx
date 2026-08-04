@@ -1,14 +1,14 @@
+import { useLocalSearchParams } from 'expo-router';
 import Head from 'expo-router/head';
-import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useEffect } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { StationChips } from '@/components/station-chips';
 import { StationDayView } from '@/components/station-day-view';
 import { ThemedText } from '@/components/themed-text';
+import { useRouteStation } from '@/hooks/use-route-station';
 import { usePalette } from '@/hooks/use-theme-color';
 import { useSelectedStation } from '@/lib/selected-station';
-import { STATIONS, stationById } from '@/lib/stations';
+import { STATIONS } from '@/lib/stations';
 
 // Pre-render one static HTML page per station so shareable links like
 // /station/oban survive a hard refresh on GitHub Pages.
@@ -21,24 +21,11 @@ export async function generateStaticParams(): Promise<{ id: string }[]> {
 // URL is always /station/<id> and can be shared.
 export default function StationScreen() {
   const palette = usePalette();
-  const router = useRouter();
-  const { id, d } = useLocalSearchParams<{ id: string; d?: string }>();
-  const station = stationById(id) ?? STATIONS[0];
-  const { stationId, setStationId, isFavourite, toggleFavourite } = useSelectedStation();
+  // Only the day param is read here; the station comes from the shared hook.
+  const { d } = useLocalSearchParams<{ d?: string }>();
+  const { station, switchStation } = useRouteStation('/station/[id]');
+  const { isFavourite, toggleFavourite } = useSelectedStation();
   const fav = isFavourite(station.id);
-
-  // Keep the persisted "current" station in sync with whatever we're viewing
-  // (e.g. arriving via a shared link) so the Station tab points back here.
-  useEffect(() => {
-    if (station.id !== stationId) {
-      setStationId(station.id);
-    }
-  }, [station.id, stationId, setStationId]);
-
-  const switchStation = (sid: string) => {
-    setStationId(sid);
-    router.replace({ pathname: '/station/[id]', params: { id: sid } });
-  };
 
   return (
     <>

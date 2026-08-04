@@ -54,11 +54,13 @@ jobs:
           cache: npm
           cache-dependency-path: apps/mobile/package-lock.json
       - run: npm ci
-      - name: Unit tests (datetime, tide-day)
+      - name: Unit tests (every *.test.ts)
         run: npm run test:unit
       - name: Engine parity tests (vs pytides reference)
         run: npm run test:engine
       - name: Install Playwright browser
         run: npx playwright install --with-deps chromium
-      - name: End-to-end tests
+      # Builds the static export and serves dist/ (see playwright.config.ts) —
+      # the dev server can't reproduce the export-only bugs this is here to catch.
+      - name: End-to-end tests (against the static export)
         run: npm run test:e2e

@@ -14,6 +14,7 @@ import { Note } from '@/components/note';
 import { ThemedText } from '@/components/themed-text';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useHydrated } from '@/hooks/use-hydrated';
+import { useNow } from '@/hooks/use-now';
 import { usePalette } from '@/hooks/use-theme-color';
 import { ymdInUk } from '@/lib/datetime';
 import { coeffFill, type DayCell, type Scheme, yearMonths } from '@/lib/planner';
@@ -46,7 +47,11 @@ export function TripPlanner({ station, header }: { station: Station; header?: Re
   // static export doesn't have — see use-hydrated.ts. The heatmap (and its 365
   // harmonic solves) therefore waits for the client.
   const hydrated = useHydrated();
-  const todayYmd = ymdInUk(new Date());
+  // Off the ticking clock, not a bare render-time `new Date()`: the heatmap is a
+  // page you leave open, and the React Compiler is free to cache a render-time
+  // value that has no dependencies — either way today's cell keeps its ring on
+  // yesterday. Same rule as use-day-nav.
+  const todayYmd = ymdInUk(useNow());
   const nowY = Number(todayYmd.slice(0, 4));
 
   const [year, setYear] = useState(nowY);

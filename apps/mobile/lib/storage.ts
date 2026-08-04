@@ -9,7 +9,11 @@ const LAST_KEY = 'scottide.lastStation';
 export async function loadFavourites(): Promise<string[]> {
   try {
     const v = await AsyncStorage.getItem(FAV_KEY);
-    return v ? (JSON.parse(v) as string[]) : [];
+    const parsed = v ? JSON.parse(v) : [];
+    // Anything but an array (corrupt entry, an older format) would throw at the
+    // caller's .filter(), outside its try — the restore promise then rejects,
+    // `ready` never flips and the app sits blank forever.
+    return Array.isArray(parsed) ? (parsed as string[]) : [];
   } catch {
     return [];
   }

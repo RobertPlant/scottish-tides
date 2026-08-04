@@ -109,29 +109,8 @@ export function TideCurve({ series, events, now, height = 200, scrubbable = fals
     .join(' ');
   const area = `${line} L ${x(t1).toFixed(1)} ${baseY.toFixed(1)} L ${x(t0).toFixed(1)} ${baseY.toFixed(1)} Z`;
 
-  // Interpolated height (and rising/falling trend) at `now` for the marker dot
-  // and the current-level readout. `nowX` (the line position) comes from the
-  // shared frame; here we only add the height/trend the tide chart needs.
-  let nowY: number | null = null;
-  let nowH: number | null = null;
-  let nowRising = false;
-  if (nowX !== null && now) {
-    let h = merged[0].h;
-    for (let i = 1; i < merged.length; i++) {
-      if (merged[i].t >= now.getTime()) {
-        const a = merged[i - 1];
-        const b = merged[i];
-        const f = (now.getTime() - a.t) / (b.t - a.t || 1);
-        h = a.h + f * (b.h - a.h);
-        nowRising = b.h >= a.h;
-        break;
-      }
-    }
-    nowH = h;
-    nowY = y(h);
-  }
-
-  // Interpolate height + trend at an arbitrary time (for the scrub readout).
+  // Interpolate height + trend at an arbitrary time — used for both the "now"
+  // marker and the scrub readout, which had a copy of this loop each.
   const sampleAt = (tMs: number): { h: number; rising: boolean } => {
     for (let i = 1; i < merged.length; i++) {
       if (merged[i].t >= tMs) {
@@ -143,6 +122,10 @@ export function TideCurve({ series, events, now, height = 200, scrubbable = fals
     }
     return { h: merged[merged.length - 1].h, rising: false };
   };
+
+  // The now marker's height/trend; `nowX` (the line position) comes from the
+  // shared frame.
+  const nowPoint = nowX !== null && now ? sampleAt(now.getTime()) : null;
 
   const onScrub = (lx: number) => {
     const clampedX = Math.min(Math.max(lx, PAD_LEFT), width - PAD_RIGHT);
@@ -261,18 +244,17 @@ export function TideCurve({ series, events, now, height = 200, scrubbable = fals
                 strokeDasharray="3 3"
               />
             )}
-            {now && nowX !== null && nowY !== null && (
-              <Circle cx={nowX} cy={nowY} r={4} fill={palette.text} />
+            {nowX !== null && nowPoint && (
+              <Circle cx={nowX} cy={y(nowPoint.h)} r={4} fill={palette.text} />
             )}
             {/* Current-level readout at the top of the now line (today only) */}
-            {now &&
-              nowX !== null &&
-              nowH !== null &&
+            {nowX !== null &&
+              nowPoint &&
               (() => {
-                const label = `${nowH.toFixed(2)} m ${nowRising ? '▲' : '▼'}`;
+                const label = `${nowPoint.h.toFixed(2)} m ${nowPoint.rising ? '▲' : '▼'}`;
                 const w = label.length * 6.2 + 12;
                 const lx = Math.min(Math.max(nowX - w / 2, PAD_LEFT), width - PAD_RIGHT - w);
-                const color = nowRising ? palette.high : palette.low;
+                const color = nowPoint.rising ? palette.high : palette.low;
                 return (
                   <G>
                     <Rect x={lx} y={1} width={w} height={16} rx={4} fill={color} />

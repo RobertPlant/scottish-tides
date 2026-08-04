@@ -13,9 +13,8 @@ eslint, typescript, or their resolvers.
 
 Expo SDK 57, Expo Router 57, React Native 0.86, react-native-web. Styling is
 plain `StyleSheet` + a light/dark `Colors` palette in `constants/theme.ts`
-(`ThemedText` / `ThemedView` / `useThemeColor`), matching the sibling OtterPool
-project. No backend, no auth, no network calls at runtime — everything the app
-needs is bundled.
+(`ThemedText` / `useThemeColor` / `usePalette`). No backend, no auth, no network
+calls at runtime — everything the app needs is bundled.
 
 ## The tide engine is the keystone
 
@@ -61,13 +60,21 @@ uses the local `modules/platform-location` module (plain `LocationManager`),
 Three layers, all in CI (`.github/workflows/test.yml`), alongside a `lint` job
 that gates Biome (`biome ci`) and `tsc --noEmit`:
 
-- **Unit** — `npm run test:unit` (node --test + tsx) covers the pure helpers:
-  datetime, tide-day, planner, streams, astronomy, geo.
+- **Unit** — `npm run test:unit` (node --test + tsx) runs **every** `*.test.ts`
+  in the app (`"**/*.test.ts"`, node excludes node_modules): the pure helpers —
+  datetime, tide-day, planner, streams, astronomy, geo — and the engine parity
+  tests along with them. Keep the glob recursive; the old `lib/*.test.ts` meant
+  a test file one directory deeper silently never ran.
 - **Engine parity** — `npm run test:engine` (node --test + tsx) checks the TS
   engine against the committed pytides reference (`lib/tides/__fixtures__/`).
-- **e2e** — `npm run test:e2e` (Playwright) drives the web build: routes render
-  without the React error overlay, the station list, the date picker changes the
-  day, and deep links render on direct load. Specs in `e2e/`.
+  A subset of `test:unit`, kept as the focused script for engine work.
+- **e2e** — `npm run test:e2e` (Playwright) drives the **static export**, not
+  the dev server: `playwright.config.ts` runs `expo export --platform web` and
+  hosts `dist/` with `expo serve`. This matters — the web build ships as a
+  static export, and its two worst bugs (build-time tide data baked into the
+  HTML, every page titled with its URL) exist *only* in the exported artifact
+  and sailed past a green run against `expo start --web`. Costs ~90 s of export
+  per run. Specs in `e2e/`.
 
 Running e2e on NixOS: `playwright.config.ts` auto-detects the devenv-provided
 `PLAYWRIGHT_BROWSERS_PATH` and points Playwright straight at the nix

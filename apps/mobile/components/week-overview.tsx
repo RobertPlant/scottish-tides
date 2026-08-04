@@ -7,19 +7,22 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { Card } from '@/components/card';
 import { ThemedText } from '@/components/themed-text';
 import { usePalette } from '@/hooks/use-theme-color';
-import { formatDay, ukDayStartFromYmd, ymdAddDays, ymdInUk } from '@/lib/datetime';
+import { formatDay, ukDayStartFromYmd, ymdAddDays } from '@/lib/datetime';
 import type { Station } from '@/lib/stations';
-import { classifyTide, dayEvents, dayRange, tidalStats } from '@/lib/tide-day';
+import { classifyTide, dayEvents, dayRange, tidalStats, tideClassKey } from '@/lib/tide-day';
 
 export function WeekOverview({
   station,
   fromYmd,
   selectedYmd,
+  todayYmd,
   onSelectDay,
 }: {
   station: Station;
   fromYmd: string;
   selectedYmd: string;
+  /** Today from the day-nav's ticking clock — never a render-time `new Date()`. */
+  todayYmd: string;
   onSelectDay: (ymd: string) => void;
 }) {
   const palette = usePalette();
@@ -45,7 +48,7 @@ export function WeekOverview({
   // The window is anchored to the selected day, not always today — so only call
   // it "Next 7 days" when it really starts today; otherwise show the date range.
   const title =
-    fromYmd === ymdInUk(new Date())
+    fromYmd === todayYmd
       ? 'Next 7 days'
       : `${formatDay(days[0].start)} – ${formatDay(days[6].start)}`;
 
@@ -60,12 +63,7 @@ export function WeekOverview({
       </View>
       {days.map((d) => {
         const selected = d.ymd === selectedYmd;
-        const barColor =
-          d.cls.label === 'Springs'
-            ? palette.accent
-            : d.cls.label === 'Neaps'
-              ? palette.muted
-              : palette.tint;
+        const barColor = palette[tideClassKey(d.cls.label)];
         return (
           <Pressable
             key={d.ymd}

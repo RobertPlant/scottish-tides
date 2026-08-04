@@ -22,7 +22,14 @@ import { usePalette } from '@/hooks/use-theme-color';
 import { sunTimes } from '@/lib/astronomy';
 import { ymdAddDays } from '@/lib/datetime';
 import type { Station } from '@/lib/stations';
-import { classifyTide, dayEvents, dayHeightSeries, dayRange, tidalStats } from '@/lib/tide-day';
+import {
+  classifyTide,
+  dayEvents,
+  dayHeightSeries,
+  dayRange,
+  tidalStats,
+  tideClassKey,
+} from '@/lib/tide-day';
 
 export function StationDayView({
   station,
@@ -97,12 +104,7 @@ export function StationDayView({
   const stats = useMemo(() => tidalStats(station), [station]);
   const range = useMemo(() => dayRange(events), [events]);
   const tideClass = useMemo(() => classifyTide(range, stats), [range, stats]);
-  const classColor =
-    tideClass.label === 'Springs'
-      ? palette.accent
-      : tideClass.label === 'Neaps'
-        ? palette.muted
-        : palette.tint;
+  const classColor = palette[tideClassKey(tideClass.label)];
 
   return (
     <ScrollView
@@ -156,6 +158,7 @@ export function StationDayView({
                 station={station}
                 fromYmd={ymd}
                 selectedYmd={ymd}
+                todayYmd={nav.todayYmd}
                 onSelectDay={nav.setDay}
               />
             </>

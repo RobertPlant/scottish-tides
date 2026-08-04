@@ -70,9 +70,9 @@ environment loads on `cd`.
 cd apps/mobile
 npm install
 npm run web           # or: npm run ios / npm run android
-npm run test:unit     # pure helpers (datetime, tide-day, planner, streams, …)
+npm run test:unit     # every *.test.ts (helpers, and the engine parity tests)
 npm run test:engine   # validate the TS engine against the Python reference
-npm run test:e2e      # Playwright against the web build (run inside devenv shell)
+npm run test:e2e      # Playwright against the static export (run inside devenv shell)
 npx tsc --noEmit      # typecheck
 ```
 

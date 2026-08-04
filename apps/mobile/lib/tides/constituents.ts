@@ -269,8 +269,6 @@ export const noaa: Constituent[] = [
   _MS4,
 ];
 
-export const Z0 = _Z0;
-
 /** name -> constituent, including Z0 (the datum mean). */
 export const NAME2CONST: Record<string, Constituent> = (() => {
   const m: Record<string, Constituent> = {};
