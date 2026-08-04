@@ -5,6 +5,7 @@
 import { useRouter } from 'expo-router';
 import { useCallback, useMemo, useState } from 'react';
 
+import { useNow } from '@/hooks/use-now';
 import { ukDayStartFromYmd, ymdAddDays, ymdInUk } from '@/lib/datetime';
 
 const YMD_RE = /^\d{4}-\d{2}-\d{2}$/;
@@ -29,10 +30,11 @@ export function useDayNav({
   syncUrl?: boolean;
 }): DayNavState {
   const router = useRouter();
-  // Read on every render, not memoised on mount: an app left open overnight
-  // otherwise keeps calling yesterday "today" (the day views re-render each
-  // minute off `useNow`, so this rolls over on its own).
-  const todayYmd = ymdInUk(new Date());
+  // Derived from the ticking clock, not read once on mount: an app left open
+  // overnight otherwise keeps calling yesterday "today". Taking it off `useNow`
+  // rather than a bare `new Date()` also keeps it honest under the React
+  // Compiler, which is free to cache a render-time value with no dependencies.
+  const todayYmd = ymdInUk(useNow());
   const minYmd = ymdAddDays(todayYmd, -730);
   const maxYmd = ymdAddDays(todayYmd, 730);
   // Clamped here rather than in the UI so every route in — Prev/Next, the swipe
