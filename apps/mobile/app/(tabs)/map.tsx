@@ -1,3 +1,4 @@
+import Head from 'expo-router/head';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { Platform, Pressable, ScrollView, StyleSheet, View } from 'react-native';
@@ -83,6 +84,9 @@ export default function MapScreen() {
       contentContainerStyle={styles.content}
       style={{ backgroundColor: palette.background }}
     >
+      <Head>
+        <title>Ports &amp; tidal streams · Scottish Tides</title>
+      </Head>
       <ScotlandMap
         stations={STATIONS}
         selectedId={stationId}

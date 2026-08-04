@@ -1,3 +1,4 @@
+import Head from 'expo-router/head';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect } from 'react';
 import { StyleSheet, View } from 'react-native';
@@ -35,20 +36,25 @@ export default function PlanScreen() {
   };
 
   return (
-    <TripPlanner
-      station={station}
-      header={
-        <View style={styles.header}>
-          <StationChips activeId={station.id} onSelect={switchStation} />
-          <View>
-            <ThemedText type="title">{station.name}</ThemedText>
-            <ThemedText type="caption" style={{ color: palette.muted }}>
-              Plan ahead — pick a day for the tides you want
-            </ThemedText>
+    <>
+      <Head>
+        <title>{`${station.name} tide planner · Scottish Tides`}</title>
+      </Head>
+      <TripPlanner
+        station={station}
+        header={
+          <View style={styles.header}>
+            <StationChips activeId={station.id} onSelect={switchStation} />
+            <View>
+              <ThemedText type="title">{station.name}</ThemedText>
+              <ThemedText type="caption" style={{ color: palette.muted }}>
+                Plan ahead — pick a day for the tides you want
+              </ThemedText>
+            </View>
           </View>
-        </View>
-      }
-    />
+        }
+      />
+    </>
   );
 }
 

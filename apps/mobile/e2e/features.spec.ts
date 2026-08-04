@@ -226,3 +226,19 @@ test('the last station opens on next launch', async ({ page }) => {
   await page.goto('/');
   await expect(page).toHaveURL(/\/station\/leith/, { timeout: 15_000 });
 });
+
+test('every screen titles its browser tab', async ({ page }) => {
+  // Without a per-route title the tab falls back to the URL. The station and
+  // race pages name what you are looking at, so a pinned tab or a bookmark is
+  // readable; the rest at least say what the app is.
+  for (const [url, title] of [
+    ['/station/leith', 'Leith tide times · Scottish Tides'],
+    ['/plan/oban', 'Oban tide planner · Scottish Tides'],
+    ['/stream/corryvreckan', 'Gulf of Corryvreckan tidal stream · Scottish Tides'],
+    ['/map', 'Ports & tidal streams · Scottish Tides'],
+    ['/about', 'About · Scottish Tides'],
+  ] as const) {
+    await page.goto(url);
+    await expect(page).toHaveTitle(title);
+  }
+});

@@ -1,3 +1,4 @@
+import Head from 'expo-router/head';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
@@ -40,38 +41,43 @@ export default function StationScreen() {
   };
 
   return (
-    <StationDayView
-      station={station}
-      initialYmd={d}
-      syncUrl
-      header={
-        <View style={styles.header}>
-          <StationChips activeId={station.id} onSelect={switchStation} />
+    <>
+      <Head>
+        <title>{`${station.name} tide times · Scottish Tides`}</title>
+      </Head>
+      <StationDayView
+        station={station}
+        initialYmd={d}
+        syncUrl
+        header={
+          <View style={styles.header}>
+            <StationChips activeId={station.id} onSelect={switchStation} />
 
-          <View style={styles.nameRow}>
-            <View style={{ flex: 1 }}>
-              <ThemedText type="title">{station.name}</ThemedText>
-              {station.subtitle ? (
-                <ThemedText type="caption" style={{ color: palette.muted }}>
-                  {station.subtitle}
+            <View style={styles.nameRow}>
+              <View style={{ flex: 1 }}>
+                <ThemedText type="title">{station.name}</ThemedText>
+                {station.subtitle ? (
+                  <ThemedText type="caption" style={{ color: palette.muted }}>
+                    {station.subtitle}
+                  </ThemedText>
+                ) : null}
+              </View>
+              <Pressable
+                onPress={() => toggleFavourite(station.id)}
+                hitSlop={8}
+                accessibilityRole="button"
+                accessibilityLabel={fav ? 'Remove favourite' : 'Add favourite'}
+                style={styles.star}
+              >
+                <ThemedText style={{ fontSize: 24, color: fav ? palette.accent : palette.muted }}>
+                  {fav ? '★' : '☆'}
                 </ThemedText>
-              ) : null}
+              </Pressable>
             </View>
-            <Pressable
-              onPress={() => toggleFavourite(station.id)}
-              hitSlop={8}
-              accessibilityRole="button"
-              accessibilityLabel={fav ? 'Remove favourite' : 'Add favourite'}
-              style={styles.star}
-            >
-              <ThemedText style={{ fontSize: 24, color: fav ? palette.accent : palette.muted }}>
-                {fav ? '★' : '☆'}
-              </ThemedText>
-            </Pressable>
           </View>
-        </View>
-      }
-    />
+        }
+      />
+    </>
   );
 }
 

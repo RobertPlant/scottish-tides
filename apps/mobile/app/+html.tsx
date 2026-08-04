@@ -16,6 +16,9 @@ export default function Root({ children }: PropsWithChildren) {
     <html lang="en">
       <head>
         <meta charSet="utf-8" />
+        {/* Fallback only. Each screen sets its own via `expo-router/head`; without
+            this, a route that doesn't would leave the tab showing the bare URL. */}
+        <title>Scottish Tides</title>
         <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
         <meta
           name="viewport"

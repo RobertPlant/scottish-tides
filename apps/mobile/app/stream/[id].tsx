@@ -1,4 +1,5 @@
 import { Stack, useLocalSearchParams } from 'expo-router';
+import Head from 'expo-router/head';
 import { useMemo } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 
@@ -49,6 +50,9 @@ export default function RaceDetail() {
   return (
     <>
       <Stack.Screen options={{ title: race.name }} />
+      <Head>
+        <title>{`${race.name} tidal stream · Scottish Tides`}</title>
+      </Head>
       <ScrollView
         contentContainerStyle={styles.content}
         style={{ backgroundColor: palette.background }}

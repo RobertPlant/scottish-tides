@@ -3,6 +3,7 @@
 
 import Constants from 'expo-constants';
 import { Stack } from 'expo-router';
+import Head from 'expo-router/head';
 import { Linking, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
 import { Card } from '@/components/card';
@@ -60,6 +61,9 @@ export default function About() {
   return (
     <>
       <Stack.Screen options={{ title: 'About' }} />
+      <Head>
+        <title>About · Scottish Tides</title>
+      </Head>
       <ScrollView
         contentContainerStyle={styles.content}
         style={{ backgroundColor: palette.background }}
