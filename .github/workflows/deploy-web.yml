@@ -36,6 +36,30 @@ jobs:
       - run: npm ci
       - name: Export static web build
         run: npx expo export --platform web
+      # The export renders every route once, at build time. Anything derived
+      # from the clock is therefore frozen at the build and served as though it
+      # were current — which for a tide app means plausible, wrong tide times
+      # before hydration, plus a hydration mismatch (React #418). The screens
+      # gate that on `useHydrated`; this makes sure it stays gated.
+      - name: Assert no build-time clock data in the HTML
+        run: |
+          python3 - <<'PY'
+          import pathlib, re, sys
+          pats = {
+              'relative time': r'\d+h \d+m ago|in \d+h \d+m',
+              'long date': r'(Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday) \d+ \w+ 20\d\d',
+              'clock time': r'>\d\d:\d\d<',
+          }
+          bad = 0
+          for f in pathlib.Path('dist').rglob('*.html'):
+              h = f.read_text(encoding='utf8')
+              for name, pat in pats.items():
+                  for m in set(re.findall(pat, h)):
+                      print(f'{f}: baked {name}: {m}')
+                      bad += 1
+          print('clean' if not bad else f'{bad} baked clock strings')
+          sys.exit(1 if bad else 0)
+          PY
       # Pages served from an Actions artifact isn't run through Jekyll, but add
       # .nojekyll anyway so the underscore-prefixed _expo/ dir is never stripped.
       - run: touch dist/.nojekyll

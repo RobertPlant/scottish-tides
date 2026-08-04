@@ -16,6 +16,7 @@ import { TideCurve } from '@/components/tide-curve';
 import { TideTable } from '@/components/tide-table';
 import { WeekOverview } from '@/components/week-overview';
 import { useDayNav } from '@/hooks/use-day-nav';
+import { useHydrated } from '@/hooks/use-hydrated';
 import { useNow } from '@/hooks/use-now';
 import { usePalette } from '@/hooks/use-theme-color';
 import { sunTimes } from '@/lib/astronomy';
@@ -45,6 +46,10 @@ export function StationDayView({
 
   // Keep "now" live so the current-time marker/readout stays current.
   const now = useNow();
+  // Everything below the header is "what the tide is doing today", which the
+  // static export cannot know — see use-hydrated.ts. Until the client takes
+  // over, this screen is its header and nothing else.
+  const hydrated = useHydrated();
 
   const nav = useDayNav({ initialYmd, syncUrl });
   const { ymd, dayStart, isToday } = nav;
@@ -74,8 +79,14 @@ export function StationDayView({
     [ymd, setDay],
   );
 
-  const events = useMemo(() => dayEvents(station, dayStart), [station, dayStart]);
-  const series = useMemo(() => dayHeightSeries(station, dayStart), [station, dayStart]);
+  const events = useMemo(
+    () => (hydrated ? dayEvents(station, dayStart) : []),
+    [hydrated, station, dayStart],
+  );
+  const series = useMemo(
+    () => (hydrated ? dayHeightSeries(station, dayStart) : []),
+    [hydrated, station, dayStart],
+  );
   // Evaluate at midday so the returned sunrise/sunset land on this civil day
   // (UK midnight is the previous UTC day in summer) — matches SunMoonCard.
   const sun = useMemo(
@@ -102,49 +113,53 @@ export function StationDayView({
         <View style={styles.inner}>
           {header}
 
-          <DayNav nav={nav}>
-            <View style={[styles.badge, { backgroundColor: classColor }]}>
-              <ThemedText style={styles.badgeText}>
-                {tideClass.label} · {tideClass.coefficient}
-              </ThemedText>
-            </View>
-            <ThemedText type="caption" style={{ color: palette.muted }}>
-              {range.toFixed(1)} m range
-            </ThemedText>
-          </DayNav>
+          {hydrated ? (
+            <>
+              <DayNav nav={nav}>
+                <View style={[styles.badge, { backgroundColor: classColor }]}>
+                  <ThemedText style={styles.badgeText}>
+                    {tideClass.label} · {tideClass.coefficient}
+                  </ThemedText>
+                </View>
+                <ThemedText type="caption" style={{ color: palette.muted }}>
+                  {range.toFixed(1)} m range
+                </ThemedText>
+              </DayNav>
 
-          <Card
-            onPointerEnter={() => setChartHovered(true)}
-            onPointerLeave={() => setChartHovered(false)}
-          >
-            <TideCurve
-              series={series}
-              events={events}
-              now={isToday ? now : undefined}
-              height={220}
-              scrubbable
-              sun={sun}
-            />
-            <ThemedText
-              type="caption"
-              style={[
-                { color: palette.muted },
-                Platform.OS === 'web' && !chartHovered && styles.hintHidden,
-              ]}
-            >
-              Tap the chart to read the level at any time. Gold band = daylight.
-            </ThemedText>
-            <TideTable events={events} now={isToday ? now : undefined} />
-          </Card>
+              <Card
+                onPointerEnter={() => setChartHovered(true)}
+                onPointerLeave={() => setChartHovered(false)}
+              >
+                <TideCurve
+                  series={series}
+                  events={events}
+                  now={isToday ? now : undefined}
+                  height={220}
+                  scrubbable
+                  sun={sun}
+                />
+                <ThemedText
+                  type="caption"
+                  style={[
+                    { color: palette.muted },
+                    Platform.OS === 'web' && !chartHovered && styles.hintHidden,
+                  ]}
+                >
+                  Tap the chart to read the level at any time. Gold band = daylight.
+                </ThemedText>
+                <TideTable events={events} now={isToday ? now : undefined} />
+              </Card>
 
-          <SunMoonCard date={dayStart} lat={station.lat} lon={station.lon} />
+              <SunMoonCard date={dayStart} lat={station.lat} lon={station.lon} />
 
-          <WeekOverview
-            station={station}
-            fromYmd={ymd}
-            selectedYmd={ymd}
-            onSelectDay={nav.setDay}
-          />
+              <WeekOverview
+                station={station}
+                fromYmd={ymd}
+                selectedYmd={ymd}
+                onSelectDay={nav.setDay}
+              />
+            </>
+          ) : null}
 
           <Note>
             <ThemedText type="caption" style={{ color: palette.muted }}>

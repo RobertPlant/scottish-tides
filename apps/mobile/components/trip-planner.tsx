@@ -13,6 +13,7 @@ import { Card } from '@/components/card';
 import { Note } from '@/components/note';
 import { ThemedText } from '@/components/themed-text';
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import { useHydrated } from '@/hooks/use-hydrated';
 import { usePalette } from '@/hooks/use-theme-color';
 import { ymdInUk } from '@/lib/datetime';
 import { coeffFill, type DayCell, type Scheme, yearMonths } from '@/lib/planner';
@@ -41,6 +42,10 @@ export function TripPlanner({ station, header }: { station: Station; header?: Re
   const scheme: Scheme = useColorScheme() ?? 'light';
   const router = useRouter();
 
+  // Which year is "this year", and which cell is today, are clock facts the
+  // static export doesn't have — see use-hydrated.ts. The heatmap (and its 365
+  // harmonic solves) therefore waits for the client.
+  const hydrated = useHydrated();
   const todayYmd = ymdInUk(new Date());
   const nowY = Number(todayYmd.slice(0, 4));
 
@@ -52,7 +57,10 @@ export function TripPlanner({ station, header }: { station: Station; header?: Re
   // block on mount and on every ‹ › press. If this grows (e.g. the opinionated
   // "best window" layer in TODO.md, which would add stream/daylight solves on
   // top), it needs deferring off the first paint rather than more memoising.
-  const months = useMemo(() => yearMonths(station, year, stats), [station, year, stats]);
+  const months = useMemo(
+    () => (hydrated ? yearMonths(station, year, stats) : []),
+    [hydrated, station, year, stats],
+  );
 
   const minYear = nowY - YEAR_SPAN;
   const maxYear = nowY + YEAR_SPAN;
@@ -81,79 +89,92 @@ export function TripPlanner({ station, header }: { station: Station; header?: Re
       <View style={styles.inner}>
         {header}
 
-        <View style={styles.navRow}>
-          <Pressable
-            onPress={() => setYear((y) => y - 1)}
-            disabled={!canPrev}
-            accessibilityRole="button"
-            accessibilityLabel="Previous year"
-            style={[styles.navBtn, { borderColor: palette.border, opacity: canPrev ? 1 : 0.35 }]}
-          >
-            <ThemedText style={{ color: palette.accent }}>‹</ThemedText>
-          </Pressable>
-          <ThemedText type="defaultSemiBold" style={styles.navLabel}>
-            {year}
-          </ThemedText>
-          <Pressable
-            onPress={() => setYear((y) => y + 1)}
-            disabled={!canNext}
-            accessibilityRole="button"
-            accessibilityLabel="Next year"
-            style={[styles.navBtn, { borderColor: palette.border, opacity: canNext ? 1 : 0.35 }]}
-          >
-            <ThemedText style={{ color: palette.accent }}>›</ThemedText>
-          </Pressable>
-        </View>
-        {year !== nowY ? (
-          <Pressable
-            onPress={() => setYear(nowY)}
-            accessibilityRole="button"
-            style={styles.todayLink}
-          >
-            <ThemedText style={{ color: palette.accent }}>This year</ThemedText>
-          </Pressable>
-        ) : null}
+        {hydrated ? (
+          <>
+            <View style={styles.navRow}>
+              <Pressable
+                onPress={() => setYear((y) => y - 1)}
+                disabled={!canPrev}
+                accessibilityRole="button"
+                accessibilityLabel="Previous year"
+                style={[
+                  styles.navBtn,
+                  { borderColor: palette.border, opacity: canPrev ? 1 : 0.35 },
+                ]}
+              >
+                <ThemedText style={{ color: palette.accent }}>‹</ThemedText>
+              </Pressable>
+              <ThemedText type="defaultSemiBold" style={styles.navLabel}>
+                {year}
+              </ThemedText>
+              <Pressable
+                onPress={() => setYear((y) => y + 1)}
+                disabled={!canNext}
+                accessibilityRole="button"
+                accessibilityLabel="Next year"
+                style={[
+                  styles.navBtn,
+                  { borderColor: palette.border, opacity: canNext ? 1 : 0.35 },
+                ]}
+              >
+                <ThemedText style={{ color: palette.accent }}>›</ThemedText>
+              </Pressable>
+            </View>
+            {year !== nowY ? (
+              <Pressable
+                onPress={() => setYear(nowY)}
+                accessibilityRole="button"
+                style={styles.todayLink}
+              >
+                <ThemedText style={{ color: palette.accent }}>This year</ThemedText>
+              </Pressable>
+            ) : null}
 
-        <Card gap={3}>
-          {months.map(({ month, days }) => {
-            const cellStyle = cellW != null ? { width: cellW } : { flex: 1 };
-            // Short months trail one blank spacer the width of their missing
-            // days, so every row's cells line up under the same columns.
-            const padCols = COLS - days.length;
-            return (
-              <View key={month} style={styles.yearRow}>
-                <ThemedText type="caption" style={[styles.yearLabel, { color: palette.muted }]}>
-                  {MONTHS_SHORT[month - 1]}
-                </ThemedText>
-                <View style={styles.yearCells} onLayout={month === 1 ? onCellsLayout : undefined}>
-                  {days.map((d) => (
-                    <DayBlock
-                      key={d.ymd}
-                      cell={d}
-                      scheme={scheme}
-                      isToday={d.ymd === todayYmd}
-                      weekendRing={palette.low}
-                      todayRing={palette.text}
-                      gridLine={palette.surface}
-                      sizeStyle={cellStyle}
-                      onPick={openDay}
-                    />
-                  ))}
-                  {padCols > 0 ? (
+            <Card gap={3}>
+              {months.map(({ month, days }) => {
+                const cellStyle = cellW != null ? { width: cellW } : { flex: 1 };
+                // Short months trail one blank spacer the width of their missing
+                // days, so every row's cells line up under the same columns.
+                const padCols = COLS - days.length;
+                return (
+                  <View key={month} style={styles.yearRow}>
+                    <ThemedText type="caption" style={[styles.yearLabel, { color: palette.muted }]}>
+                      {MONTHS_SHORT[month - 1]}
+                    </ThemedText>
                     <View
-                      style={[
-                        styles.dayBlock,
-                        cellW != null ? { width: cellW * padCols } : { flex: padCols },
-                      ]}
-                    />
-                  ) : null}
-                </View>
-              </View>
-            );
-          })}
-        </Card>
+                      style={styles.yearCells}
+                      onLayout={month === 1 ? onCellsLayout : undefined}
+                    >
+                      {days.map((d) => (
+                        <DayBlock
+                          key={d.ymd}
+                          cell={d}
+                          scheme={scheme}
+                          isToday={d.ymd === todayYmd}
+                          weekendRing={palette.low}
+                          todayRing={palette.text}
+                          gridLine={palette.surface}
+                          sizeStyle={cellStyle}
+                          onPick={openDay}
+                        />
+                      ))}
+                      {padCols > 0 ? (
+                        <View
+                          style={[
+                            styles.dayBlock,
+                            cellW != null ? { width: cellW * padCols } : { flex: padCols },
+                          ]}
+                        />
+                      ) : null}
+                    </View>
+                  </View>
+                );
+              })}
+            </Card>
 
-        <Legend scheme={scheme} palette={palette} />
+            <Legend scheme={scheme} palette={palette} />
+          </>
+        ) : null}
 
         <Note>
           <ThemedText type="caption" style={{ color: palette.muted }}>
