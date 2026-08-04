@@ -12,6 +12,7 @@ import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Svg, { Circle, G, Path, Polygon, Rect, Text as SvgText } from 'react-native-svg';
 
 import coastRings from '@/assets/data/scotland-coast.json';
+import { useColorScheme } from '@/hooks/use-color-scheme';
 import { usePalette } from '@/hooks/use-theme-color';
 import type { Station } from '@/lib/stations';
 
@@ -73,11 +74,11 @@ export function ScotlandMap({
   onSelectStream?: (id: string) => void;
 }) {
   const palette = usePalette();
-  const isDark = palette.background === '#06121d';
+  const isDark = useColorScheme() === 'dark';
   const sea = isDark ? '#0a1c29' : '#d8e7f0';
   const land = isDark ? '#16302a' : '#cdd9cb';
   const coast = isDark ? '#2c4a44' : '#9fb09c';
-  const halo = isDark ? '#06121d' : '#ffffff'; // label casing for contrast
+  const halo = palette.background; // label casing: contrast against the surface
 
   const [width, setWidth] = useState(0);
   const height = width * ASPECT;

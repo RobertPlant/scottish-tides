@@ -8,6 +8,7 @@ import { type LayoutChangeEvent, StyleSheet, Text, View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Svg, { Circle, G, Line, Path, Rect, Text as SvgText } from 'react-native-svg';
 
+import { useColorScheme } from '@/hooks/use-color-scheme';
 import { usePalette } from '@/hooks/use-theme-color';
 import { CHART_PAD, chartFrame } from '@/lib/chart-frame';
 import { formatTime } from '@/lib/datetime';
@@ -36,7 +37,7 @@ function niceStep(raw: number): number {
 
 export function TideCurve({ series, events, now, height = 200, scrubbable = false, sun }: Props) {
   const palette = usePalette();
-  const isDark = palette.background === '#06121d';
+  const isDark = useColorScheme() === 'dark';
   const [width, setWidth] = useState(0);
   const [scrubT, setScrubT] = useState<number | null>(null);
 

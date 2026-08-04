@@ -3,6 +3,7 @@
 
 import type { ChangeEvent } from 'react';
 
+import { useColorScheme } from '@/hooks/use-color-scheme';
 import { usePalette } from '@/hooks/use-theme-color';
 
 export interface DateFieldProps {
@@ -15,6 +16,7 @@ export interface DateFieldProps {
 
 export function DateField({ value, onChange, min, max }: DateFieldProps) {
   const palette = usePalette();
+  const scheme = useColorScheme();
   return (
     <input
       type="date"
@@ -38,7 +40,7 @@ export function DateField({ value, onChange, min, max }: DateFieldProps) {
         padding: '9px 12px',
         fontSize: 16,
         fontFamily: 'inherit',
-        colorScheme: palette.background === '#06121d' ? 'dark' : 'light',
+        colorScheme: scheme,
       }}
     />
   );
