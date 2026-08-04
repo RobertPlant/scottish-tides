@@ -6,13 +6,11 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
 import {
-  addDays,
   formatDay,
   formatLongDay,
   formatRelative,
   formatTime,
   ukDayStartFromYmd,
-  ukStartOfDay,
   ymdAddDays,
   ymdInUk,
 } from './datetime';
@@ -28,12 +26,6 @@ test('formatDay / formatLongDay format the UK civil date', () => {
   const d = new Date('2026-01-01T12:00:00Z'); // Thursday
   assert.equal(formatDay(d), 'Thu 1 Jan');
   assert.equal(formatLongDay(d), 'Thursday, 1 January 2026');
-});
-
-test('addDays adds whole 24h blocks', () => {
-  const d = new Date('2026-01-01T00:00:00Z');
-  assert.equal(addDays(d, 3).getTime(), d.getTime() + 3 * 86_400_000);
-  assert.equal(addDays(d, -1).getTime(), d.getTime() - 86_400_000);
 });
 
 test('ymdInUk uses the UK calendar day, not the UTC one', () => {
@@ -59,22 +51,6 @@ test('ukDayStartFromYmd is the UK midnight instant (offset by DST)', () => {
   assert.equal(ukDayStartFromYmd('2026-07-04').toISOString(), '2026-07-03T23:00:00.000Z');
   // Winter: UK midnight is 00:00Z (GMT).
   assert.equal(ukDayStartFromYmd('2026-01-04').toISOString(), '2026-01-04T00:00:00.000Z');
-});
-
-test('ukStartOfDay reduces any instant to that UK day midnight', () => {
-  assert.equal(
-    ukStartOfDay(new Date('2026-07-04T12:00:00Z')).toISOString(),
-    '2026-07-03T23:00:00.000Z',
-  );
-  assert.equal(
-    ukStartOfDay(new Date('2026-01-04T12:00:00Z')).toISOString(),
-    '2026-01-04T00:00:00.000Z',
-  );
-  // An instant just past UK midnight in summer still maps to that day's start.
-  assert.equal(
-    ukStartOfDay(new Date('2026-07-03T23:30:00Z')).toISOString(), // 00:30 BST, 4 Jul
-    '2026-07-03T23:00:00.000Z',
-  );
 });
 
 test('ymd <-> UK-day-start round-trips (incl. DST transition days)', () => {

@@ -78,16 +78,6 @@ function ukMidnight(y: number, m: number, day: number): Date {
   return new Date(wallAsUtc - ukOffsetMs(new Date(wallAsUtc)));
 }
 
-/** Local civil midnight (UK) of the day containing `d`, as an absolute instant. */
-export function ukStartOfDay(d: Date): Date {
-  const [y, m, day] = ymdInUk(d).split('-').map(Number);
-  return ukMidnight(y, m, day);
-}
-
-export function addDays(d: Date, n: number): Date {
-  return new Date(d.getTime() + n * 86_400_000);
-}
-
 /** The civil midnight that *ends* the UK day starting at `dayStart`. Not
  *  `+24 h`: the BST transitions make two days a year 23 and 25 hours long, and
  *  a fixed 24 h window then runs an hour into the next day (duplicating its
