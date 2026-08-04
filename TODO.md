@@ -35,6 +35,11 @@ All of these are enforced in CI.
       atlas/diamond figures become available.
 - [ ] **Flood/ebb asymmetry**: gate model uses symmetric magnitudes, but e.g. Corryvreckan
       W-going 8.5 kn vs E-going "rather less". Add a per-race flood:ebb ratio.
+- [ ] **Re-check the Falls of Lora turn times against fallsoflora.info.** The
+      reservoir filter's warm-up went from 16 h to 48 h (it was still carrying up
+      to 5 min of its "loch starts at sea level" initial guess into the day, and
+      the model claims ~12 min). Turn times move by up to ~5 min, so the
+      calibration was fitted with that transient in it.
 - [ ] **Grey Dogs** and **Sound of Islay** offsets are approximate (taken from the adjacent
       Corryvreckan / Rhinns-of-Islay). Verify against a better source.
 - [ ] Add a "**good transit window**" highlight on the stream curve (fallsoflora shows

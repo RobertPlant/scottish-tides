@@ -268,6 +268,9 @@ function predictGate(race: Race, ref: Station, dayStart: Date, fraction: number)
 
 // --- 'sill' races (Falls of Lora): rate ∝ head between sea and lagged loch -----
 
+/** Hours of sea level fed through the reservoir filter before the day itself. */
+const SILL_WARMUP_H = 48;
+
 function predictSill(race: Race, ref: Station, dayStart: Date, fraction: number): StreamDay {
   const tauFill = race.lochTauFillHours ?? 3.5;
   const tauDrain = race.lochTauDrainHours ?? 8;
@@ -275,8 +278,14 @@ function predictSill(race: Race, ref: Station, dayStart: Date, fraction: number)
   const start = dayStart.getTime();
   const end = ukEndOfDay(dayStart).getTime();
 
-  // Sea level over a padded window so the reservoir filter has warmed up.
-  const sea = seaLevelSeries(ref, new Date(start - 16 * 3600_000), new Date(end), 10);
+  // Sea level over a padded window so the reservoir filter has warmed up. 16 h
+  // was not enough: the loch starts at sea level, and at τ_drain = 8 h that
+  // initial guess is still worth up to 5 min of slack-time error on the day
+  // itself — against a model calibrated to ~12 min. Measured against a 240 h
+  // warm-up, the error is 5.2 min at 16 h, 0.6 at 24 h and 0.06 (≈ 4 s) from
+  // 48 h on, so 48 h is where it stops mattering. Costs one extra harmonic
+  // pass over ~430 samples, on one screen.
+  const sea = seaLevelSeries(ref, new Date(start - SILL_WARMUP_H * 3600_000), new Date(end), 10);
 
   // Loch level: an asymmetric first-order low-pass of the sea. It fills faster
   // than it drains (the sill restricts outflow), so the falls run OUT longer.
