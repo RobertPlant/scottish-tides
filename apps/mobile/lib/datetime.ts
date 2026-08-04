@@ -79,6 +79,14 @@ export function addDays(d: Date, n: number): Date {
   return new Date(d.getTime() + n * 86_400_000);
 }
 
+/** The civil midnight that *ends* the UK day starting at `dayStart`. Not
+ *  `+24 h`: the BST transitions make two days a year 23 and 25 hours long, and
+ *  a fixed 24 h window then runs an hour into the next day (duplicating its
+ *  first tide) or stops an hour short (dropping the last one). */
+export function ukEndOfDay(dayStart: Date): Date {
+  return ukDayStartFromYmd(ymdAddDays(ymdInUk(dayStart), 1));
+}
+
 /** Calendar date (YYYY-MM-DD) of an instant as seen in UK local time. */
 export function ymdInUk(d: Date): string {
   const parts = new Intl.DateTimeFormat('en-CA', {

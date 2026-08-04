@@ -4,7 +4,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
-import { ukDayStartFromYmd, ymdInUk } from './datetime';
+import { ukDayStartFromYmd, ukEndOfDay, ymdInUk } from './datetime';
 import { type Station, stationById } from './stations';
 import { classifyTide, dayEvents, dayRange, type TidalStats, tidalStats } from './tide-day';
 import type { StationData, TideEvent } from './tides';
@@ -132,4 +132,21 @@ test("a secondary port's day holds exactly its own events", () => {
       assert.equal(ymdInUk(e.time), ymd);
     }
   }
+});
+
+test('a UK day is its civil day, not 24 hours (BST transitions)', () => {
+  const st = stationById('stornoway');
+  assert.ok(st);
+  // 29 Mar 2026 is 23 h long and 25 Oct 2026 is 25 h: a fixed +24 h window ran
+  // an hour into the 30th (which then showed its 00:03 LW on both days) and
+  // stopped an hour short on the 25th.
+  for (const ymd of ['2026-03-29', '2026-10-25']) {
+    for (const e of dayEvents(st, ukDayStartFromYmd(ymd))) {
+      assert.equal(ymdInUk(e.time), ymd);
+    }
+  }
+  // The 25-hour day must still cover its final hour.
+  const to = ukEndOfDay(ukDayStartFromYmd('2026-10-25'));
+  assert.equal(to.getTime() - ukDayStartFromYmd('2026-10-25').getTime(), 25 * 3600_000);
+  assert.equal(ymdInUk(new Date(to.getTime() - 1)), '2026-10-25');
 });

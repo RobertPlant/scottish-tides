@@ -10,6 +10,7 @@
 // Slack timing and direction are approximate — verify against the pilot/atlas.
 // These races (Corryvreckan, Pentland Firth) can kill.
 
+import { ukEndOfDay } from '@/lib/datetime';
 import { type Station, stationById } from '@/lib/stations';
 import { classifyTide, dayEvents, dayRange, seaLevelSeries, tidalStats } from '@/lib/tide-day';
 import { predictExtrema } from '@/lib/tides';
@@ -248,7 +249,7 @@ function predictGate(race: Race, ref: Station, dayStart: Date, fraction: number)
   };
 
   const start = dayStart.getTime();
-  const end = start + 24 * 3600_000;
+  const end = ukEndOfDay(dayStart).getTime();
   const samples: StreamSample[] = [];
   for (let t = start; t <= end; t += 15 * 60_000) {
     samples.push({ time: new Date(t), rate: rateAt(t) });
@@ -272,7 +273,7 @@ function predictSill(race: Race, ref: Station, dayStart: Date, fraction: number)
   const tauDrain = race.lochTauDrainHours ?? 8;
   const scale = race.headRateScale ?? 4;
   const start = dayStart.getTime();
-  const end = start + 24 * 3600_000;
+  const end = ukEndOfDay(dayStart).getTime();
 
   // Sea level over a padded window so the reservoir filter has warmed up.
   const sea = seaLevelSeries(ref, new Date(start - 16 * 3600_000), new Date(end), 10);

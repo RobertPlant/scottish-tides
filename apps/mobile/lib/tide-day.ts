@@ -1,14 +1,14 @@
 // Per-day / "right now" derivations on top of the engine, shared by the screens.
 
 import coefficientRefs from '@/assets/data/coefficient-refs.json';
-import { addDays } from '@/lib/datetime';
+import { ukEndOfDay } from '@/lib/datetime';
 import type { Station } from '@/lib/stations';
 import { heightSeries, predictExtrema, type TideEvent } from '@/lib/tides';
 
 const COEF_REFS = coefficientRefs as Record<string, { springRef: number; neapRef: number }>;
 
 function dayWindow(dayStart: Date): { from: Date; to: Date } {
-  return { from: dayStart, to: addDays(dayStart, 1) };
+  return { from: dayStart, to: ukEndOfDay(dayStart) };
 }
 
 /**
