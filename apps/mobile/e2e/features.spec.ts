@@ -209,3 +209,20 @@ test.describe('tides near me', () => {
     await expect(page).toHaveURL(/\/station\/stornoway/);
   });
 });
+
+test('the last station opens on next launch', async ({ page }) => {
+  // "/" redirects to the selected station, which is restored from AsyncStorage
+  // (async). Redirecting before that read lands lands on the default port and the
+  // station screen then saves the default back over the stored one — so this
+  // only fails for someone whose last station wasn't the default.
+  await page.goto('/station/leith');
+  await expect(page.locator('body')).toContainText('Firth of Forth');
+  await page.waitForTimeout(800); // let the write land
+
+  await page.goto('/');
+  await expect(page).toHaveURL(/\/station\/leith/, { timeout: 15_000 });
+
+  // And again from cold, to prove the store wasn't overwritten on the way.
+  await page.goto('/');
+  await expect(page).toHaveURL(/\/station\/leith/, { timeout: 15_000 });
+});
