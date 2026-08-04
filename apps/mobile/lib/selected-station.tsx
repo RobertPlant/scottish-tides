@@ -16,6 +16,8 @@ import { loadFavourites, loadLastStation, saveFavourites, saveLastStation } from
 
 interface SelectedStationContext {
   stationId: string;
+  /** False until the persisted state has been read back (AsyncStorage is async). */
+  ready: boolean;
   setStationId: (id: string) => void;
   favourites: string[];
   toggleFavourite: (id: string) => void;
@@ -29,17 +31,20 @@ const DEFAULT_ID = STATIONS.find((s) => s.id === 'oban')?.id ?? STATIONS[0]?.id 
 export function SelectedStationProvider({ children }: { children: ReactNode }) {
   const [stationId, setStationIdState] = useState(DEFAULT_ID);
   const [favourites, setFavourites] = useState<string[]>([]);
+  const [ready, setReady] = useState(false);
 
-  // Restore persisted state on launch.
+  // Restore persisted state on launch. Nothing may route off `stationId` until
+  // this lands (see `ready`): the index route used to redirect to the default
+  // port first, and the station screen then wrote that default straight back
+  // over the restored last station.
   useEffect(() => {
-    loadLastStation().then((id) => {
+    Promise.all([loadLastStation(), loadFavourites()]).then(([id, ids]) => {
       if (id && STATIONS.some((s) => s.id === id)) {
         setStationIdState(id);
       }
+      setFavourites(ids.filter((fid) => STATIONS.some((s) => s.id === fid)));
+      setReady(true);
     });
-    loadFavourites().then((ids) =>
-      setFavourites(ids.filter((id) => STATIONS.some((s) => s.id === id))),
-    );
   }, []);
 
   const setStationId = useCallback((id: string) => {
@@ -58,8 +63,8 @@ export function SelectedStationProvider({ children }: { children: ReactNode }) {
   const isFavourite = useCallback((id: string) => favourites.includes(id), [favourites]);
 
   const value = useMemo(
-    () => ({ stationId, setStationId, favourites, toggleFavourite, isFavourite }),
-    [stationId, setStationId, favourites, toggleFavourite, isFavourite],
+    () => ({ stationId, ready, setStationId, favourites, toggleFavourite, isFavourite }),
+    [stationId, ready, setStationId, favourites, toggleFavourite, isFavourite],
   );
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }

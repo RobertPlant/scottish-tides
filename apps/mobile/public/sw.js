@@ -44,7 +44,11 @@ self.addEventListener('fetch', (event) => {
         .catch(() => null);
 
       if (cached) {
-        return cached; // revalidate happens in the background
+        // Keep the worker alive for the background revalidate — without this the
+        // browser is free to kill it the moment the cached response is returned,
+        // so the cache could never refresh and the app would be frozen at v1.
+        event.waitUntil(network);
+        return cached;
       }
       const res = await network;
       if (res) {
