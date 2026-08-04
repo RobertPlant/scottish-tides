@@ -29,23 +29,33 @@ export function useDayNav({
   syncUrl?: boolean;
 }): DayNavState {
   const router = useRouter();
-  const todayYmd = useMemo(() => ymdInUk(new Date()), []);
+  // Read on every render, not memoised on mount: an app left open overnight
+  // otherwise keeps calling yesterday "today" (the day views re-render each
+  // minute off `useNow`, so this rolls over on its own).
+  const todayYmd = ymdInUk(new Date());
+  const minYmd = ymdAddDays(todayYmd, -730);
+  const maxYmd = ymdAddDays(todayYmd, 730);
+  // Clamped here rather than in the UI so every route in — Prev/Next, the swipe
+  // gesture, the week strip, a hand-edited ?d= — obeys the same bounds. The date
+  // field already refuses out-of-range input; the others used to walk past it.
+  // ISO YYYY-MM-DD compares correctly as a string.
+  const clamp = (d: string) => (d < minYmd ? minYmd : d > maxYmd ? maxYmd : d);
+
   const [ymd, setYmd] = useState(() =>
-    initialYmd && YMD_RE.test(initialYmd) ? initialYmd : todayYmd,
+    initialYmd && YMD_RE.test(initialYmd) ? clamp(initialYmd) : todayYmd,
   );
 
   const dayStart = useMemo(() => ukDayStartFromYmd(ymd), [ymd]);
-  const minYmd = useMemo(() => ymdAddDays(todayYmd, -730), [todayYmd]);
-  const maxYmd = useMemo(() => ymdAddDays(todayYmd, 730), [todayYmd]);
 
   const setDay = useCallback(
     (next: string) => {
-      setYmd(next);
+      const clamped = next < minYmd ? minYmd : next > maxYmd ? maxYmd : next;
+      setYmd(clamped);
       if (syncUrl) {
-        router.setParams({ d: next });
+        router.setParams({ d: clamped });
       }
     },
-    [router, syncUrl],
+    [router, syncUrl, minYmd, maxYmd],
   );
 
   return { ymd, dayStart, todayYmd, isToday: ymd === todayYmd, minYmd, maxYmd, setDay };

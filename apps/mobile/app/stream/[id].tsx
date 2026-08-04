@@ -8,6 +8,7 @@ import { Note } from '@/components/note';
 import { StreamCurve } from '@/components/stream-curve';
 import { ThemedText } from '@/components/themed-text';
 import { useDayNav } from '@/hooks/use-day-nav';
+import { useNow } from '@/hooks/use-now';
 import { usePalette } from '@/hooks/use-theme-color';
 import { formatTime } from '@/lib/datetime';
 import { stationById } from '@/lib/stations';
@@ -23,7 +24,7 @@ export default function RaceDetail() {
   const race = raceById(id) ?? RACES[0];
   const ref = stationById(race.referenceStationId);
 
-  const now = useMemo(() => new Date(), []);
+  const now = useNow();
   const nav = useDayNav({ initialYmd: d, syncUrl: true });
   const { dayStart, isToday } = nav;
 

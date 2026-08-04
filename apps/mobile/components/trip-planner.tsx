@@ -41,7 +41,7 @@ export function TripPlanner({ station, header }: { station: Station; header?: Re
   const scheme: Scheme = useColorScheme() ?? 'light';
   const router = useRouter();
 
-  const todayYmd = useMemo(() => ymdInUk(new Date()), []);
+  const todayYmd = ymdInUk(new Date());
   const nowY = Number(todayYmd.slice(0, 4));
 
   const [year, setYear] = useState(nowY);

@@ -3,7 +3,7 @@
 // HW/LW table, sun & moon, and the 7-day overview. Shared by the default tab
 // and the /station/[id] deep-link route so both show the complete picture.
 
-import { type ReactNode, useEffect, useMemo, useRef, useState } from 'react';
+import { type ReactNode, useMemo, useRef, useState } from 'react';
 import { Platform, ScrollView, StyleSheet, View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 
@@ -16,6 +16,7 @@ import { TideCurve } from '@/components/tide-curve';
 import { TideTable } from '@/components/tide-table';
 import { WeekOverview } from '@/components/week-overview';
 import { useDayNav } from '@/hooks/use-day-nav';
+import { useNow } from '@/hooks/use-now';
 import { usePalette } from '@/hooks/use-theme-color';
 import { sunTimes } from '@/lib/astronomy';
 import { ymdAddDays } from '@/lib/datetime';
@@ -43,11 +44,7 @@ export function StationDayView({
   const [chartHovered, setChartHovered] = useState(false);
 
   // Keep "now" live so the current-time marker/readout stays current.
-  const [now, setNow] = useState(() => new Date());
-  useEffect(() => {
-    const id = setInterval(() => setNow(new Date()), 60_000);
-    return () => clearInterval(id);
-  }, []);
+  const now = useNow();
 
   const nav = useDayNav({ initialYmd, syncUrl });
   const { ymd, dayStart, isToday } = nav;
