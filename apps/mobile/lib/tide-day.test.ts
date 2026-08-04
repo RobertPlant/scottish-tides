@@ -4,8 +4,9 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
-import type { Station } from './stations';
-import { classifyTide, dayRange, type TidalStats, tidalStats } from './tide-day';
+import { ukDayStartFromYmd, ymdInUk } from './datetime';
+import { type Station, stationById } from './stations';
+import { classifyTide, dayEvents, dayRange, type TidalStats, tidalStats } from './tide-day';
 import type { StationData, TideEvent } from './tides';
 
 const ev = (type: 'high' | 'low', height: number): TideEvent => ({
@@ -114,4 +115,21 @@ test('tidalStats adds the secondary-port range shift', () => {
   // rangeShift = 0.5 − (−0.3) = 0.8 added to both.
   assert.equal(springRange, 5.8);
   assert.equal(neapRange, 3.8);
+});
+
+test("a secondary port's day holds exactly its own events", () => {
+  const oban = stationById('oban');
+  assert.ok(oban);
+  // Oban is Tobermory − 21/18 min, so events within the offset of midnight land
+  // on the other civil day. 25 Aug 2026 has a 23:48 LW (Tobermory 00:09 on the
+  // 26th): before the shift was applied ahead of the window trim, the 25th lost
+  // it and the 26th listed it first, out of order.
+  const aug25 = dayEvents(oban, ukDayStartFromYmd('2026-08-25'));
+  assert.equal(aug25.length, 4);
+  assert.equal(aug25[3].type, 'low');
+  for (const ymd of ['2026-08-25', '2026-08-26', '2026-08-27']) {
+    for (const e of dayEvents(oban, ukDayStartFromYmd(ymd))) {
+      assert.equal(ymdInUk(e.time), ymd);
+    }
+  }
 });

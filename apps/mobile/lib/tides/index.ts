@@ -64,6 +64,11 @@ export function pruneMinorExtrema(events: TideEvent[], minProminenceM: number): 
  * secondary port. The window is padded internally so events near the edges are
  * not missed, then trimmed back to [from, to]. Sub-`minProminenceM` wiggles are
  * pruned (see `pruneMinorExtrema`).
+ *
+ * The base search window is widened by the secondary-port time offset and the
+ * trim happens *after* the shift, so the window means what the caller asked for:
+ * an Oban (−21 min) day otherwise both lost its own late-evening event and
+ * inherited one from the previous evening.
  */
 export function predictExtrema(
   data: StationData,
@@ -73,9 +78,12 @@ export function predictExtrema(
   minProminenceM = 0.05,
 ): TideEvent[] {
   const tide = new Tide(data);
-  const raw = tide.extrema(from, to);
+  const padMs = shift
+    ? Math.max(Math.abs(shift.hw_time_min), Math.abs(shift.lw_time_min)) * 60_000
+    : 0;
+  const raw = tide.extrema(new Date(from.getTime() - padMs), new Date(to.getTime() + padMs));
   const shifted = shift ? applyShift(raw, shift) : raw;
-  return pruneMinorExtrema(shifted, minProminenceM);
+  return pruneMinorExtrema(shifted, minProminenceM).filter((e) => e.time >= from && e.time <= to);
 }
 
 /** Continuous height samples for charting, `stepMinutes` apart over [from, to]. */
