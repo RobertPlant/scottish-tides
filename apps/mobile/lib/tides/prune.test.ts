@@ -52,3 +52,21 @@ test('Normal port (Leith) is unaffected by pruning', () => {
   const pruned = predictExtrema(load('leith.json'), FROM, TO, undefined, PROM);
   assert.equal(pruned.length, raw.length, 'pruning should not touch a metres-range port');
 });
+
+test('pruning never leaves a day with only one kind of water', () => {
+  // 5 Oct 2026 at Port Ellen: seven raw extrema, none clearing 5 cm against its
+  // neighbours, which collapsed to a single 17:43 high water — a day the app
+  // then showed as "0.0 m range, Neaps 20" though the curve moves 0.45 m.
+  const from = new Date('2026-10-05T00:00:00+01:00');
+  const to = new Date('2026-10-06T00:00:00+01:00');
+  const pruned = predictExtrema(load('port_ellen.json'), from, to, undefined, PROM);
+
+  assert.ok(
+    pruned.some((e) => e.type === 'high') && pruned.some((e) => e.type === 'low'),
+    `expected both a high and a low, got ${pruned.map((e) => e.type).join(',')}`,
+  );
+  const range =
+    Math.max(...pruned.filter((e) => e.type === 'high').map((e) => e.height)) -
+    Math.min(...pruned.filter((e) => e.type === 'low').map((e) => e.height));
+  assert.ok(range > 0.3, `range ${range.toFixed(2)} m should reflect the day's real movement`);
+});

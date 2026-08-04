@@ -27,6 +27,13 @@ export {
  * fall to a neighbour is below `minProminenceM`; when one is removed its two
  * same-type neighbours merge, keeping the more extreme. Normal ports (metres of
  * range) are unaffected.
+ *
+ * Never returns a day with only one kind of water. Each pass drops *two* events
+ * (the extremum, then the loser of the neighbour merge), so the `> 2` bound let
+ * a three-event day collapse to a lone high water — and a day with no low water
+ * reads as 0.0 m range / minimum coefficient however far the water actually
+ * moved. When that happens the day falls back to its highest high and lowest
+ * low, which is what the range meant all along.
  */
 export function pruneMinorExtrema(events: TideEvent[], minProminenceM: number): TideEvent[] {
   const evs = [...events];
@@ -54,6 +61,18 @@ export function pruneMinorExtrema(events: TideEvent[], minProminenceM: number): 
     if (a && b && a.type === b.type) {
       const keepA = a.type === 'high' ? a.height >= b.height : a.height <= b.height;
       evs.splice(keepA ? minIdx : minIdx - 1, 1);
+    }
+  }
+
+  if (!evs.some((e) => e.type === 'high') || !evs.some((e) => e.type === 'low')) {
+    const highs = events.filter((e) => e.type === 'high');
+    const lows = events.filter((e) => e.type === 'low');
+    // Only when the day really has both — a window can legitimately hold a
+    // single turn of the tide, and there is nothing to fall back to then.
+    if (highs.length > 0 && lows.length > 0) {
+      const hi = highs.reduce((a, b) => (b.height > a.height ? b : a));
+      const lo = lows.reduce((a, b) => (b.height < a.height ? b : a));
+      return [hi, lo].sort((a, b) => a.time.getTime() - b.time.getTime());
     }
   }
   return evs;
