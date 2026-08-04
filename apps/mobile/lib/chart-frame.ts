@@ -5,6 +5,8 @@
 // A plain function, not a hook, so it can be called after each chart's
 // "not enough data" early return without breaking the rules of hooks.
 
+import { formatHour } from '@/lib/datetime';
+
 export const CHART_PAD = { left: 30, right: 10, top: 14, bottom: 22 } as const;
 
 export interface ChartFrame {
@@ -26,11 +28,14 @@ export function chartFrame(
   const plotH = height - CHART_PAD.top - CHART_PAD.bottom;
   const x = (t: number) => CHART_PAD.left + ((t - t0) / (t1 - t0)) * plotW;
 
+  // Labelled from the instant, not from "k hours after midnight": on the two
+  // BST-transition days the two disagree by an hour, and the clock on the wall
+  // is what the reader is matching the chart against.
   const hourTicks: { t: number; label: string }[] = [];
   for (let k = 0; k <= 24; k += 6) {
     const t = t0 + k * 3600_000;
     if (t <= t1 + 1) {
-      hourTicks.push({ t, label: String(k % 24).padStart(2, '0') });
+      hourTicks.push({ t, label: formatHour(new Date(t)) });
     }
   }
 

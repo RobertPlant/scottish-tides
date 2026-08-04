@@ -12,6 +12,15 @@ export function formatTime(d: Date): string {
   });
 }
 
+/** "14" — the UK local hour, 00–23. For chart axis ticks. */
+export function formatHour(d: Date): string {
+  return d.toLocaleTimeString('en-GB', {
+    hour: '2-digit',
+    hourCycle: 'h23', // 00–23, so midnight reads "00" and not "24"
+    timeZone: UK_TZ,
+  });
+}
+
 /** "Fri 3 Jul" in UK local time. */
 export function formatDay(d: Date): string {
   return d.toLocaleDateString('en-GB', {
