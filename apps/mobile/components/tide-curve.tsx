@@ -24,7 +24,7 @@ interface Props {
   sun?: { sunrise: Date | null; sunset: Date | null; alwaysUp?: boolean };
 }
 
-const { left: PAD_LEFT, right: PAD_RIGHT, top: PAD_TOP, bottom: PAD_BOTTOM } = CHART_PAD;
+const { left: PAD_LEFT, right: PAD_RIGHT, top: PAD_TOP } = CHART_PAD;
 
 /** A "nice" axis step (1, 2, 5 × 10ⁿ) close to the requested size. */
 function niceStep(raw: number): number {

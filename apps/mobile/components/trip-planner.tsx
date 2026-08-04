@@ -116,34 +116,37 @@ export function TripPlanner({ station, header }: { station: Station; header?: Re
 
         <Card gap={3}>
           {months.map(({ month, days }) => {
-            const slots: (DayCell | null)[] = [...days];
-            while (slots.length < COLS) {
-              slots.push(null);
-            }
             const cellStyle = cellW != null ? { width: cellW } : { flex: 1 };
+            // Short months trail one blank spacer the width of their missing
+            // days, so every row's cells line up under the same columns.
+            const padCols = COLS - days.length;
             return (
               <View key={month} style={styles.yearRow}>
                 <ThemedText type="caption" style={[styles.yearLabel, { color: palette.muted }]}>
                   {MONTHS_SHORT[month - 1]}
                 </ThemedText>
                 <View style={styles.yearCells} onLayout={month === 1 ? onCellsLayout : undefined}>
-                  {slots.map((d, i) =>
-                    d ? (
-                      <DayBlock
-                        key={d.ymd}
-                        cell={d}
-                        scheme={scheme}
-                        isToday={d.ymd === todayYmd}
-                        weekendRing={palette.low}
-                        todayRing={palette.text}
-                        gridLine={palette.surface}
-                        sizeStyle={cellStyle}
-                        onPick={openDay}
-                      />
-                    ) : (
-                      <View key={`pad-${i}`} style={[styles.dayBlock, cellStyle]} />
-                    ),
-                  )}
+                  {days.map((d) => (
+                    <DayBlock
+                      key={d.ymd}
+                      cell={d}
+                      scheme={scheme}
+                      isToday={d.ymd === todayYmd}
+                      weekendRing={palette.low}
+                      todayRing={palette.text}
+                      gridLine={palette.surface}
+                      sizeStyle={cellStyle}
+                      onPick={openDay}
+                    />
+                  ))}
+                  {padCols > 0 ? (
+                    <View
+                      style={[
+                        styles.dayBlock,
+                        cellW != null ? { width: cellW * padCols } : { flex: padCols },
+                      ]}
+                    />
+                  ) : null}
                 </View>
               </View>
             );

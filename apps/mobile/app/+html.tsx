@@ -34,6 +34,10 @@ export default function Root({ children }: PropsWithChildren) {
         {/* Disable body scrolling on web so ScrollView components behave. */}
         <ScrollViewStyleReset />
 
+        {/* biome-ignore lint/security/noDangerouslySetInnerHtml: `swRegister` is a
+            module-level constant built from the build-time base URL — no user or
+            request data reaches it, and an inline <script> is the only way to
+            register the worker from the static shell. */}
         {isProd ? <script dangerouslySetInnerHTML={{ __html: swRegister }} /> : null}
       </head>
       <body>{children}</body>

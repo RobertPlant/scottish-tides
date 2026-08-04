@@ -2,7 +2,7 @@
 // Slack = zero crossings; peaks are marked. Knots on the Y-axis, hours on X.
 
 import { useState } from 'react';
-import { type LayoutChangeEvent, StyleSheet, View } from 'react-native';
+import { type LayoutChangeEvent, View } from 'react-native';
 import Svg, { Circle, G, Line, Path, Text as SvgText } from 'react-native-svg';
 
 import { usePalette } from '@/hooks/use-theme-color';

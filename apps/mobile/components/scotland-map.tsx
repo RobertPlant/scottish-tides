@@ -231,8 +231,16 @@ export function ScotlandMap({
             `${i === 0 ? 'M' : 'L'} ${projX(lon).toFixed(1)} ${projY(lat).toFixed(1)}`,
         )
         .join(' ')} Z`;
-    return COAST.map((ring, i) => (
-      <Path key={i} d={ringPath(ring)} fill={land} stroke={coast} strokeWidth={0.5} />
+    // Keyed by first vertex — a build-time constant, so each ring's start point
+    // is a stable identity (and unlike the array index, obviously one).
+    return COAST.map((ring) => (
+      <Path
+        key={`${ring[0][0]},${ring[0][1]}`}
+        d={ringPath(ring)}
+        fill={land}
+        stroke={coast}
+        strokeWidth={0.5}
+      />
     ));
   }, [width, land, coast]);
 

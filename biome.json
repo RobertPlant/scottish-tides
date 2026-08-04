@@ -36,8 +36,11 @@
   },
   "linter": {
     "enabled": true,
+    "domains": {
+      "react": "recommended"
+    },
     "rules": {
-      "recommended": false,
+      "recommended": true,
       "style": {
         "useBlockStatements": "error"
       }

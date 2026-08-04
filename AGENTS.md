@@ -2,8 +2,11 @@
 
 Monorepo: `apps/mobile` (Expo universal app), `tools/` (station-fitting
 helpers), `docs/`. Toolchain is pinned via `devenv.nix` at the repo root
-(Node 22, Biome, Playwright browsers). Format/lint with Biome from the root
-(`npm run check`); the app keeps `expo lint` for Expo-specific rules.
+(Node 22, Biome, Playwright browsers). Format *and* lint with Biome from the
+root (`npm run check`) — recommended rules plus the React domain. ESLint is
+gone: `@typescript-eslint` can't load under TypeScript 7, so `expo lint` /
+`eslint .` only ever threw, and Biome's linter (previously disabled here, so
+nothing was linted at all) covers the same ground and is what CI gates.
 
 ## Stack
 

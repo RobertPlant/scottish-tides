@@ -36,7 +36,7 @@ self.addEventListener('fetch', (event) => {
 
       const network = fetch(req)
         .then((res) => {
-          if (res && res.ok && res.type === 'basic') {
+          if (res?.ok && res.type === 'basic') {
             cache.put(req, res.clone());
           }
           return res;

@@ -10,8 +10,6 @@
     "android": "expo run:android",
     "ios": "expo run:ios",
     "web": "expo start --web",
-    "//lint": "`expo lint` (the wrapper) broke in expo 57.0.9: it resolves @typescript-eslint/parser from its own module context and fails, producing ~104 bogus `Parse errors in imported module` / import/namespace errors. Calling eslint directly is what the wrapper does anyway, and reports the real findings. Retry `expo lint` after a future SDK bump.",
-    "lint": "eslint .",
     "test:engine": "node --import tsx --test lib/tides/*.test.ts",
     "test:unit": "node --import tsx --test lib/*.test.ts",
     "test:e2e": "playwright test",
@@ -64,8 +62,6 @@
   "devDependencies": {
     "@playwright/test": "^1.62.0",
     "@types/react": "~19.2.10",
-    "eslint": "^10.8.0",
-    "eslint-config-expo": "~57.0.1",
     "tsx": "^4.19.2",
     "typescript": "~7.0.2"
   },
