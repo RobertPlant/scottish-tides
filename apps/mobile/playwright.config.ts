@@ -69,8 +69,6 @@ export default defineConfig({
   // shipped artifact — build-time-frozen tide data and missing <title> both got
   // to production past a green e2e run. `expo serve` hosts dist/ with the
   // export's own route manifest (clean URLs), so no extra dependency.
-  // NB locally an already-running server on this port is reused, so a stray
-  // `npm run web` will still be tested instead; CI never reuses.
   // `ln -sfn . dist/scottish-tides`: the export bakes in `experiments.baseUrl`
   // ("/scottish-tides", the GitHub Pages project path), so every script and font
   // in the HTML is requested under that prefix while `expo serve` hosts dist/ at
@@ -81,7 +79,12 @@ export default defineConfig({
   webServer: {
     command: `node_modules/.bin/expo export --platform web && ln -sfn . dist/scottish-tides && node_modules/.bin/expo serve --port ${PORT}`,
     url: BASE_URL,
-    reuseExistingServer: !process.env.CI,
+    // Never reuse, not even locally: a `npm run web` left open on this port is
+    // exactly the dev server this suite was moved off, and reusing it would
+    // silently test that instead of the export. Playwright fails loudly if the
+    // port is busy — free it (or stop the dev server) and re-run. The cost is
+    // an export per run.
+    reuseExistingServer: false,
     timeout: 300_000,
     stdout: 'ignore',
     stderr: 'pipe',
