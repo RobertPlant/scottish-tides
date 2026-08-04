@@ -2,7 +2,7 @@
 
 Monorepo: `apps/mobile` (Expo universal app), `tools/` (station-fitting
 helpers), `docs/`. Toolchain is pinned via `devenv.nix` at the repo root
-(Node 22, Biome, Playwright browsers). Two linters, both gated in CI and not
+(Node 24, Biome, Playwright browsers). Two linters, both gated in CI and not
 overlapping: Biome from the root (`npm run check` — format, plus its recommended
 rules and the React domain) and ESLint in the app (`npm run lint` — react-hooks
 and import rules via eslint-config-expo). ESLint is sensitive to its dependency

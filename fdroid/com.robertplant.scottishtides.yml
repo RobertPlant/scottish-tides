@@ -29,7 +29,11 @@ Builds:
     versionCode: 2
     commit: v0.1.1
     sudo:
-      - curl -fsSL https://deb.nodesource.com/setup_22.x | bash -
+      # Must match the Node the lockfile was written with (devenv.nix, the
+      # workflows, and `packageManager` in apps/mobile/package.json all pin 24).
+      # Node 22 ships npm 10, and `npm ci` on an npm 11 lockfile fails there with
+      # "Missing: <pkg> from lock file"; react-native 0.86 also requires ^24.3.0.
+      - curl -fsSL https://deb.nodesource.com/setup_24.x | bash -
       - apt-get install -y nodejs
     build:
       - npm ci --prefix apps/mobile

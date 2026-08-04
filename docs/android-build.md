@@ -114,7 +114,7 @@ which is what Android renders with anyway.
 `fdroid/com.robertplant.scottishtides.yml` is the ready-made recipe: copy it to
 `metadata/com.robertplant.scottishtides.yml` in a fork of
 [fdroiddata](https://gitlab.com/fdroid/fdroiddata) and open a merge request. It
-installs Node 22, runs `npm ci` + `expo prebuild`, strips the template's debug
+installs Node 24, runs `npm ci` + `expo prebuild`, strips the template's debug
 `signingConfig` (F-Droid signs its own), and builds `assembleRelease`.
 
 Requirements it already satisfies: GPL-3.0-only, all source in the repo, no
