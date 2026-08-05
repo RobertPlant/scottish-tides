@@ -39,10 +39,11 @@ test('station detail: the date picker changes the day', async ({ page }) => {
   // The anchored Tides tab stays mounted (with its own date picker) beneath the
   // pushed station detail, so two date inputs exist — the detail is rendered last.
   const input = page.locator('input[type=date]').last();
+  // Waiting for the input *is* waiting for hydration: DayNav (which owns it)
+  // renders only behind the useHydrated gate, so it cannot exist until React has
+  // taken over and attached onChange. This replaced a fixed 1.5 s sleep that
+  // predated the gate and was aimed at the dev server.
   await expect(input).toBeVisible();
-  // Let dev-mode hydration attach React's onChange before we dispatch a synthetic
-  // edit (otherwise the event has no listener and state never updates).
-  await page.waitForTimeout(1500);
 
   // fill() on type=date doesn't drive React's controlled onChange; set the value
   // via the native setter and dispatch input/change like a real edit.
