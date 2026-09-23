@@ -82,10 +82,19 @@ updates:
         update-types: [version-update:semver-major]
       - dependency-name: expo-*
         update-types: [version-update:semver-major]
+      # Minor too, not just major: #31 was reanimated 4.5.1 -> 4.7.0 and
+      # worklets 0.10.1 -> 0.13.0, both minor, both pinned *exactly* by SDK 57,
+      # and the static export's node render died on `requestAnimationFrame is
+      # not defined`. Every react-native-* package here is SDK-pinned, so this
+      # blocks nothing the SDK doesn't already name.
       - dependency-name: react-native-*
-        update-types: [version-update:semver-major]
+        update-types:
+          - version-update:semver-minor
+          - version-update:semver-major
       - dependency-name: "@react-native*"
-        update-types: [version-update:semver-major]
+        update-types:
+          - version-update:semver-minor
+          - version-update:semver-major
 
   - package-ecosystem: github-actions
     directory: /
