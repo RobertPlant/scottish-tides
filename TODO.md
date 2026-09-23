@@ -19,9 +19,9 @@ All of these are enforced in CI.
 ---
 
 ## 1. Deploy / CI — verify (can't check from this sandbox)
-- [ ] Confirm the **GitHub Pages** Actions run is green and the site is live at
-      https://tides.robertplant.io/ (Settings → Pages → source "GitHub Actions";
-      the workflow self-enables via `configure-pages`, but verify).
+- [x] **GitHub Pages live** at https://tides.robertplant.io/ — custom domain, HTTPS
+      enforced, source "GitHub Actions" (self-enabled via `configure-pages`).
+      Verified in a browser 2026-09-23.
 - [ ] Confirm the **Tests** workflow (`.github/workflows/test.yml`) passes in CI (engine + e2e).
 - [x] **Dependabot advisories reviewed** — all (now 13 moderate) trace to a single transitive
       `uuid <11.1.1` pulled in by the Expo build tooling (`xcode` → `@expo/config-plugins` →
