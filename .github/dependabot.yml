@@ -30,6 +30,14 @@ updates:
           - "@react-native*"
       dev-tooling:
         dependency-type: development
+      # Everything left over is transitive: lockfile-only bumps nothing here
+      # asks for by name. Dependabot puts a dependency in the first group it
+      # matches, so this catch-all sits last and only ever sees what the two
+      # groups above didn't claim. Without it each one is its own PR — js-yaml,
+      # browserslist and baseline-browser-mapping opened three in a week.
+      transitive:
+        patterns:
+          - "*"
     # The lint toolchain is only coherent with the versions eslint-config-expo
     # was built against, and nothing here pins that for it. A grouped dev-tooling
     # bump to eslint 10 + typescript 7 (#5) broke `npm run lint` outright — twice
