@@ -69,15 +69,8 @@ export default defineConfig({
   // shipped artifact — build-time-frozen tide data and missing <title> both got
   // to production past a green e2e run. `expo serve` hosts dist/ with the
   // export's own route manifest (clean URLs), so no extra dependency.
-  // `ln -sfn . dist/scottish-tides`: the export bakes in `experiments.baseUrl`
-  // ("/scottish-tides", the GitHub Pages project path), so every script and font
-  // in the HTML is requested under that prefix while `expo serve` hosts dist/ at
-  // the root — the bundle 404s and the page never hydrates. The self-symlink
-  // makes dist/ answer to both, so the pages load at the root paths the specs
-  // use and their prefixed assets resolve. dist/ is gitignored and the deploy
-  // workflow exports from a clean checkout, so this never reaches production.
   webServer: {
-    command: `node_modules/.bin/expo export --platform web && ln -sfn . dist/scottish-tides && node_modules/.bin/expo serve --port ${PORT}`,
+    command: `node_modules/.bin/expo export --platform web && node_modules/.bin/expo serve --port ${PORT}`,
     url: BASE_URL,
     // Never reuse, not even locally: a `npm run web` left open on this port is
     // exactly the dev server this suite was moved off, and reusing it would

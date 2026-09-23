@@ -20,7 +20,7 @@ All of these are enforced in CI.
 
 ## 1. Deploy / CI — verify (can't check from this sandbox)
 - [ ] Confirm the **GitHub Pages** Actions run is green and the site is live at
-      https://robertplant.github.io/scottish-tides/ (Settings → Pages → source "GitHub Actions";
+      https://tides.robertplant.io/ (Settings → Pages → source "GitHub Actions";
       the workflow self-enables via `configure-pages`, but verify).
 - [ ] Confirm the **Tests** workflow (`.github/workflows/test.yml`) passes in CI (engine + e2e).
 - [x] **Dependabot advisories reviewed** — all (now 13 moderate) trace to a single transitive
