@@ -51,6 +51,42 @@ updates:
       - dependency-name: typescript
         update-types: [version-update:semver-major]
 
+      # Grouping the Expo SDK set keeps it moving together; it does nothing to
+      # stop the whole group moving past the SDK together, which is what #28
+      # was. Both jobs went red for unrelated reasons — react-native 0.87 drops
+      # the ./rn-get-polyfills subpath that SDK 57's bundler imports, and
+      # @types/react 19.3 rejects the useRef<View> in scotland-map.tsx — which
+      # is the shape of the problem: these versions are only ever tested as a
+      # set, by Expo, and the set is named by the SDK.
+      #
+      # Patches still come through, so a security fix inside the SDK is not
+      # blocked. Anything that crosses to another SDK's set arrives the only
+      # way it works: `npx expo install --fix` on the new SDK, deliberately.
+      - dependency-name: react-native
+        update-types:
+          - version-update:semver-minor
+          - version-update:semver-major
+      - dependency-name: react
+        update-types:
+          - version-update:semver-minor
+          - version-update:semver-major
+      - dependency-name: react-dom
+        update-types:
+          - version-update:semver-minor
+          - version-update:semver-major
+      - dependency-name: "@types/react"
+        update-types:
+          - version-update:semver-minor
+          - version-update:semver-major
+      - dependency-name: expo
+        update-types: [version-update:semver-major]
+      - dependency-name: expo-*
+        update-types: [version-update:semver-major]
+      - dependency-name: react-native-*
+        update-types: [version-update:semver-major]
+      - dependency-name: "@react-native*"
+        update-types: [version-update:semver-major]
+
   - package-ecosystem: github-actions
     directory: /
     schedule:
