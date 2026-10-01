@@ -90,8 +90,11 @@ All of these are enforced in CI.
       Expo module over the platform `LocationManager`, plus `expo.autolinking.android.exclude` and a
       Metro platform split to keep `expo-location` out of the Android build entirely. Submission
       recipe: `fdroid/com.robertplant.scottishtides.yml`.
-- [ ] Actually submit the fdroiddata MR (needs a `v0.1.0` tag first, and a
-      screenshots/description drop under `metadata/en-US/`).
+- [x] **F-Droid recipe passes fdroidserver** — `fdroid lint`, `rewritemeta` (canonical) and
+      `checkupdates` clean locally; scanner run documented. See "Submitting to F-Droid" in
+      `docs/android-build.md`.
+- [ ] Cut `v0.1.5` (first tag with the `dependenciesInfo` plugin), bump the recipe to it, then
+      open the fdroiddata MR and work through its CI.
 - [ ] iOS binaries still need a Mac or EAS — untried.
 
 ## 6. Feature roadmap (offered, not started)

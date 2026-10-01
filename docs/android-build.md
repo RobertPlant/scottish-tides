@@ -111,11 +111,60 @@ which is what Android renders with anyway.
 
 ## Submitting to F-Droid
 
-`fdroid/com.robertplant.scottishtides.yml` is the ready-made recipe: copy it to
-`metadata/com.robertplant.scottishtides.yml` in a fork of
-[fdroiddata](https://gitlab.com/fdroid/fdroiddata) and open a merge request. It
-installs Node 24, runs `npm ci` + `expo prebuild`, strips the template's debug
-`signingConfig` (F-Droid signs its own), and builds `assembleRelease`.
+`fdroid/com.robertplant.scottishtides.yml` is the ready-made recipe, kept
+byte-for-byte as it goes into
+[fdroiddata](https://gitlab.com/fdroid/fdroiddata). That's why it has no
+comments: fdroiddata CI fails any file that `fdroid rewritemeta` would change,
+and rewritemeta strips comments and reorders keys. The reasoning lives here:
+
+- **Every script list is one shell.** fdroidserver joins `sudo:`, `prebuild:`
+  and `build:` with `&&`, so a `cd` carries over and later paths are relative
+  to it.
+- **`sudo:`** installs Node 24 from the official tarball with a pinned sha256.
+  It has to be 24: the lockfile is npm 11's, and `npm ci` under Node 22's
+  npm 10 fails with *"Missing: <pkg> from lock file"*. Bump the URL and hash
+  together with the Node pin everywhere else (`devenv.nix`, the workflows).
+- **`prebuild:`** runs `npm ci` and `expo prebuild` (`android/` is generated),
+  then strips the template's debug `signingConfig` so the APK comes out unsigned
+  for F-Droid to sign. Dependencies are fetched here rather than in `build:`
+  because the source scanner runs between the two — it must see
+  `node_modules`.
+- **`build:`** calls `gradle`, which on the buildserver is `gradlew-fdroid` (it
+  reads the wrapper's version and fetches a checksum-verified distribution).
+- **`UpdateCheckData`** reads `versionCode`/`version` from
+  `apps/mobile/app.json`. `UpdateCheckMode: Tags` otherwise looks in
+  `build.gradle`, which isn't committed.
+- **`plugins/with-no-dependencies-info.js`** turns off AGP's `dependenciesInfo`
+  block (a dependency list encrypted to Google's key, embedded in the signing
+  block), which F-Droid asks apps to drop.
+
+Check it locally before submitting, in a scratch fdroiddata layout. You need
+`metadata/` holding the recipe, fdroiddata's `config/categories.yml` with its
+`icon:` lines removed, and `git init` plus a commit, because `checkupdates`
+refuses to run in a dirty tree:
+
+```bash
+nix shell nixpkgs#fdroidserver -c fdroid lint com.robertplant.scottishtides
+nix shell nixpkgs#fdroidserver -c fdroid rewritemeta com.robertplant.scottishtides  # must not change it
+nix shell nixpkgs#fdroidserver -c fdroid checkupdates -v com.robertplant.scottishtides
+```
+
+`fdroid scanner com.robertplant.scottishtides` runs the prebuild and scans the
+result. Run it inside `devenv shell`, so Node 24 is on the path. To scan
+unpushed work, point `Repo:` at a local checkout and `commit:` at a SHA. The
+full `fdroid build` needs F-Droid's buildserver image; the fdroiddata merge
+request's CI runs it.
+
+### Releasing to F-Droid
+
+1. Release as usual (bump `version`/`versionCode`, tag `vX.Y.Z`), and in the
+   same commit bump the recipe's `Builds` entry and `CurrentVersion*`.
+2. First submission only: fork fdroiddata, copy the recipe to
+   `metadata/com.robertplant.scottishtides.yml` and open a merge request.
+   Fix anything its CI pipeline reports, both here and in the MR.
+3. After it's merged, fdroiddata's checkupdates bot finds new tags by itself
+   (`AutoUpdateMode: Version`). Change the recipe in fdroiddata only when the
+   build steps themselves change.
 
 Requirements it already satisfies: GPL-3.0-only, all source in the repo, no
 proprietary dependencies, no analytics/ads, reproducible from a tagged commit.
