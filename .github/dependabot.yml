@@ -59,21 +59,9 @@ updates:
       # is the shape of the problem: these versions are only ever tested as a
       # set, by Expo, and the set is named by the SDK.
       #
-      # Patches still come through, so a security fix inside the SDK is not
-      # blocked. Anything that crosses to another SDK's set arrives the only
+      # Patches still come through for anything the SDK gives a range (but see
+      # the exact pins below), so a security fix inside the SDK is not blocked. Anything that crosses to another SDK's set arrives the only
       # way it works: `npx expo install --fix` on the new SDK, deliberately.
-      - dependency-name: react-native
-        update-types:
-          - version-update:semver-minor
-          - version-update:semver-major
-      - dependency-name: react
-        update-types:
-          - version-update:semver-minor
-          - version-update:semver-major
-      - dependency-name: react-dom
-        update-types:
-          - version-update:semver-minor
-          - version-update:semver-major
       - dependency-name: "@types/react"
         update-types:
           - version-update:semver-minor
@@ -95,6 +83,20 @@ updates:
         update-types:
           - version-update:semver-minor
           - version-update:semver-major
+      # No updates at all for what the SDK pins *exactly* (bundledNativeModules
+      # names a bare version, and package.json carries it with no range): for
+      # these a patch walks off the SDK as surely as a minor. #33 moved react
+      # 19.2.3 -> 19.2.8, reanimated 4.5.1 -> 4.5.5, worklets 0.10.1 -> 0.10.4
+      # and svg 15.15.4 -> 15.15.5 while expo 57.0.25 still pinned the old ones.
+      # They move when an expo patch moves its pin, via `npx expo install --fix`.
+      - dependency-name: react
+      - dependency-name: react-dom
+      - dependency-name: react-native
+      - dependency-name: react-native-reanimated
+      - dependency-name: react-native-worklets
+      - dependency-name: react-native-svg
+      - dependency-name: "@react-native-async-storage/async-storage"
+      - dependency-name: "@react-native-community/datetimepicker"
 
   - package-ecosystem: github-actions
     directory: /
