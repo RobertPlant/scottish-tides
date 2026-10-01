@@ -47,6 +47,7 @@
         }
       ],
       "./plugins/with-low-memory-gradle",
+      "./plugins/with-no-dependencies-info",
       "expo-font",
       "expo-web-browser",
       "expo-status-bar",
