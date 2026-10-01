@@ -15,15 +15,15 @@ Builds:
   - versionName: 0.1.4
     versionCode: 5
     commit: v0.1.4
+    subdir: apps/mobile
     sudo:
       - curl -fsSLo /tmp/node.tar.xz https://nodejs.org/dist/v24.21.0/node-v24.21.0-linux-x64.tar.xz
       - echo 'fd8e59d5a511510f6a298afb548f18c7d2b1be404d8b4a27d94fbe49f56cb2d6  /tmp/node.tar.xz'
         | sha256sum -c -
       - tar -xJf /tmp/node.tar.xz -C /usr/local --strip-components=1
-    output: apps/mobile/android/app/build/outputs/apk/release/app-release-unsigned.apk
+    output: android/app/build/outputs/apk/release/app-release-unsigned.apk
     prebuild:
       - export EXPO_NO_TELEMETRY=1
-      - cd apps/mobile
       - npm ci --omit=dev
       - ./node_modules/.bin/expo prebuild --platform android --no-install
       - sed -i '/signingConfig signingConfigs.debug/d' android/app/build.gradle
@@ -37,19 +37,10 @@ Builds:
       - apps/mobile/node_modules/react-native-screens/android/build.gradle
       - apps/mobile/node_modules/react-native-svg/android/build.gradle
     scandelete:
-      - apps/mobile/node_modules/*/local-maven-repo
-      - apps/mobile/node_modules/@*/*/local-maven-repo
-      - apps/mobile/node_modules/*/prebuilds
-      - apps/mobile/node_modules/expo-location/android
-      - apps/mobile/node_modules/expo/template.tgz
-      - apps/mobile/node_modules/@expo/expo-modules-macros-plugin/apple
-      - apps/mobile/node_modules/react-native/React/I18n
-      - apps/mobile/node_modules/fb-dotslash
-      - apps/mobile/node_modules/hermes-compiler/hermesc/osx-bin
-      - apps/mobile/node_modules/hermes-compiler/hermesc/win64-bin
+      - apps/mobile/node_modules
     build:
       - export EXPO_NO_TELEMETRY=1
-      - cd apps/mobile/android
+      - cd android
       - gradle assembleRelease -x lintVitalRelease
     ndk: r27b
 
