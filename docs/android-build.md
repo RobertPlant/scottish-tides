@@ -129,6 +129,19 @@ and rewritemeta strips comments and reorders keys. The reasoning lives here:
   for F-Droid to sign. Dependencies are fetched here rather than in `build:`
   because the source scanner runs between the two — it must see
   `node_modules`.
+- **`scandelete:` / `scanignore:`** triage what the scanner finds in
+  `node_modules` (96 problems before triage). Deleted: Expo's precompiled
+  `local-maven-repo` AARs (unused — see `buildFromSource` below), iOS-only
+  artefacts, `fb-dotslash` (dev server only), hermesc's macOS/Windows builds, and
+  `expo-location/android` (the Play Services reference; already excluded from
+  autolinking). Ignored: RN library `build.gradle`s whose "unknown maven repo"
+  is a path inside `node_modules`, and the Linux `hermesc`, which compiles the JS
+  bundle to bytecode at build time. hermesc is the one a reviewer may push back
+  on; the answer then is building it from `react-native/sdks/hermes`.
+- **`buildFromSource: [".*"]`** in `apps/mobile/package.json`: Expo modules
+  ship precompiled AARs and Android links those unless told otherwise. F-Droid
+  only ships what it compiles, so every module is built from source — in both
+  channels, so the GitHub APK is the same code.
 - **`build:`** calls `gradle`, which on the buildserver is `gradlew-fdroid` (it
   reads the wrapper's version and fetches a checksum-verified distribution).
 - **`UpdateCheckData`** reads `versionCode`/`version` from
@@ -150,7 +163,9 @@ nix shell nixpkgs#fdroidserver -c fdroid checkupdates -v com.robertplant.scottis
 ```
 
 `fdroid scanner com.robertplant.scottishtides` runs the prebuild and scans the
-result. Run it inside `devenv shell`, so Node 24 is on the path. To scan
+result. Run it inside `devenv shell`, so Node 24 is on the path. The nixpkgs
+build of the scanner crashes on import (`file`'s `magic.py` shadows
+`python-magic`), so use `pip install fdroidserver` in a venv for this one. To scan
 unpushed work, point `Repo:` at a local checkout and `commit:` at a SHA. The
 full `fdroid build` needs F-Droid's buildserver image; the fdroiddata merge
 request's CI runs it.
