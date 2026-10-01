@@ -24,9 +24,29 @@ Builds:
     prebuild:
       - export EXPO_NO_TELEMETRY=1
       - cd apps/mobile
-      - npm ci
+      - npm ci --omit=dev
       - ./node_modules/.bin/expo prebuild --platform android --no-install
       - sed -i '/signingConfig signingConfigs.debug/d' android/app/build.gradle
+    scanignore:
+      - apps/mobile/node_modules/hermes-compiler/hermesc/linux64-bin/hermesc
+      - apps/mobile/node_modules/expo-modules-core/android/ExpoModulesCorePlugin.gradle
+      - apps/mobile/node_modules/react-native/ReactAndroid/publish.gradle
+      - apps/mobile/node_modules/@react-native-async-storage/async-storage/android/build.gradle
+      - apps/mobile/node_modules/@react-native-masked-view/masked-view/android/build.gradle
+      - apps/mobile/node_modules/react-native-safe-area-context/android/build.gradle
+      - apps/mobile/node_modules/react-native-screens/android/build.gradle
+      - apps/mobile/node_modules/react-native-svg/android/build.gradle
+    scandelete:
+      - apps/mobile/node_modules/*/local-maven-repo
+      - apps/mobile/node_modules/@*/*/local-maven-repo
+      - apps/mobile/node_modules/*/prebuilds
+      - apps/mobile/node_modules/expo-location/android
+      - apps/mobile/node_modules/expo/template.tgz
+      - apps/mobile/node_modules/@expo/expo-modules-macros-plugin/apple
+      - apps/mobile/node_modules/react-native/React/I18n
+      - apps/mobile/node_modules/fb-dotslash
+      - apps/mobile/node_modules/hermes-compiler/hermesc/osx-bin
+      - apps/mobile/node_modules/hermes-compiler/hermesc/win64-bin
     build:
       - export EXPO_NO_TELEMETRY=1
       - cd apps/mobile/android
