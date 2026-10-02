@@ -12,9 +12,9 @@ RepoType: git
 Repo: https://github.com/RobertPlant/scottish-tides.git
 
 Builds:
-  - versionName: 0.1.4
-    versionCode: 5
-    commit: v0.1.4
+  - versionName: 0.1.5
+    versionCode: 6
+    commit: v0.1.5
     subdir: apps/mobile
     sudo:
       - curl -fsSLo /tmp/node.tar.xz https://nodejs.org/dist/v24.21.0/node-v24.21.0-linux-x64.tar.xz
@@ -47,5 +47,5 @@ Builds:
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^v[\d.]+$
 UpdateCheckData: apps/mobile/app.json|"versionCode":\s*(\d+)|apps/mobile/app.json|"version":\s*"([\d.]+)"
-CurrentVersion: 0.1.4
-CurrentVersionCode: 5
+CurrentVersion: 0.1.5
+CurrentVersionCode: 6
