@@ -3,9 +3,12 @@ name: Release APK
 # Tag a commit v<version> and this builds, signs and publishes the APK as a
 # public release asset — the download link for people not using F-Droid.
 #
-# Note the two channels are NOT upgrade-compatible: F-Droid signs with its own
-# key, this signs with ours, and Android refuses an update signed by a different
-# key. Someone switching channels has to uninstall first.
+# F-Droid builds are reproducible: F-Droid rebuilds the tag, checks it matches
+# this APK byte for byte (signature aside), then ships it with OUR signature
+# (`Binaries:` / `AllowedAPKSigningKeys:` in the recipe). So both channels are
+# upgrade-compatible, but only while this build mirrors the recipe exactly:
+# same Node, `npm ci --omit=dev`, same build path, JDK 21, no post-processing
+# of the APK. Change one, change both, and run fdroid-verify.yml.
 on:
   push:
     tags: ['v*']
@@ -13,38 +16,56 @@ on:
   # APK is left as a build artifact, so the signing path can be exercised
   # without minting a junk release.
   workflow_dispatch:
+  # fdroid-verify.yml builds our side of the comparison through this.
+  workflow_call:
 
 permissions:
   contents: write # needed to create the release
+
+env:
+  EXPO_NO_TELEMETRY: 1
+  # F-Droid's build path. Native libraries embed it, so building anywhere else
+  # changes the bytes.
+  APP: /home/vagrant/build/com.robertplant.scottishtides/apps/mobile
 
 jobs:
   release:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
+      - name: Move to F-Droid's build path
+        run: |
+          sudo mkdir -p /home/vagrant/build
+          sudo chown "$USER" /home/vagrant/build
+          cp -a "$GITHUB_WORKSPACE" /home/vagrant/build/com.robertplant.scottishtides
       - uses: actions/setup-node@v7
         with:
-          node-version: 24
+          node-version: 24.21.0 # = the recipe's `sudo:` Node
           cache: npm
           cache-dependency-path: apps/mobile/package-lock.json
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: 21 # fdroiddata's build job uses openjdk-21
 
-      - run: npm ci
-        working-directory: apps/mobile
+      - run: npm ci --omit=dev
+        working-directory: ${{ env.APP }}
 
       # android/ is generated (Expo CNG), not committed.
       - name: Generate the native project
-        run: npx expo prebuild --platform android --no-install
-        working-directory: apps/mobile
+        run: ./node_modules/.bin/expo prebuild --platform android --no-install
+        working-directory: ${{ env.APP }}
 
       # The Expo template signs release builds with its own debug keystore,
       # whose password is public. Strip it so Gradle emits an unsigned APK and
       # we sign with the real key below. Same step the F-Droid recipe uses.
       - name: Drop the template's debug signing config
-        run: sed -i '/signingConfig signingConfigs.debug/d' apps/mobile/android/app/build.gradle
+        run: sed -i '/signingConfig signingConfigs.debug/d' android/app/build.gradle
+        working-directory: ${{ env.APP }}
 
       - name: Build
         run: ./gradlew assembleRelease -x lintVitalRelease
-        working-directory: apps/mobile/android
+        working-directory: ${{ env.APP }}/android
 
       # F-Droid eligibility is a property of the APK, not of the source: any
       # dependency can drag Play Services back in. Assert it here so a bad
@@ -53,7 +74,7 @@ jobs:
         run: |
           python3 - <<'EOF'
           import sys, zipfile
-          apk = 'apps/mobile/android/app/build/outputs/apk/release/app-release-unsigned.apk'
+          apk = '${{ env.APP }}/android/app/build/outputs/apk/release/app-release-unsigned.apk'
           z = zipfile.ZipFile(apk)
           hits = sum(z.read(n).count(b'com/google/android/gms')
                      for n in z.namelist() if n.endswith('.dex'))
@@ -71,16 +92,16 @@ jobs:
         run: |
           set -euo pipefail
           BUILD_TOOLS="$(ls -d "$ANDROID_HOME"/build-tools/* | sort -V | tail -1)"
-          OUT=apps/mobile/android/app/build/outputs/apk/release
           echo "$KEYSTORE_B64" | base64 -d > /tmp/release.jks
-          # Align before signing: zipalign after apksigner would break the signature.
-          "$BUILD_TOOLS/zipalign" -p -f 4 "$OUT/app-release-unsigned.apk" /tmp/aligned.apk
+          # Sign Gradle's output as-is (it's already aligned). Re-aligning would
+          # change bytes F-Droid's unsigned build has, and our signature would
+          # no longer fit it.
           "$BUILD_TOOLS/apksigner" sign \
             --ks /tmp/release.jks \
             --ks-pass env:KEYSTORE_PASSWORD \
             --ks-key-alias "$KEY_ALIAS" \
             --out scottish-tides.apk \
-            /tmp/aligned.apk
+            "$APP/android/app/build/outputs/apk/release/app-release-unsigned.apk"
           "$BUILD_TOOLS/apksigner" verify --print-certs scottish-tides.apk
           rm -f /tmp/release.jks
 
