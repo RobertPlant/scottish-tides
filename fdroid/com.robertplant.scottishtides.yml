@@ -13,9 +13,9 @@ Repo: https://github.com/RobertPlant/scottish-tides.git
 Binaries: https://github.com/RobertPlant/scottish-tides/releases/download/v%v/scottish-tides.apk
 
 Builds:
-  - versionName: 0.1.5
-    versionCode: 6
-    commit: c90bb1cf347f6e4c688b7fe065cd7aa6cfa9bb34
+  - versionName: 0.1.6
+    versionCode: 7
+    commit: v0.1.6
     subdir: apps/mobile
     sudo:
       - echo 'deb https://deb.debian.org/debian bookworm main' > /etc/apt/sources.list.d/bookworm.list
@@ -53,5 +53,5 @@ AllowedAPKSigningKeys: 4b70fec50aaaa91d61ed8bb16046c547b3fb5c99a7cf359c5827adcd7
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^v[\d.]+$
 UpdateCheckData: apps/mobile/app.json|"versionCode":\s*(\d+)|apps/mobile/app.json|"version":\s*"([\d.]+)"
-CurrentVersion: 0.1.5
-CurrentVersionCode: 6
+CurrentVersion: 0.1.6
+CurrentVersionCode: 7

@@ -94,8 +94,13 @@ All of these are enforced in CI.
       `checkupdates` clean locally; scanner run documented. See "Submitting to F-Droid" in
       `docs/android-build.md`.
 - [x] Cut `v0.1.5` (first tag with the `dependenciesInfo` plugin) and bump the recipe to it.
-- [ ] Open the fdroiddata MR (copy the recipe to `metadata/` in a GitLab fork) and work through
-      its CI.
+- [x] **Reproducible builds** — F-Droid ships our signed GitHub APK (`Binaries:` +
+      `AllowedAPKSigningKeys:`), so both channels upgrade each other. `release.yml` mirrors the
+      recipe; `fdroid-verify.yml` builds both ways and checks with `apksigcopier`. See
+      "Reproducible builds" in `docs/android-build.md`.
+- [ ] Tag `v0.1.6` (first reproducible release), pin the recipe's `commit:` to its SHA, then open
+      the fdroiddata MR (fork `RobertPlant1/fdroiddata`, branch `com.robertplant.scottishtides`)
+      and work through its CI.
 - [ ] iOS binaries still need a Mac or EAS — untried.
 
 ## 6. Feature roadmap (offered, not started)
