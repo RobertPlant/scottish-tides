@@ -179,6 +179,8 @@ request's CI runs it.
 
 1. Release as usual (bump `version`/`versionCode`, tag `vX.Y.Z`), and in the
    same commit bump the recipe's `Builds` entry and `CurrentVersion*`.
+   fdroiddata requires `commit:` to be the tag's full SHA, not the tag name, so
+   fill that in once the tag exists.
 2. First submission only: fork fdroiddata, copy the recipe to
    `metadata/com.robertplant.scottishtides.yml` and open a merge request.
    Fix anything its CI pipeline reports, both here and in the MR.
