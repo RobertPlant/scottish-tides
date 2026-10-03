@@ -93,8 +93,9 @@ All of these are enforced in CI.
 - [x] **F-Droid recipe passes fdroidserver** — `fdroid lint`, `rewritemeta` (canonical) and
       `checkupdates` clean locally; scanner run documented. See "Submitting to F-Droid" in
       `docs/android-build.md`.
-- [ ] Cut `v0.1.5` (first tag with the `dependenciesInfo` plugin), bump the recipe to it, then
-      open the fdroiddata MR and work through its CI.
+- [x] Cut `v0.1.5` (first tag with the `dependenciesInfo` plugin) and bump the recipe to it.
+- [ ] Open the fdroiddata MR (copy the recipe to `metadata/` in a GitLab fork) and work through
+      its CI.
 - [ ] iOS binaries still need a Mac or EAS — untried.
 
 ## 6. Feature roadmap (offered, not started)
