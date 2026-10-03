@@ -1,0 +1,87 @@
+name: F-Droid reproducibility check
+
+# Builds this commit twice, once through release.yml and once the way F-Droid's
+# buildserver does (fdroiddata's "fdroid build" CI job, trimmed to this app), and
+# checks our signature fits F-Droid's build. If it doesn't, F-Droid rejects the
+# release. Run it before tagging whenever release.yml, the recipe's build steps,
+# or native dependencies change. PRs that touch the build run it by themselves.
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - fdroid/**
+      - .github/workflows/release.yml
+      - .github/workflows/fdroid-verify.yml
+
+jobs:
+  ours:
+    uses: ./.github/workflows/release.yml
+    secrets: inherit
+    permissions:
+      contents: write
+
+  fdroid:
+    runs-on: ubuntu-latest
+    container: registry.gitlab.com/fdroid/fdroidserver:buildserver-trixie
+    defaults:
+      run:
+        shell: bash
+    env:
+      ANDROID_HOME: /opt/android-sdk
+      COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
+    steps:
+      - uses: actions/checkout@v7
+      - name: fdroid build
+        run: |
+          set -euxo pipefail
+          source /etc/profile.d/bsenv.sh
+          apt-get update
+          apt-get install -y sudo openjdk-21-jdk-headless
+          update-alternatives --set java /usr/lib/jvm/java-21-openjdk-amd64/bin/java
+          sdkmanager "platform-tools" "build-tools;31.0.0"
+          rm -rf "$fdroidserver"
+          git clone --depth 1 https://gitlab.com/fdroid/fdroidserver.git "$fdroidserver"
+          git -C "$home_vagrant/gradlew-fdroid" pull
+
+          app=com.robertplant.scottishtides
+          vercode=$(sed -n 's/^    versionCode: //p' "fdroid/$app.yml" | tail -1)
+          mkdir -p "$home_vagrant"/{metadata,tmp,unsigned,logs}
+          # The committed recipe, building this commit, minus Binaries: (that
+          # points at a published release; the compare job checks against ours).
+          sed -e "s/^    commit: .*/    commit: $COMMIT/" -e '/^Binaries:/d' \
+            "fdroid/$app.yml" > "$home_vagrant/metadata/$app.yml"
+          chown -R vagrant "$home_vagrant"
+
+          cd "$home_vagrant"
+          fdroid() {
+            sudo --preserve-env --user vagrant env \
+              PATH="$fdroidserver:$PATH" \
+              PYTHONPATH="$fdroidserver:$fdroidserver/examples" \
+              HOME="$home_vagrant" GRADLE_USER_HOME="$home_vagrant/.gradle" \
+              fdroid "$@"
+          }
+          fdroid fetch_repo "$app:$vercode" --verbose # clones the app into build/
+          fdroid build --verbose --test --refresh-scanner --on-server --no-tarball "$app:$vercode"
+          cp "tmp/${app}_${vercode}.apk" "$GITHUB_WORKSPACE/fdroid.apk"
+      - uses: actions/upload-artifact@v7
+        with:
+          name: fdroid-apk
+          path: fdroid.apk
+
+  compare:
+    needs: [ours, fdroid]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          merge-multiple: true
+      - run: |
+          PATH="$PATH:$(ls -d "$ANDROID_HOME"/build-tools/* | sort -V | tail -1)" # apksigner
+          if pipx run apksigcopier compare --unsigned scottish-tides.apk fdroid.apk; then
+            echo "Reproducible: F-Droid's build takes our signature."
+            exit 0
+          fi
+          # Entries whose CRC differs, which usually names the culprit.
+          entries() { unzip -v "$1" | awk '$8 !~ /^META-INF\// {print $7, $8}' | sort -k2; }
+          diff <(entries scottish-tides.apk) <(entries fdroid.apk) || true
+          exit 1
