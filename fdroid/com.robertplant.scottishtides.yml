@@ -18,10 +18,10 @@ Builds:
     commit: c90bb1cf347f6e4c688b7fe065cd7aa6cfa9bb34
     subdir: apps/mobile
     sudo:
-      - curl -fsSLo /tmp/node.tar.xz https://nodejs.org/dist/v24.21.0/node-v24.21.0-linux-x64.tar.xz
-      - echo 'fd8e59d5a511510f6a298afb548f18c7d2b1be404d8b4a27d94fbe49f56cb2d6  /tmp/node.tar.xz'
+      - curl -fsSLo /tmp/node.tar.gz https://nodejs.org/dist/v24.21.0/node-v24.21.0-linux-x64.tar.gz
+      - echo '6e1db87ef58b8819e5d5402eff1536491b18edd8eb7bee5ef7897876e88dc5ff  /tmp/node.tar.gz'
         | sha256sum -c -
-      - tar -xJf /tmp/node.tar.xz -C /usr/local --strip-components=1
+      - tar -xzf /tmp/node.tar.gz -C /usr/local --strip-components=1
     output: android/app/build/outputs/apk/release/app-release-unsigned.apk
     prebuild:
       - export EXPO_NO_TELEMETRY=1
