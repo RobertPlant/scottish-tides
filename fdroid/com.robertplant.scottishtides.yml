@@ -45,7 +45,7 @@ Builds:
     build:
       - export EXPO_NO_TELEMETRY=1
       - cd android
-      - gradle assembleRelease -x lintVitalRelease
+      - gradle assembleRelease -x lintVitalRelease -PreactNativeDevServerIp=localhost
     ndk: r27b
 
 AllowedAPKSigningKeys: 4b70fec50aaaa91d61ed8bb16046c547b3fb5c99a7cf359c5827adcd72cdaffd

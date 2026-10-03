@@ -200,9 +200,12 @@ they don't match, F-Droid publishes nothing for that version.
 That only works while `release.yml` builds exactly as the recipe does: Node
 24.21.0, `npm ci --omit=dev`, JDK 21 for Gradle plus JDK 17 (the toolchain React
 Native and Expo compile Kotlin with; trixie lacks it, so the recipe takes it
-from bookworm), F-Droid's build path
-(`/home/vagrant/build/com.robertplant.scottishtides`, which native libraries
-embed), and the APK signed straight out of Gradle with no `zipalign` pass.
+from bookworm), F-Droid's paths (the build dir
+`/home/vagrant/build/com.robertplant.scottishtides`, `GRADLE_USER_HOME`
+`/home/vagrant/.gradle` and the SDK at `/opt/android-sdk`, all of which end up
+inside the native libraries), `-PreactNativeDevServerIp=localhost` (or React
+Native bakes the build machine's IP into `resources.arsc`), and the APK signed
+straight out of Gradle with no `zipalign` pass.
 Change one side, change the other.
 
 `.github/workflows/fdroid-verify.yml` checks it. It builds a commit through

@@ -76,6 +76,7 @@ jobs:
         with:
           merge-multiple: true
       - run: |
+          PATH="$PATH:$(ls -d "$ANDROID_HOME"/build-tools/* | sort -V | tail -1)" # apksigner
           if pipx run apksigcopier compare --unsigned scottish-tides.apk fdroid.apk; then
             echo "Reproducible: F-Droid's build takes our signature."
             exit 0
