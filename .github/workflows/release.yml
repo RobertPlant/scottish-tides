@@ -33,6 +33,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
+        with:
+          # On a PR (via fdroid-verify.yml), the branch head rather than the
+          # merge commit: F-Droid can only build a commit it can fetch, and
+          # the commit ID ends up inside the APK.
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
       - name: Move to F-Droid's build path
         run: |
           sudo mkdir -p /home/vagrant/build

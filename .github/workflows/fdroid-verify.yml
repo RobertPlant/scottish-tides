@@ -28,6 +28,7 @@ jobs:
         shell: bash
     env:
       ANDROID_HOME: /opt/android-sdk
+      COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
     steps:
       - uses: actions/checkout@v7
       - name: fdroid build
@@ -47,7 +48,7 @@ jobs:
           mkdir -p "$home_vagrant"/{metadata,tmp,unsigned,logs}
           # The committed recipe, building this commit, minus Binaries: (that
           # points at a published release; the compare job checks against ours).
-          sed -e "s/^    commit: .*/    commit: $GITHUB_SHA/" -e '/^Binaries:/d' \
+          sed -e "s/^    commit: .*/    commit: $COMMIT/" -e '/^Binaries:/d' \
             "fdroid/$app.yml" > "$home_vagrant/metadata/$app.yml"
           chown -R vagrant "$home_vagrant"
 
