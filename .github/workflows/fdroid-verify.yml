@@ -53,11 +53,15 @@ jobs:
           chown -R vagrant "$home_vagrant"
 
           cd "$home_vagrant"
-          sudo --preserve-env --user vagrant env \
-            PATH="$fdroidserver:$PATH" \
-            PYTHONPATH="$fdroidserver:$fdroidserver/examples" \
-            HOME="$home_vagrant" GRADLE_USER_HOME="$home_vagrant/.gradle" \
-            fdroid build --verbose --test --refresh-scanner --on-server --no-tarball "$app:$vercode"
+          fdroid() {
+            sudo --preserve-env --user vagrant env \
+              PATH="$fdroidserver:$PATH" \
+              PYTHONPATH="$fdroidserver:$fdroidserver/examples" \
+              HOME="$home_vagrant" GRADLE_USER_HOME="$home_vagrant/.gradle" \
+              fdroid "$@"
+          }
+          fdroid fetch_repo "$app:$vercode" --verbose # clones the app into build/
+          fdroid build --verbose --test --refresh-scanner --on-server --no-tarball "$app:$vercode"
           cp "tmp/${app}_${vercode}.apk" "$GITHUB_WORKSPACE/fdroid.apk"
       - uses: actions/upload-artifact@v7
         with:
