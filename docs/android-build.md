@@ -23,8 +23,9 @@ for sideloading onto a modern phone.
 
 Locally the release APK is signed with Expo's template debug keystore, so it
 installs straight away (`adb install -r <apk>`). It is **not** a distributable
-signing identity — for a real release, sign with your own key, and remember
-F-Droid signs its own builds with its key regardless.
+signing identity. Real releases are signed with the project key by
+`.github/workflows/release.yml`, and F-Droid ships that same signature (see
+"Reproducible builds" below).
 
 Bump `expo.android.versionCode` in `app.json` for every release F-Droid should
 pick up, and tag the commit `vX.Y.Z` (the metadata's `UpdateCheckMode: Tags`
@@ -187,6 +188,26 @@ request's CI runs it.
 3. After it's merged, fdroiddata's checkupdates bot finds new tags by itself
    (`AutoUpdateMode: Version`). Change the recipe in fdroiddata only when the
    build steps themselves change.
+
+### Reproducible builds
+
+F-Droid rebuilds each tag from source, compares the result with the APK on the
+GitHub release (`Binaries:`), and if they match apart from the signature, ships
+the APK signed with our key (`AllowedAPKSigningKeys:`, the SHA-256 of the
+release certificate). So GitHub and F-Droid installs can update each other. If
+they don't match, F-Droid publishes nothing for that version.
+
+That only works while `release.yml` builds exactly as the recipe does: Node
+24.21.0, `npm ci --omit=dev`, JDK 21, F-Droid's build path
+(`/home/vagrant/build/com.robertplant.scottishtides`, which native libraries
+embed), and the APK signed straight out of Gradle with no `zipalign` pass.
+Change one side, change the other.
+
+`.github/workflows/fdroid-verify.yml` checks it. It builds a commit through
+`release.yml` and through `fdroid build` in F-Droid's buildserver image, then
+runs `apksigcopier compare`. It runs on PRs that touch the recipe or the
+release workflow, and can be run by hand (Actions → F-Droid reproducibility
+check) before tagging, e.g. after native dependency upgrades.
 
 Requirements it already satisfies: GPL-3.0-only, all source in the repo, no
 proprietary dependencies, no analytics/ads, reproducible from a tagged commit.
