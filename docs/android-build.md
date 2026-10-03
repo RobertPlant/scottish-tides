@@ -205,7 +205,8 @@ from bookworm), F-Droid's paths (the build dir
 `/home/vagrant/.gradle` and the SDK at `/opt/android-sdk`, all of which end up
 inside the native libraries), `-PreactNativeDevServerIp=localhost` (or React
 Native bakes the build machine's IP into `resources.arsc`), and the APK signed
-straight out of Gradle with no `zipalign` pass.
+straight out of Gradle with no realignment (no `zipalign`, and `apksigner
+--alignment-preserved`).
 Change one side, change the other.
 
 `.github/workflows/fdroid-verify.yml` checks it. It builds a commit through

@@ -112,10 +112,11 @@ jobs:
           set -euo pipefail
           BUILD_TOOLS="$(ls -d "$ANDROID_HOME"/build-tools/* | sort -V | tail -1)"
           echo "$KEYSTORE_B64" | base64 -d > /tmp/release.jks
-          # Sign Gradle's output as-is (it's already aligned). Re-aligning would
-          # change bytes F-Droid's unsigned build has, and our signature would
-          # no longer fit it.
+          # Sign Gradle's output as-is (it's already aligned). Re-aligning, by
+          # zipalign or apksigner's own default, would change bytes F-Droid's
+          # unsigned build has, and our signature would no longer fit it.
           "$BUILD_TOOLS/apksigner" sign \
+            --alignment-preserved \
             --ks /tmp/release.jks \
             --ks-pass env:KEYSTORE_PASSWORD \
             --ks-key-alias "$KEY_ALIAS" \
