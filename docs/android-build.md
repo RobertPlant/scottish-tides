@@ -198,7 +198,9 @@ release certificate). So GitHub and F-Droid installs can update each other. If
 they don't match, F-Droid publishes nothing for that version.
 
 That only works while `release.yml` builds exactly as the recipe does: Node
-24.21.0, `npm ci --omit=dev`, JDK 21, F-Droid's build path
+24.21.0, `npm ci --omit=dev`, JDK 21 for Gradle plus JDK 17 (the toolchain React
+Native and Expo compile Kotlin with; trixie lacks it, so the recipe takes it
+from bookworm), F-Droid's build path
 (`/home/vagrant/build/com.robertplant.scottishtides`, which native libraries
 embed), and the APK signed straight out of Gradle with no `zipalign` pass.
 Change one side, change the other.

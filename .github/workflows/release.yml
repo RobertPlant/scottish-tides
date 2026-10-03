@@ -51,7 +51,12 @@ jobs:
       - uses: actions/setup-java@v6
         with:
           distribution: temurin
-          java-version: 21 # fdroiddata's build job uses openjdk-21
+          # 21 runs Gradle, as in fdroiddata's build job; 17 is the toolchain
+          # React Native and Expo compile the app's Kotlin with. The recipe
+          # installs the same pair.
+          java-version: |
+            17
+            21
 
       - run: npm ci --omit=dev
         working-directory: ${{ env.APP }}

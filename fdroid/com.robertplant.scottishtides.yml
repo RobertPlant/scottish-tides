@@ -18,6 +18,9 @@ Builds:
     commit: c90bb1cf347f6e4c688b7fe065cd7aa6cfa9bb34
     subdir: apps/mobile
     sudo:
+      - echo 'deb https://deb.debian.org/debian bookworm main' > /etc/apt/sources.list.d/bookworm.list
+      - apt-get update
+      - apt-get install -y -t bookworm openjdk-17-jdk-headless
       - curl -fsSLo /tmp/node.tar.gz https://nodejs.org/dist/v24.21.0/node-v24.21.0-linux-x64.tar.gz
       - echo '6e1db87ef58b8819e5d5402eff1536491b18edd8eb7bee5ef7897876e88dc5ff  /tmp/node.tar.gz'
         | sha256sum -c -
