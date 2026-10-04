@@ -1,14 +1,15 @@
 name: Release APK
 
-# Tag a commit v<version> and this builds, signs and publishes the APK as a
-# public release asset — the download link for people not using F-Droid.
+# Tag a commit v<version> and this builds, signs and publishes one APK per ABI
+# as public release assets — the download links for people not using F-Droid.
 #
-# F-Droid builds are reproducible: F-Droid rebuilds the tag, checks it matches
-# this APK byte for byte (signature aside), then ships it with OUR signature
-# (`Binaries:` / `AllowedAPKSigningKeys:` in the recipe). So both channels are
-# upgrade-compatible, but only while this build mirrors the recipe exactly:
-# same Node, `npm ci --omit=dev`, same build path, JDK 21, no post-processing
-# of the APK. Change one, change both, and run fdroid-verify.yml.
+# F-Droid builds are reproducible: F-Droid rebuilds the tag per ABI, checks each
+# matches the APK here byte for byte (signature aside), then ships it with OUR
+# signature (`binary:` / `AllowedAPKSigningKeys:` in the recipe). So both
+# channels are upgrade-compatible, but only while this build mirrors the recipe
+# exactly: same Node, `npm ci --omit=dev`, the JDK 21 patch, same paths, same
+# Gradle properties, no post-processing of the APK. Change one, change both,
+# and run fdroid-verify.yml.
 on:
   push:
     tags: ['v*']
@@ -32,8 +33,13 @@ env:
   GRADLE_USER_HOME: /home/vagrant/.gradle
 
 jobs:
-  release:
+  build:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        # Order sets the versionCode: 10 * base + position (plugins/with-abi-split.js,
+        # the recipe's VercodeOperation).
+        abi: [armeabi-v7a, arm64-v8a, x86, x86_64]
     steps:
       - uses: actions/checkout@v7
         with:
@@ -52,20 +58,24 @@ jobs:
           echo ANDROID_SDK_ROOT=/opt/android-sdk >> "$GITHUB_ENV"
       - uses: actions/setup-node@v7
         with:
-          node-version: 24.21.0 # = the recipe's `sudo:` Node
+          node-version: 24.21.0 # = Debian forky's nodejs, which the recipe installs
           cache: npm
           cache-dependency-path: apps/mobile/package-lock.json
       - uses: actions/setup-java@v6
         with:
           distribution: temurin
-          # 21 runs Gradle, as in fdroiddata's build job; 17 is the toolchain
-          # React Native and Expo compile the app's Kotlin with. The recipe
-          # installs the same pair.
-          java-version: |
-            17
-            21
+          java-version: 21 # fdroiddata's build job; see the toolchain patch below
 
       - run: npm ci --omit=dev
+        working-directory: ${{ env.APP }}
+
+      # React Native pins a JDK 17 toolchain; F-Droid's buildserver only has 21.
+      # The recipe's patch, verbatim (it's fdroiddata's React Native template).
+      - name: Build with JDK 21
+        run: >-
+          sed -i '/jvmToolchain\|JavaVersion/s/17/21/'
+          node_modules/@react-native/gradle-plugin/*/build.gradle.kts
+          node_modules/@react-native/gradle-plugin/react-native-gradle-plugin/src/main/kotlin/com/facebook/react/utils/JdkConfiguratorUtils.kt
         working-directory: ${{ env.APP }}
 
       # android/ is generated (Expo CNG), not committed.
@@ -81,25 +91,44 @@ jobs:
         working-directory: ${{ env.APP }}
 
       - name: Build
-        # The dev-server IP is otherwise the build machine's, baked into
-        # resources.arsc. The recipe passes the same.
-        run: ./gradlew assembleRelease -x lintVitalRelease -PreactNativeDevServerIp=localhost
+        # The recipe's gradleprops. The dev-server IP is otherwise the build
+        # machine's, baked into resources.arsc. Toolchain auto-detection is off
+        # so a stray JDK 17 on the runner can't be used where F-Droid has none.
+        run: >-
+          ./gradlew assembleRelease -x lintVitalRelease
+          -PreactNativeArchitectures=${{ matrix.abi }}
+          -PreactNativeDevServerIp=localhost
+          -Porg.gradle.java.installations.auto-detect=false
         working-directory: ${{ env.APP }}/android
 
-      # F-Droid eligibility is a property of the APK, not of the source: any
-      # dependency can drag Play Services back in. Assert it here so a bad
-      # dependency fails the release rather than shipping quietly.
-      - name: Assert no Google Play Services
+      # What F-Droid reviewers check, asserted on the APK itself so a bad
+      # dependency or config fails the release rather than shipping quietly:
+      # no Play Services, only this ABI's native code, no permissions the app
+      # doesn't use, and the per-ABI versionCode.
+      - name: Check the APK
         run: |
+          BUILD_TOOLS="$(ls -d "$ANDROID_HOME"/build-tools/* | sort -V | tail -1)"
+          "$BUILD_TOOLS/aapt2" dump badging "$APK" > badging.txt
           python3 - <<'EOF'
-          import sys, zipfile
-          apk = '${{ env.APP }}/android/app/build/outputs/apk/release/app-release-unsigned.apk'
-          z = zipfile.ZipFile(apk)
-          hits = sum(z.read(n).count(b'com/google/android/gms')
-                     for n in z.namelist() if n.endswith('.dex'))
-          print(f'play-services refs: {hits}')
-          sys.exit(1 if hits else 0)
+          import json, os, re, sys, zipfile
+          abi = '${{ matrix.abi }}'
+          z = zipfile.ZipFile(os.environ['APK'])
+          badging = open('badging.txt').read()
+          base = json.load(open('${{ env.APP }}/app.json'))['expo']['android']['versionCode']
+          want = base * 10 + ['armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64'].index(abi) + 1
+          got = int(re.search(r"versionCode='(\d+)'", badging).group(1))
+          gms = sum(z.read(n).count(b'com/google/android/gms') for n in z.namelist() if n.endswith('.dex'))
+          abis = {n.split('/')[1] for n in z.namelist() if n.startswith('lib/')}
+          perms = set(re.findall(r"uses-permission: name='([^']+)'", badging))
+          banned = perms & {'android.permission.INTERNET', 'android.permission.SYSTEM_ALERT_WINDOW',
+                            'android.permission.READ_EXTERNAL_STORAGE', 'android.permission.WRITE_EXTERNAL_STORAGE'}
+          print(f'versionCode {got} (want {want}), ABIs {sorted(abis)}, play-services refs {gms}')
+          print('permissions:', *sorted(perms), sep='\n  ')
+          ok = got == want and abis == {abi} and not gms and not banned
+          sys.exit(0 if ok else f'APK check failed (unwanted permissions: {sorted(banned)})')
           EOF
+        env:
+          APK: ${{ env.APP }}/android/app/build/outputs/apk/release/app-release-unsigned.apk
 
       - name: Sign
         env:
@@ -111,6 +140,8 @@ jobs:
         run: |
           set -euo pipefail
           BUILD_TOOLS="$(ls -d "$ANDROID_HOME"/build-tools/* | sort -V | tail -1)"
+          VERSION=$(node -p "require('$APP/app.json').expo.version")
+          OUT="scottish-tides-$VERSION-${{ matrix.abi }}.apk"
           echo "$KEYSTORE_B64" | base64 -d > /tmp/release.jks
           # Sign Gradle's output as-is (it's already aligned). Re-aligning, by
           # zipalign or apksigner's own default, would change bytes F-Droid's
@@ -120,23 +151,30 @@ jobs:
             --ks /tmp/release.jks \
             --ks-pass env:KEYSTORE_PASSWORD \
             --ks-key-alias "$KEY_ALIAS" \
-            --out scottish-tides.apk \
+            --out "$OUT" \
             "$APP/android/app/build/outputs/apk/release/app-release-unsigned.apk"
-          "$BUILD_TOOLS/apksigner" verify --print-certs scottish-tides.apk
+          "$BUILD_TOOLS/apksigner" verify --print-certs "$OUT"
           rm -f /tmp/release.jks
 
-      - name: Upload artifact (runs that don't publish)
-        if: ${{ !startsWith(github.ref, 'refs/tags/v') }}
-        uses: actions/upload-artifact@v7
+      - uses: actions/upload-artifact@v7
         with:
-          name: scottish-tides-apk
-          path: scottish-tides.apk
+          name: apk-${{ matrix.abi }}
+          path: scottish-tides-*.apk
 
+  publish:
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          pattern: apk-*
+          merge-multiple: true
       - name: Publish release
-        if: startsWith(github.ref, 'refs/tags/v')
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release create "${GITHUB_REF_NAME}" scottish-tides.apk \
+          gh release create "${GITHUB_REF_NAME}" scottish-tides-*.apk \
+            --repo "$GITHUB_REPOSITORY" \
             --title "Scottish Tides ${GITHUB_REF_NAME}" \
             --generate-notes

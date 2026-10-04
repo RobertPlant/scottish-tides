@@ -99,8 +99,12 @@ All of these are enforced in CI.
       recipe; `fdroid-verify.yml` builds both ways and checks with `apksigcopier`. See
       "Reproducible builds" in `docs/android-build.md`.
 - [x] Tag `v0.1.6` (first reproducible release) and pin the recipe's `commit:` to its SHA.
-- [ ] Open the fdroiddata MR (fork `RobertPlant1/fdroiddata`, branch `com.robertplant.scottishtides`)
-      and work through its CI.
+- [x] Open the fdroiddata MR — !51187 (fork `RobertPlant1/fdroiddata`, branch
+      `com.robertplant.scottishtides`). CI green on v0.1.6; back in draft for v0.1.7.
+- [ ] v0.1.7: what reviewers ask every Expo app for — ABI split (one APK per ABI,
+      `plugins/with-abi-split.js`), no unused permissions (`plugins/with-release-permissions.js`),
+      and fdroiddata's React Native template (Node from forky, JDK 21 patch, `gradle: yes`).
+      Then move the MR to v0.1.7 and take it out of draft.
 - [ ] iOS binaries still need a Mac or EAS — untried.
 
 ## 6. Feature roadmap (offered, not started)
