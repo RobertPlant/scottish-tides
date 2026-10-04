@@ -15,26 +15,25 @@ Builds:
   - versionName: 0.1.7
     versionCode: 81
     commit: v0.1.7
-    subdir: apps/mobile/android/app
+    subdir: apps/mobile
     sudo:
       - echo 'deb https://deb.debian.org/debian forky main' > 
         /etc/apt/sources.list.d/forky.list
       - apt-get update
       - apt-get install -y -t forky nodejs npm
     init:
-      - cd ../..
       - export EXPO_NO_TELEMETRY=1
       - npm ci --omit=dev
-    gradle:
-      - yes
+    output: android/app/build/outputs/apk/release/app-release-unsigned.apk
     binary: 
       https://github.com/RobertPlant/scottish-tides/releases/download/v%v/scottish-tides-%v-armeabi-v7a.apk
     prebuild:
-      - cd ../..
       - export EXPO_NO_TELEMETRY=1
-      - sed -i '/jvmToolchain\|JavaVersion/s/17/21/' 
-        node_modules/@react-native/gradle-plugin/*/build.gradle.kts 
-        node_modules/@react-native/gradle-plugin/react-native-gradle-plugin/src/main/kotlin/com/facebook/react/utils/JdkConfiguratorUtils.kt
+      - find node_modules -type f \( -name '*.gradle' -o -name '*.gradle.kts' -o
+        -name '*.kt' \) -exec sed -i -e 
+        's/JavaVersion.VERSION_17/JavaVersion.VERSION_21/g' -e 
+        's/jvmToolchain(17)/jvmToolchain(21)/g' -e "s/jvmTarget = '17'/jvmTarget
+        = '21'/g" {} +
       - ./node_modules/.bin/expo prebuild --platform android --no-install
       - sed -i '/signingConfig signingConfigs.debug/d' android/app/build.gradle
     scanignore:
@@ -48,34 +47,36 @@ Builds:
       - apps/mobile/node_modules/react-native-svg/android/build.gradle
     scandelete:
       - apps/mobile/node_modules
+    build:
+      - export EXPO_NO_TELEMETRY=1
+      - cd android
+      - gradle assembleRelease -x lintVitalRelease 
+        -PreactNativeArchitectures=armeabi-v7a 
+        -PreactNativeDevServerIp=localhost
     ndk: r27b
-    gradleprops:
-      - reactNativeArchitectures=armeabi-v7a
-      - reactNativeDevServerIp=localhost
 
   - versionName: 0.1.7
     versionCode: 82
     commit: v0.1.7
-    subdir: apps/mobile/android/app
+    subdir: apps/mobile
     sudo:
       - echo 'deb https://deb.debian.org/debian forky main' > 
         /etc/apt/sources.list.d/forky.list
       - apt-get update
       - apt-get install -y -t forky nodejs npm
     init:
-      - cd ../..
       - export EXPO_NO_TELEMETRY=1
       - npm ci --omit=dev
-    gradle:
-      - yes
+    output: android/app/build/outputs/apk/release/app-release-unsigned.apk
     binary: 
       https://github.com/RobertPlant/scottish-tides/releases/download/v%v/scottish-tides-%v-arm64-v8a.apk
     prebuild:
-      - cd ../..
       - export EXPO_NO_TELEMETRY=1
-      - sed -i '/jvmToolchain\|JavaVersion/s/17/21/' 
-        node_modules/@react-native/gradle-plugin/*/build.gradle.kts 
-        node_modules/@react-native/gradle-plugin/react-native-gradle-plugin/src/main/kotlin/com/facebook/react/utils/JdkConfiguratorUtils.kt
+      - find node_modules -type f \( -name '*.gradle' -o -name '*.gradle.kts' -o
+        -name '*.kt' \) -exec sed -i -e 
+        's/JavaVersion.VERSION_17/JavaVersion.VERSION_21/g' -e 
+        's/jvmToolchain(17)/jvmToolchain(21)/g' -e "s/jvmTarget = '17'/jvmTarget
+        = '21'/g" {} +
       - ./node_modules/.bin/expo prebuild --platform android --no-install
       - sed -i '/signingConfig signingConfigs.debug/d' android/app/build.gradle
     scanignore:
@@ -89,34 +90,35 @@ Builds:
       - apps/mobile/node_modules/react-native-svg/android/build.gradle
     scandelete:
       - apps/mobile/node_modules
+    build:
+      - export EXPO_NO_TELEMETRY=1
+      - cd android
+      - gradle assembleRelease -x lintVitalRelease 
+        -PreactNativeArchitectures=arm64-v8a -PreactNativeDevServerIp=localhost
     ndk: r27b
-    gradleprops:
-      - reactNativeArchitectures=arm64-v8a
-      - reactNativeDevServerIp=localhost
 
   - versionName: 0.1.7
     versionCode: 83
     commit: v0.1.7
-    subdir: apps/mobile/android/app
+    subdir: apps/mobile
     sudo:
       - echo 'deb https://deb.debian.org/debian forky main' > 
         /etc/apt/sources.list.d/forky.list
       - apt-get update
       - apt-get install -y -t forky nodejs npm
     init:
-      - cd ../..
       - export EXPO_NO_TELEMETRY=1
       - npm ci --omit=dev
-    gradle:
-      - yes
+    output: android/app/build/outputs/apk/release/app-release-unsigned.apk
     binary: 
       https://github.com/RobertPlant/scottish-tides/releases/download/v%v/scottish-tides-%v-x86.apk
     prebuild:
-      - cd ../..
       - export EXPO_NO_TELEMETRY=1
-      - sed -i '/jvmToolchain\|JavaVersion/s/17/21/' 
-        node_modules/@react-native/gradle-plugin/*/build.gradle.kts 
-        node_modules/@react-native/gradle-plugin/react-native-gradle-plugin/src/main/kotlin/com/facebook/react/utils/JdkConfiguratorUtils.kt
+      - find node_modules -type f \( -name '*.gradle' -o -name '*.gradle.kts' -o
+        -name '*.kt' \) -exec sed -i -e 
+        's/JavaVersion.VERSION_17/JavaVersion.VERSION_21/g' -e 
+        's/jvmToolchain(17)/jvmToolchain(21)/g' -e "s/jvmTarget = '17'/jvmTarget
+        = '21'/g" {} +
       - ./node_modules/.bin/expo prebuild --platform android --no-install
       - sed -i '/signingConfig signingConfigs.debug/d' android/app/build.gradle
     scanignore:
@@ -130,34 +132,35 @@ Builds:
       - apps/mobile/node_modules/react-native-svg/android/build.gradle
     scandelete:
       - apps/mobile/node_modules
+    build:
+      - export EXPO_NO_TELEMETRY=1
+      - cd android
+      - gradle assembleRelease -x lintVitalRelease 
+        -PreactNativeArchitectures=x86 -PreactNativeDevServerIp=localhost
     ndk: r27b
-    gradleprops:
-      - reactNativeArchitectures=x86
-      - reactNativeDevServerIp=localhost
 
   - versionName: 0.1.7
     versionCode: 84
     commit: v0.1.7
-    subdir: apps/mobile/android/app
+    subdir: apps/mobile
     sudo:
       - echo 'deb https://deb.debian.org/debian forky main' > 
         /etc/apt/sources.list.d/forky.list
       - apt-get update
       - apt-get install -y -t forky nodejs npm
     init:
-      - cd ../..
       - export EXPO_NO_TELEMETRY=1
       - npm ci --omit=dev
-    gradle:
-      - yes
+    output: android/app/build/outputs/apk/release/app-release-unsigned.apk
     binary: 
       https://github.com/RobertPlant/scottish-tides/releases/download/v%v/scottish-tides-%v-x86_64.apk
     prebuild:
-      - cd ../..
       - export EXPO_NO_TELEMETRY=1
-      - sed -i '/jvmToolchain\|JavaVersion/s/17/21/' 
-        node_modules/@react-native/gradle-plugin/*/build.gradle.kts 
-        node_modules/@react-native/gradle-plugin/react-native-gradle-plugin/src/main/kotlin/com/facebook/react/utils/JdkConfiguratorUtils.kt
+      - find node_modules -type f \( -name '*.gradle' -o -name '*.gradle.kts' -o
+        -name '*.kt' \) -exec sed -i -e 
+        's/JavaVersion.VERSION_17/JavaVersion.VERSION_21/g' -e 
+        's/jvmToolchain(17)/jvmToolchain(21)/g' -e "s/jvmTarget = '17'/jvmTarget
+        = '21'/g" {} +
       - ./node_modules/.bin/expo prebuild --platform android --no-install
       - sed -i '/signingConfig signingConfigs.debug/d' android/app/build.gradle
     scanignore:
@@ -171,10 +174,12 @@ Builds:
       - apps/mobile/node_modules/react-native-svg/android/build.gradle
     scandelete:
       - apps/mobile/node_modules
+    build:
+      - export EXPO_NO_TELEMETRY=1
+      - cd android
+      - gradle assembleRelease -x lintVitalRelease 
+        -PreactNativeArchitectures=x86_64 -PreactNativeDevServerIp=localhost
     ndk: r27b
-    gradleprops:
-      - reactNativeArchitectures=x86_64
-      - reactNativeDevServerIp=localhost
 
 AllowedAPKSigningKeys: 
   4b70fec50aaaa91d61ed8bb16046c547b3fb5c99a7cf359c5827adcd72cdaffd

@@ -121,11 +121,13 @@ and rewritemeta strips comments and reorders keys. The reasoning lives here:
 It follows fdroiddata's `templates/build-react-native.yml`, which reviewers ask
 every React Native app to use:
 
-- **Every script list is one shell.** fdroidserver joins `sudo:`, `init:` and
-  `prebuild:` with `&&`, so a `cd` carries over. `subdir:
-  apps/mobile/android/app` is where Gradle runs, so the scripts start with
-  `cd ../..` to get to `apps/mobile`; `scanignore`/`scandelete` paths stay
-  relative to the repo root.
+- **Every script list is one shell.** fdroidserver joins `sudo:`, `init:`,
+  `prebuild:` and `build:` with `&&`, so a `cd` carries over. `subdir:
+  apps/mobile` makes the scripts and `output:` start there;
+  `scanignore`/`scandelete` paths stay relative to the repo root. The template's
+  `subdir: android/app` with `gradle: yes` needs a committed `android/`, which
+  fdroidserver checks for before anything runs; ours is generated, hence a
+  `build:` script (as in the accepted `xyz.hub13.remindiary`).
 - **`sudo:`** installs `nodejs npm` from Debian forky, as reviewers ask.
   Forky's Node is 24.21.0, the same version the release workflow and
   `devenv.nix` pin; keep them in step when forky moves. It has to be ≥ 24: the
@@ -133,10 +135,12 @@ every React Native app to use:
   from lock file"*.
 - **`init:`** runs `npm ci`. Dependencies are fetched before the source scanner
   runs, because it must see `node_modules`.
-- **`prebuild:`** applies the template's JDK 21 patch (React Native pins a JDK 17
-  toolchain; the buildserver only has 21), runs `expo prebuild` (`android/` is
-  generated), then strips the template's debug `signingConfig` so the APK comes
-  out unsigned.
+- **`prebuild:`** moves every JDK 17 pin in `node_modules` to 21 (React
+  Native's toolchain, Java targets, and Kotlin `jvmTarget`s such as
+  datetimepicker's; the buildserver only has JDK 21; the `find … sed` form is
+  the one accepted for `de.killi199.timetracking`), runs `expo prebuild`
+  (`android/` is generated), then strips the template's debug `signingConfig`
+  so the APK comes out unsigned.
 - **`scandelete:` / `scanignore:`** triage what the scanner finds in
   `node_modules` (96 problems before triage). `scandelete: apps/mobile/node_modules`
   deletes only the files the scanner flags, so a dependency bump that adds a new
@@ -154,9 +158,8 @@ every React Native app to use:
   ship precompiled AARs and Android links those unless told otherwise. F-Droid
   only ships what it compiles, so every module is built from source — in both
   channels, so the GitHub APK is the same code.
-- **`gradle: [yes]`** builds the release variant with `gradlew-fdroid` (it reads
-  the wrapper's version and fetches a checksum-verified distribution), passing
-  `gradleprops:` as `-P` properties.
+- **`build:`** calls `gradle`, which on the buildserver is `gradlew-fdroid` (it
+  reads the wrapper's version and fetches a checksum-verified distribution).
 - **ABI split:** four builds, one per ABI, each passing
   `reactNativeArchitectures=<abi>`. `plugins/with-abi-split.js` turns a single
   ABI into an `abiFilters` (otherwise prebuilt `.so`s from AARs ship for every

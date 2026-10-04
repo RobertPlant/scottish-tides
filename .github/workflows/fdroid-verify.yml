@@ -23,6 +23,7 @@ jobs:
   fdroid:
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         # n = the build's position in the recipe (and release.yml's matrix).
         include:
