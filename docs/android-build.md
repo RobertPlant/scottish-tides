@@ -18,7 +18,7 @@ when `android/` is missing and skips `lintVitalRelease`.
 
 Output: `apps/mobile/android/app/build/outputs/apk/release/app-release.apk`
 (a universal APK — all four ABIs, ~100 MB). With `ABI=arm64-v8a` it drops to
-roughly 40 MB, which is the one to use for sideloading onto a modern phone.
+roughly 25 MB, which is the one to use for sideloading onto a modern phone.
 Releases ship one APK per ABI, never the universal one (see "ABI split" below).
 
 Locally the release APK is signed with Expo's template debug keystore, so it
