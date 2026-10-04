@@ -15,7 +15,7 @@ Binaries: https://github.com/RobertPlant/scottish-tides/releases/download/v%v/sc
 Builds:
   - versionName: 0.1.6
     versionCode: 7
-    commit: v0.1.6
+    commit: 1f08e625e4659b14b15a1493b7f43b44a5dd116b
     subdir: apps/mobile
     sudo:
       - echo 'deb https://deb.debian.org/debian bookworm main' > /etc/apt/sources.list.d/bookworm.list
