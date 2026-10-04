@@ -119,7 +119,8 @@ comments: fdroiddata CI fails any file that `fdroid rewritemeta` would change,
 and rewritemeta strips comments and reorders keys. The reasoning lives here:
 
 It follows fdroiddata's `templates/build-react-native.yml`, which reviewers ask
-every React Native app to use:
+every React Native app to use, except where a generated `android/` rules it out
+(`subdir:` and `build:`, below):
 
 - **Every script list is one shell.** fdroidserver joins `sudo:`, `init:`,
   `prebuild:` and `build:` with `&&`, so a `cd` carries over. `subdir:

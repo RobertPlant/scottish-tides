@@ -78,6 +78,7 @@ jobs:
           find node_modules -type f \( -name '*.gradle' -o -name '*.gradle.kts' -o -name '*.kt' \)
           -exec sed -i -e 's/JavaVersion.VERSION_17/JavaVersion.VERSION_21/g'
           -e 's/jvmToolchain(17)/jvmToolchain(21)/g'
+          -e 's/JvmTarget.fromTarget("17")/JvmTarget.fromTarget("21")/g'
           -e "s/jvmTarget = '17'/jvmTarget = '21'/g" {} +
         working-directory: ${{ env.APP }}
 
