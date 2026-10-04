@@ -17,8 +17,7 @@ Builds:
     commit: 35df4a0f2a6fe2aee211fca6b17dfb0748d433c5
     subdir: apps/mobile
     sudo:
-      - echo 'deb https://deb.debian.org/debian forky main' > 
-        /etc/apt/sources.list.d/forky.list
+      - echo 'deb https://deb.debian.org/debian forky main' > /etc/apt/sources.list.d/forky.list
       - apt-get update
       - apt-get install -y -t forky nodejs npm
     init:
@@ -29,12 +28,10 @@ Builds:
       https://github.com/RobertPlant/scottish-tides/releases/download/v%v/scottish-tides-%v-armeabi-v7a.apk
     prebuild:
       - export EXPO_NO_TELEMETRY=1
-      - find node_modules -type f \( -name '*.gradle' -o -name '*.gradle.kts' -o
-        -name '*.kt' \) -exec sed -i -e 
-        's/JavaVersion.VERSION_17/JavaVersion.VERSION_21/g' -e 
-        's/jvmToolchain(17)/jvmToolchain(21)/g' -e 
-        's/JvmTarget.fromTarget("17")/JvmTarget.fromTarget("21")/g' -e 
-        "s/jvmTarget = '17'/jvmTarget = '21'/g" {} +
+      - find node_modules -type f \( -name '*.gradle' -o -name '*.gradle.kts' -o -name
+        '*.kt' \) -exec sed -i -e 's/JavaVersion.VERSION_17/JavaVersion.VERSION_21/g'
+        -e 's/jvmToolchain(17)/jvmToolchain(21)/g' -e 's/JvmTarget.fromTarget("17")/JvmTarget.fromTarget("21")/g'
+        -e "s/jvmTarget = '17'/jvmTarget = '21'/g" {} +
       - ./node_modules/.bin/expo prebuild --platform android --no-install
       - sed -i '/signingConfig signingConfigs.debug/d' android/app/build.gradle
     scanignore:
@@ -51,8 +48,7 @@ Builds:
     build:
       - export EXPO_NO_TELEMETRY=1
       - cd android
-      - gradle assembleRelease -x lintVitalRelease 
-        -PreactNativeArchitectures=armeabi-v7a 
+      - gradle assembleRelease -x lintVitalRelease -PreactNativeArchitectures=armeabi-v7a
         -PreactNativeDevServerIp=localhost
     ndk: r27b
 
@@ -61,8 +57,7 @@ Builds:
     commit: 35df4a0f2a6fe2aee211fca6b17dfb0748d433c5
     subdir: apps/mobile
     sudo:
-      - echo 'deb https://deb.debian.org/debian forky main' > 
-        /etc/apt/sources.list.d/forky.list
+      - echo 'deb https://deb.debian.org/debian forky main' > /etc/apt/sources.list.d/forky.list
       - apt-get update
       - apt-get install -y -t forky nodejs npm
     init:
@@ -73,12 +68,10 @@ Builds:
       https://github.com/RobertPlant/scottish-tides/releases/download/v%v/scottish-tides-%v-arm64-v8a.apk
     prebuild:
       - export EXPO_NO_TELEMETRY=1
-      - find node_modules -type f \( -name '*.gradle' -o -name '*.gradle.kts' -o
-        -name '*.kt' \) -exec sed -i -e 
-        's/JavaVersion.VERSION_17/JavaVersion.VERSION_21/g' -e 
-        's/jvmToolchain(17)/jvmToolchain(21)/g' -e 
-        's/JvmTarget.fromTarget("17")/JvmTarget.fromTarget("21")/g' -e 
-        "s/jvmTarget = '17'/jvmTarget = '21'/g" {} +
+      - find node_modules -type f \( -name '*.gradle' -o -name '*.gradle.kts' -o -name
+        '*.kt' \) -exec sed -i -e 's/JavaVersion.VERSION_17/JavaVersion.VERSION_21/g'
+        -e 's/jvmToolchain(17)/jvmToolchain(21)/g' -e 's/JvmTarget.fromTarget("17")/JvmTarget.fromTarget("21")/g'
+        -e "s/jvmTarget = '17'/jvmTarget = '21'/g" {} +
       - ./node_modules/.bin/expo prebuild --platform android --no-install
       - sed -i '/signingConfig signingConfigs.debug/d' android/app/build.gradle
     scanignore:
@@ -95,8 +88,8 @@ Builds:
     build:
       - export EXPO_NO_TELEMETRY=1
       - cd android
-      - gradle assembleRelease -x lintVitalRelease 
-        -PreactNativeArchitectures=arm64-v8a -PreactNativeDevServerIp=localhost
+      - gradle assembleRelease -x lintVitalRelease -PreactNativeArchitectures=arm64-v8a
+        -PreactNativeDevServerIp=localhost
     ndk: r27b
 
   - versionName: 0.1.7
@@ -104,8 +97,7 @@ Builds:
     commit: 35df4a0f2a6fe2aee211fca6b17dfb0748d433c5
     subdir: apps/mobile
     sudo:
-      - echo 'deb https://deb.debian.org/debian forky main' > 
-        /etc/apt/sources.list.d/forky.list
+      - echo 'deb https://deb.debian.org/debian forky main' > /etc/apt/sources.list.d/forky.list
       - apt-get update
       - apt-get install -y -t forky nodejs npm
     init:
@@ -116,12 +108,10 @@ Builds:
       https://github.com/RobertPlant/scottish-tides/releases/download/v%v/scottish-tides-%v-x86.apk
     prebuild:
       - export EXPO_NO_TELEMETRY=1
-      - find node_modules -type f \( -name '*.gradle' -o -name '*.gradle.kts' -o
-        -name '*.kt' \) -exec sed -i -e 
-        's/JavaVersion.VERSION_17/JavaVersion.VERSION_21/g' -e 
-        's/jvmToolchain(17)/jvmToolchain(21)/g' -e 
-        's/JvmTarget.fromTarget("17")/JvmTarget.fromTarget("21")/g' -e 
-        "s/jvmTarget = '17'/jvmTarget = '21'/g" {} +
+      - find node_modules -type f \( -name '*.gradle' -o -name '*.gradle.kts' -o -name
+        '*.kt' \) -exec sed -i -e 's/JavaVersion.VERSION_17/JavaVersion.VERSION_21/g'
+        -e 's/jvmToolchain(17)/jvmToolchain(21)/g' -e 's/JvmTarget.fromTarget("17")/JvmTarget.fromTarget("21")/g'
+        -e "s/jvmTarget = '17'/jvmTarget = '21'/g" {} +
       - ./node_modules/.bin/expo prebuild --platform android --no-install
       - sed -i '/signingConfig signingConfigs.debug/d' android/app/build.gradle
     scanignore:
@@ -138,8 +128,8 @@ Builds:
     build:
       - export EXPO_NO_TELEMETRY=1
       - cd android
-      - gradle assembleRelease -x lintVitalRelease 
-        -PreactNativeArchitectures=x86 -PreactNativeDevServerIp=localhost
+      - gradle assembleRelease -x lintVitalRelease -PreactNativeArchitectures=x86
+        -PreactNativeDevServerIp=localhost
     ndk: r27b
 
   - versionName: 0.1.7
@@ -147,8 +137,7 @@ Builds:
     commit: 35df4a0f2a6fe2aee211fca6b17dfb0748d433c5
     subdir: apps/mobile
     sudo:
-      - echo 'deb https://deb.debian.org/debian forky main' > 
-        /etc/apt/sources.list.d/forky.list
+      - echo 'deb https://deb.debian.org/debian forky main' > /etc/apt/sources.list.d/forky.list
       - apt-get update
       - apt-get install -y -t forky nodejs npm
     init:
@@ -159,12 +148,10 @@ Builds:
       https://github.com/RobertPlant/scottish-tides/releases/download/v%v/scottish-tides-%v-x86_64.apk
     prebuild:
       - export EXPO_NO_TELEMETRY=1
-      - find node_modules -type f \( -name '*.gradle' -o -name '*.gradle.kts' -o
-        -name '*.kt' \) -exec sed -i -e 
-        's/JavaVersion.VERSION_17/JavaVersion.VERSION_21/g' -e 
-        's/jvmToolchain(17)/jvmToolchain(21)/g' -e 
-        's/JvmTarget.fromTarget("17")/JvmTarget.fromTarget("21")/g' -e 
-        "s/jvmTarget = '17'/jvmTarget = '21'/g" {} +
+      - find node_modules -type f \( -name '*.gradle' -o -name '*.gradle.kts' -o -name
+        '*.kt' \) -exec sed -i -e 's/JavaVersion.VERSION_17/JavaVersion.VERSION_21/g'
+        -e 's/jvmToolchain(17)/jvmToolchain(21)/g' -e 's/JvmTarget.fromTarget("17")/JvmTarget.fromTarget("21")/g'
+        -e "s/jvmTarget = '17'/jvmTarget = '21'/g" {} +
       - ./node_modules/.bin/expo prebuild --platform android --no-install
       - sed -i '/signingConfig signingConfigs.debug/d' android/app/build.gradle
     scanignore:
@@ -181,12 +168,11 @@ Builds:
     build:
       - export EXPO_NO_TELEMETRY=1
       - cd android
-      - gradle assembleRelease -x lintVitalRelease 
-        -PreactNativeArchitectures=x86_64 -PreactNativeDevServerIp=localhost
+      - gradle assembleRelease -x lintVitalRelease -PreactNativeArchitectures=x86_64
+        -PreactNativeDevServerIp=localhost
     ndk: r27b
 
-AllowedAPKSigningKeys: 
-  4b70fec50aaaa91d61ed8bb16046c547b3fb5c99a7cf359c5827adcd72cdaffd
+AllowedAPKSigningKeys: 4b70fec50aaaa91d61ed8bb16046c547b3fb5c99a7cf359c5827adcd72cdaffd
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^v[\d.]+$

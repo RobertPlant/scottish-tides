@@ -18,7 +18,7 @@ when `android/` is missing and skips `lintVitalRelease`.
 
 Output: `apps/mobile/android/app/build/outputs/apk/release/app-release.apk`
 (a universal APK — all four ABIs, ~100 MB). With `ABI=arm64-v8a` it drops to
-roughly 25 MB, which is the one to use for sideloading onto a modern phone.
+roughly 40 MB, which is the one to use for sideloading onto a modern phone.
 Releases ship one APK per ABI, never the universal one (see "ABI split" below).
 
 Locally the release APK is signed with Expo's template debug keystore, so it
@@ -183,15 +183,16 @@ Check it locally before submitting, in a scratch fdroiddata layout. You need
 refuses to run in a dirty tree:
 
 ```bash
-fdroid() { nix shell nixpkgs#uv -c uvx --from git+https://gitlab.com/fdroid/fdroidserver.git fdroid "$@"; }
+fdroid() { nix shell nixpkgs#uv -c uvx --with 'ruamel.yaml==0.18.10' --from git+https://gitlab.com/fdroid/fdroidserver.git fdroid "$@"; }
 fdroid lint com.robertplant.scottishtides
 fdroid rewritemeta com.robertplant.scottishtides  # must not change it
 fdroid checkupdates -v com.robertplant.scottishtides
 ```
 
-Use fdroidserver's master, as fdroiddata's CI does, not nixpkgs' release: their
-`rewritemeta` output differs (master wraps long values onto an indented line),
-and only master's passes CI.
+Match fdroiddata's `rewritemeta` CI job exactly, or its formatting check fails:
+fdroidserver's master (not nixpkgs' release, which doesn't wrap long values at
+all) with Debian trixie's ruamel.yaml, 0.18.10 (the latest, 0.19, wraps lines
+differently). If the job's image moves past trixie, bump the pin to match.
 
 `fdroid scanner com.robertplant.scottishtides` runs the prebuild and scans the
 result. Run it inside `devenv shell`, so Node 24 is on the path. The nixpkgs
