@@ -10,7 +10,8 @@ AutoName: Scottish Tides
 
 RepoType: git
 Repo: https://github.com/RobertPlant/scottish-tides.git
-Binaries: https://github.com/RobertPlant/scottish-tides/releases/download/v%v/scottish-tides.apk
+Binaries: 
+  https://github.com/RobertPlant/scottish-tides/releases/download/v%v/scottish-tides.apk
 
 Builds:
   - versionName: 0.1.6
@@ -52,6 +53,7 @@ AllowedAPKSigningKeys: 4b70fec50aaaa91d61ed8bb16046c547b3fb5c99a7cf359c5827adcd7
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^v[\d.]+$
-UpdateCheckData: apps/mobile/app.json|"versionCode":\s*(\d+)|apps/mobile/app.json|"version":\s*"([\d.]+)"
+UpdateCheckData: 
+  apps/mobile/app.json|"versionCode":\s*(\d+)|apps/mobile/app.json|"version":\s*"([\d.]+)"
 CurrentVersion: 0.1.6
 CurrentVersionCode: 7

@@ -48,7 +48,7 @@ jobs:
           mkdir -p "$home_vagrant"/{metadata,tmp,unsigned,logs}
           # The committed recipe, building this commit, minus Binaries: (that
           # points at a published release; the compare job checks against ours).
-          sed -e "s/^    commit: .*/    commit: $COMMIT/" -e '/^Binaries:/d' \
+          sed -e "s/^    commit: .*/    commit: $COMMIT/" -e '/^Binaries:/{N;d}' \
             "fdroid/$app.yml" > "$home_vagrant/metadata/$app.yml"
           chown -R vagrant "$home_vagrant"
 
