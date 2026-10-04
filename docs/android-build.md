@@ -17,9 +17,9 @@ npm run build:android debug        # debug variant
 when `android/` is missing and skips `lintVitalRelease`.
 
 Output: `apps/mobile/android/app/build/outputs/apk/release/app-release.apk`
-(a universal APK — all four ABIs, ~100 MB; F-Droid publishes it as-is). With
-`ABI=arm64-v8a` it drops to roughly a quarter of that, which is the one to use
-for sideloading onto a modern phone.
+(a universal APK — all four ABIs, ~100 MB). With `ABI=arm64-v8a` it drops to
+roughly 25 MB, which is the one to use for sideloading onto a modern phone.
+Releases ship one APK per ABI, never the universal one (see "ABI split" below).
 
 Locally the release APK is signed with Expo's template debug keystore, so it
 installs straight away (`adb install -r <apk>`). It is **not** a distributable
@@ -118,19 +118,30 @@ byte-for-byte as it goes into
 comments: fdroiddata CI fails any file that `fdroid rewritemeta` would change,
 and rewritemeta strips comments and reorders keys. The reasoning lives here:
 
-- **Every script list is one shell.** fdroidserver joins `sudo:`, `prebuild:`
-  and `build:` with `&&`, so a `cd` carries over and later paths are relative
-  to it. `subdir: apps/mobile` makes the scripts and `output:` start there;
-  `scanignore`/`scandelete` paths stay relative to the repo root.
-- **`sudo:`** installs Node 24 from the official tarball with a pinned sha256.
-  It has to be 24: the lockfile is npm 11's, and `npm ci` under Node 22's
-  npm 10 fails with *"Missing: <pkg> from lock file"*. Bump the URL and hash
-  together with the Node pin everywhere else (`devenv.nix`, the workflows).
-- **`prebuild:`** runs `npm ci` and `expo prebuild` (`android/` is generated),
-  then strips the template's debug `signingConfig` so the APK comes out unsigned
-  for F-Droid to sign. Dependencies are fetched here rather than in `build:`
-  because the source scanner runs between the two — it must see
-  `node_modules`.
+It follows fdroiddata's `templates/build-react-native.yml`, which reviewers ask
+every React Native app to use, except where a generated `android/` rules it out
+(`subdir:` and `build:`, below):
+
+- **Every script list is one shell.** fdroidserver joins `sudo:`, `init:`,
+  `prebuild:` and `build:` with `&&`, so a `cd` carries over. `subdir:
+  apps/mobile` makes the scripts and `output:` start there;
+  `scanignore`/`scandelete` paths stay relative to the repo root. The template's
+  `subdir: android/app` with `gradle: yes` needs a committed `android/`, which
+  fdroidserver checks for before anything runs; ours is generated, hence a
+  `build:` script (as in the accepted `xyz.hub13.remindiary`).
+- **`sudo:`** installs `nodejs npm` from Debian forky, as reviewers ask.
+  Forky's Node is 24.21.0, the same version the release workflow and
+  `devenv.nix` pin; keep them in step when forky moves. It has to be ≥ 24: the
+  lockfile is npm 11's, and `npm ci` under npm 10 fails with *"Missing: <pkg>
+  from lock file"*.
+- **`init:`** runs `npm ci`. Dependencies are fetched before the source scanner
+  runs, because it must see `node_modules`.
+- **`prebuild:`** moves every JDK 17 pin in `node_modules` to 21 (React
+  Native's toolchain, Java targets, and Kotlin `jvmTarget`s such as
+  datetimepicker's; the buildserver only has JDK 21; the `find … sed` form is
+  the one accepted for `de.killi199.timetracking`), runs `expo prebuild`
+  (`android/` is generated), then strips the template's debug `signingConfig`
+  so the APK comes out unsigned.
 - **`scandelete:` / `scanignore:`** triage what the scanner finds in
   `node_modules` (96 problems before triage). `scandelete: apps/mobile/node_modules`
   deletes only the files the scanner flags, so a dependency bump that adds a new
@@ -150,6 +161,15 @@ and rewritemeta strips comments and reorders keys. The reasoning lives here:
   channels, so the GitHub APK is the same code.
 - **`build:`** calls `gradle`, which on the buildserver is `gradlew-fdroid` (it
   reads the wrapper's version and fetches a checksum-verified distribution).
+- **ABI split:** four builds, one per ABI, each passing
+  `reactNativeArchitectures=<abi>`. `plugins/with-abi-split.js` turns a single
+  ABI into an `abiFilters` (otherwise prebuilt `.so`s from AARs ship for every
+  ABI) and a versionCode of `10 * base + n`: armeabi-v7a 1, arm64-v8a 2, x86 3,
+  x86_64 4, which is the recipe's `VercodeOperation`. `app.json` keeps the base.
+- **`plugins/with-release-permissions.js`** removes `INTERNET`,
+  `SYSTEM_ALERT_WINDOW` and the storage permissions that React Native and Expo
+  merge in. The app uses none of them, and reviewers ask about each. It only
+  touches release builds; debug builds need `INTERNET` to reach Metro.
 - **`UpdateCheckData`** reads `versionCode`/`version` from
   `apps/mobile/app.json`. `UpdateCheckMode: Tags` otherwise looks in
   `build.gradle`, which isn't committed.
@@ -163,10 +183,15 @@ Check it locally before submitting, in a scratch fdroiddata layout. You need
 refuses to run in a dirty tree:
 
 ```bash
-nix shell nixpkgs#fdroidserver -c fdroid lint com.robertplant.scottishtides
-nix shell nixpkgs#fdroidserver -c fdroid rewritemeta com.robertplant.scottishtides  # must not change it
-nix shell nixpkgs#fdroidserver -c fdroid checkupdates -v com.robertplant.scottishtides
+fdroid() { nix shell nixpkgs#uv -c uvx --from git+https://gitlab.com/fdroid/fdroidserver.git fdroid "$@"; }
+fdroid lint com.robertplant.scottishtides
+fdroid rewritemeta com.robertplant.scottishtides  # must not change it
+fdroid checkupdates -v com.robertplant.scottishtides
 ```
+
+Use fdroidserver's master, as fdroiddata's CI does, not nixpkgs' release: their
+`rewritemeta` output differs (master wraps long values onto an indented line),
+and only master's passes CI.
 
 `fdroid scanner com.robertplant.scottishtides` runs the prebuild and scans the
 result. Run it inside `devenv shell`, so Node 24 is on the path. The nixpkgs
@@ -178,8 +203,10 @@ request's CI runs it.
 
 ### Releasing to F-Droid
 
-1. Release as usual (bump `version`/`versionCode`, tag `vX.Y.Z`), and in the
-   same commit bump the recipe's `Builds` entry and `CurrentVersion*`.
+1. Release as usual (bump `version`, and `versionCode` by one: it's the base the
+   four APKs' codes come from), tag `vX.Y.Z`, and in the same commit bump the
+   recipe's four `Builds` entries and `CurrentVersion*` (`CurrentVersionCode` is
+   the x86_64 one, `10 * base + 4`).
    fdroiddata requires `commit:` to be the tag's full SHA, not the tag name, so
    fill that in once the tag exists.
 2. First submission only: fork fdroiddata, copy the recipe to
@@ -191,27 +218,28 @@ request's CI runs it.
 
 ### Reproducible builds
 
-F-Droid rebuilds each tag from source, compares the result with the APK on the
-GitHub release (`Binaries:`), and if they match apart from the signature, ships
-the APK signed with our key (`AllowedAPKSigningKeys:`, the SHA-256 of the
+F-Droid rebuilds each tag from source, once per ABI, compares each result with
+that ABI's APK on the GitHub release (each build's `binary:`), and if they match
+apart from the signature, ships the APK signed with our key (`AllowedAPKSigningKeys:`, the SHA-256 of the
 release certificate). So GitHub and F-Droid installs can update each other. If
 they don't match, F-Droid publishes nothing for that version.
 
 That only works while `release.yml` builds exactly as the recipe does: Node
-24.21.0, `npm ci --omit=dev`, JDK 21 for Gradle plus JDK 17 (the toolchain React
-Native and Expo compile Kotlin with; trixie lacks it, so the recipe takes it
-from bookworm), F-Droid's paths (the build dir
+24.21.0, `npm ci --omit=dev`, JDK 21 with the same toolchain patch (and
+toolchain auto-detection off, so the runner's JDK 17 isn't picked up),
+F-Droid's paths (the build dir
 `/home/vagrant/build/com.robertplant.scottishtides`, `GRADLE_USER_HOME`
 `/home/vagrant/.gradle` and the SDK at `/opt/android-sdk`, all of which end up
-inside the native libraries), `-PreactNativeDevServerIp=localhost` (or React
-Native bakes the build machine's IP into `resources.arsc`), and the APK signed
+inside the native libraries), the same `reactNativeArchitectures` and
+`-PreactNativeDevServerIp=localhost` (or React Native bakes the build machine's
+IP into `resources.arsc`), and the APK signed
 straight out of Gradle with no realignment (no `zipalign`, and `apksigner
 --alignment-preserved`).
 Change one side, change the other.
 
 `.github/workflows/fdroid-verify.yml` checks it. It builds a commit through
-`release.yml` and through `fdroid build` in F-Droid's buildserver image, then
-runs `apksigcopier compare`. It runs on PRs that touch the recipe or the
+`release.yml` and through `fdroid build` in F-Droid's buildserver image, for
+each ABI, then runs `apksigcopier compare` on each pair. It runs on PRs that touch the recipe or the
 release workflow, and can be run by hand (Actions → F-Droid reproducibility
 check) before tagging, e.g. after native dependency upgrades.
 

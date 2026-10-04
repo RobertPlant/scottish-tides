@@ -10,26 +10,31 @@ AutoName: Scottish Tides
 
 RepoType: git
 Repo: https://github.com/RobertPlant/scottish-tides.git
-Binaries: 
-  https://github.com/RobertPlant/scottish-tides/releases/download/v%v/scottish-tides.apk
 
 Builds:
-  - versionName: 0.1.6
-    versionCode: 7
-    commit: 1f08e625e4659b14b15a1493b7f43b44a5dd116b
+  - versionName: 0.1.7
+    versionCode: 81
+    commit: v0.1.7
     subdir: apps/mobile
     sudo:
-      - echo 'deb https://deb.debian.org/debian bookworm main' > /etc/apt/sources.list.d/bookworm.list
+      - echo 'deb https://deb.debian.org/debian forky main' > 
+        /etc/apt/sources.list.d/forky.list
       - apt-get update
-      - apt-get install -y -t bookworm openjdk-17-jdk-headless
-      - curl -fsSLo /tmp/node.tar.gz https://nodejs.org/dist/v24.21.0/node-v24.21.0-linux-x64.tar.gz
-      - echo '6e1db87ef58b8819e5d5402eff1536491b18edd8eb7bee5ef7897876e88dc5ff  /tmp/node.tar.gz'
-        | sha256sum -c -
-      - tar -xzf /tmp/node.tar.gz -C /usr/local --strip-components=1
-    output: android/app/build/outputs/apk/release/app-release-unsigned.apk
-    prebuild:
+      - apt-get install -y -t forky nodejs npm
+    init:
       - export EXPO_NO_TELEMETRY=1
       - npm ci --omit=dev
+    output: android/app/build/outputs/apk/release/app-release-unsigned.apk
+    binary: 
+      https://github.com/RobertPlant/scottish-tides/releases/download/v%v/scottish-tides-%v-armeabi-v7a.apk
+    prebuild:
+      - export EXPO_NO_TELEMETRY=1
+      - find node_modules -type f \( -name '*.gradle' -o -name '*.gradle.kts' -o
+        -name '*.kt' \) -exec sed -i -e 
+        's/JavaVersion.VERSION_17/JavaVersion.VERSION_21/g' -e 
+        's/jvmToolchain(17)/jvmToolchain(21)/g' -e 
+        's/JvmTarget.fromTarget("17")/JvmTarget.fromTarget("21")/g' -e 
+        "s/jvmTarget = '17'/jvmTarget = '21'/g" {} +
       - ./node_modules/.bin/expo prebuild --platform android --no-install
       - sed -i '/signingConfig signingConfigs.debug/d' android/app/build.gradle
     scanignore:
@@ -46,14 +51,151 @@ Builds:
     build:
       - export EXPO_NO_TELEMETRY=1
       - cd android
-      - gradle assembleRelease -x lintVitalRelease -PreactNativeDevServerIp=localhost
+      - gradle assembleRelease -x lintVitalRelease 
+        -PreactNativeArchitectures=armeabi-v7a 
+        -PreactNativeDevServerIp=localhost
     ndk: r27b
 
-AllowedAPKSigningKeys: 4b70fec50aaaa91d61ed8bb16046c547b3fb5c99a7cf359c5827adcd72cdaffd
+  - versionName: 0.1.7
+    versionCode: 82
+    commit: v0.1.7
+    subdir: apps/mobile
+    sudo:
+      - echo 'deb https://deb.debian.org/debian forky main' > 
+        /etc/apt/sources.list.d/forky.list
+      - apt-get update
+      - apt-get install -y -t forky nodejs npm
+    init:
+      - export EXPO_NO_TELEMETRY=1
+      - npm ci --omit=dev
+    output: android/app/build/outputs/apk/release/app-release-unsigned.apk
+    binary: 
+      https://github.com/RobertPlant/scottish-tides/releases/download/v%v/scottish-tides-%v-arm64-v8a.apk
+    prebuild:
+      - export EXPO_NO_TELEMETRY=1
+      - find node_modules -type f \( -name '*.gradle' -o -name '*.gradle.kts' -o
+        -name '*.kt' \) -exec sed -i -e 
+        's/JavaVersion.VERSION_17/JavaVersion.VERSION_21/g' -e 
+        's/jvmToolchain(17)/jvmToolchain(21)/g' -e 
+        's/JvmTarget.fromTarget("17")/JvmTarget.fromTarget("21")/g' -e 
+        "s/jvmTarget = '17'/jvmTarget = '21'/g" {} +
+      - ./node_modules/.bin/expo prebuild --platform android --no-install
+      - sed -i '/signingConfig signingConfigs.debug/d' android/app/build.gradle
+    scanignore:
+      - apps/mobile/node_modules/hermes-compiler/hermesc/linux64-bin/hermesc
+      - apps/mobile/node_modules/expo-modules-core/android/ExpoModulesCorePlugin.gradle
+      - apps/mobile/node_modules/react-native/ReactAndroid/publish.gradle
+      - apps/mobile/node_modules/@react-native-async-storage/async-storage/android/build.gradle
+      - apps/mobile/node_modules/@react-native-masked-view/masked-view/android/build.gradle
+      - apps/mobile/node_modules/react-native-safe-area-context/android/build.gradle
+      - apps/mobile/node_modules/react-native-screens/android/build.gradle
+      - apps/mobile/node_modules/react-native-svg/android/build.gradle
+    scandelete:
+      - apps/mobile/node_modules
+    build:
+      - export EXPO_NO_TELEMETRY=1
+      - cd android
+      - gradle assembleRelease -x lintVitalRelease 
+        -PreactNativeArchitectures=arm64-v8a -PreactNativeDevServerIp=localhost
+    ndk: r27b
+
+  - versionName: 0.1.7
+    versionCode: 83
+    commit: v0.1.7
+    subdir: apps/mobile
+    sudo:
+      - echo 'deb https://deb.debian.org/debian forky main' > 
+        /etc/apt/sources.list.d/forky.list
+      - apt-get update
+      - apt-get install -y -t forky nodejs npm
+    init:
+      - export EXPO_NO_TELEMETRY=1
+      - npm ci --omit=dev
+    output: android/app/build/outputs/apk/release/app-release-unsigned.apk
+    binary: 
+      https://github.com/RobertPlant/scottish-tides/releases/download/v%v/scottish-tides-%v-x86.apk
+    prebuild:
+      - export EXPO_NO_TELEMETRY=1
+      - find node_modules -type f \( -name '*.gradle' -o -name '*.gradle.kts' -o
+        -name '*.kt' \) -exec sed -i -e 
+        's/JavaVersion.VERSION_17/JavaVersion.VERSION_21/g' -e 
+        's/jvmToolchain(17)/jvmToolchain(21)/g' -e 
+        's/JvmTarget.fromTarget("17")/JvmTarget.fromTarget("21")/g' -e 
+        "s/jvmTarget = '17'/jvmTarget = '21'/g" {} +
+      - ./node_modules/.bin/expo prebuild --platform android --no-install
+      - sed -i '/signingConfig signingConfigs.debug/d' android/app/build.gradle
+    scanignore:
+      - apps/mobile/node_modules/hermes-compiler/hermesc/linux64-bin/hermesc
+      - apps/mobile/node_modules/expo-modules-core/android/ExpoModulesCorePlugin.gradle
+      - apps/mobile/node_modules/react-native/ReactAndroid/publish.gradle
+      - apps/mobile/node_modules/@react-native-async-storage/async-storage/android/build.gradle
+      - apps/mobile/node_modules/@react-native-masked-view/masked-view/android/build.gradle
+      - apps/mobile/node_modules/react-native-safe-area-context/android/build.gradle
+      - apps/mobile/node_modules/react-native-screens/android/build.gradle
+      - apps/mobile/node_modules/react-native-svg/android/build.gradle
+    scandelete:
+      - apps/mobile/node_modules
+    build:
+      - export EXPO_NO_TELEMETRY=1
+      - cd android
+      - gradle assembleRelease -x lintVitalRelease 
+        -PreactNativeArchitectures=x86 -PreactNativeDevServerIp=localhost
+    ndk: r27b
+
+  - versionName: 0.1.7
+    versionCode: 84
+    commit: v0.1.7
+    subdir: apps/mobile
+    sudo:
+      - echo 'deb https://deb.debian.org/debian forky main' > 
+        /etc/apt/sources.list.d/forky.list
+      - apt-get update
+      - apt-get install -y -t forky nodejs npm
+    init:
+      - export EXPO_NO_TELEMETRY=1
+      - npm ci --omit=dev
+    output: android/app/build/outputs/apk/release/app-release-unsigned.apk
+    binary: 
+      https://github.com/RobertPlant/scottish-tides/releases/download/v%v/scottish-tides-%v-x86_64.apk
+    prebuild:
+      - export EXPO_NO_TELEMETRY=1
+      - find node_modules -type f \( -name '*.gradle' -o -name '*.gradle.kts' -o
+        -name '*.kt' \) -exec sed -i -e 
+        's/JavaVersion.VERSION_17/JavaVersion.VERSION_21/g' -e 
+        's/jvmToolchain(17)/jvmToolchain(21)/g' -e 
+        's/JvmTarget.fromTarget("17")/JvmTarget.fromTarget("21")/g' -e 
+        "s/jvmTarget = '17'/jvmTarget = '21'/g" {} +
+      - ./node_modules/.bin/expo prebuild --platform android --no-install
+      - sed -i '/signingConfig signingConfigs.debug/d' android/app/build.gradle
+    scanignore:
+      - apps/mobile/node_modules/hermes-compiler/hermesc/linux64-bin/hermesc
+      - apps/mobile/node_modules/expo-modules-core/android/ExpoModulesCorePlugin.gradle
+      - apps/mobile/node_modules/react-native/ReactAndroid/publish.gradle
+      - apps/mobile/node_modules/@react-native-async-storage/async-storage/android/build.gradle
+      - apps/mobile/node_modules/@react-native-masked-view/masked-view/android/build.gradle
+      - apps/mobile/node_modules/react-native-safe-area-context/android/build.gradle
+      - apps/mobile/node_modules/react-native-screens/android/build.gradle
+      - apps/mobile/node_modules/react-native-svg/android/build.gradle
+    scandelete:
+      - apps/mobile/node_modules
+    build:
+      - export EXPO_NO_TELEMETRY=1
+      - cd android
+      - gradle assembleRelease -x lintVitalRelease 
+        -PreactNativeArchitectures=x86_64 -PreactNativeDevServerIp=localhost
+    ndk: r27b
+
+AllowedAPKSigningKeys: 
+  4b70fec50aaaa91d61ed8bb16046c547b3fb5c99a7cf359c5827adcd72cdaffd
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^v[\d.]+$
+VercodeOperation:
+  - 10 * %c + 1
+  - 10 * %c + 2
+  - 10 * %c + 3
+  - 10 * %c + 4
 UpdateCheckData: 
   apps/mobile/app.json|"versionCode":\s*(\d+)|apps/mobile/app.json|"version":\s*"([\d.]+)"
-CurrentVersion: 0.1.6
-CurrentVersionCode: 7
+CurrentVersion: 0.1.7
+CurrentVersionCode: 84

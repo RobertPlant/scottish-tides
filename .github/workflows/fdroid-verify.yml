@@ -1,8 +1,8 @@
 name: F-Droid reproducibility check
 
-# Builds this commit twice, once through release.yml and once the way F-Droid's
-# buildserver does (fdroiddata's "fdroid build" CI job, trimmed to this app), and
-# checks our signature fits F-Droid's build. If it doesn't, F-Droid rejects the
+# Builds this commit twice per ABI, once through release.yml and once the way
+# F-Droid's buildserver does (fdroiddata's "fdroid build" CI job, trimmed to this
+# app), and checks our signature fits each of F-Droid's builds. If it doesn't, F-Droid rejects the
 # release. Run it before tagging whenever release.yml, the recipe's build steps,
 # or native dependencies change. PRs that touch the build run it by themselves.
 on:
@@ -22,6 +22,15 @@ jobs:
 
   fdroid:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # n = the build's position in the recipe (and release.yml's matrix).
+        include:
+          - { n: 1, abi: armeabi-v7a }
+          - { n: 2, abi: arm64-v8a }
+          - { n: 3, abi: x86 }
+          - { n: 4, abi: x86_64 }
     container: registry.gitlab.com/fdroid/fdroidserver:buildserver-trixie
     defaults:
       run:
@@ -44,12 +53,14 @@ jobs:
           git -C "$home_vagrant/gradlew-fdroid" pull
 
           app=com.robertplant.scottishtides
-          vercode=$(sed -n 's/^    versionCode: //p' "fdroid/$app.yml" | tail -1)
+          vercode=$(sed -n 's/^    versionCode: //p' "fdroid/$app.yml" | sed -n '${{ matrix.n }}p')
           mkdir -p "$home_vagrant"/{metadata,tmp,unsigned,logs}
-          # The committed recipe, building this commit, minus Binaries: (that
+          # The committed recipe, building this commit, minus each binary: (it
           # points at a published release; the compare job checks against ours).
-          sed -e "s/^    commit: .*/    commit: $COMMIT/" -e '/^Binaries:/{N;d}' \
+          sed -e "s/^    commit: .*/    commit: $COMMIT/" -e '/^    binary:/d' \
+            -e '/^      https:\/\/github.com\/RobertPlant\/scottish-tides\/releases\//d' \
             "fdroid/$app.yml" > "$home_vagrant/metadata/$app.yml"
+          ! grep -n 'releases/download' "$home_vagrant/metadata/$app.yml"
           chown -R vagrant "$home_vagrant"
 
           cd "$home_vagrant"
@@ -62,11 +73,11 @@ jobs:
           }
           fdroid fetch_repo "$app:$vercode" --verbose # clones the app into build/
           fdroid build --verbose --test --refresh-scanner --on-server --no-tarball "$app:$vercode"
-          cp "tmp/${app}_${vercode}.apk" "$GITHUB_WORKSPACE/fdroid.apk"
+          cp "tmp/${app}_${vercode}.apk" "$GITHUB_WORKSPACE/fdroid-${{ matrix.abi }}.apk"
       - uses: actions/upload-artifact@v7
         with:
-          name: fdroid-apk
-          path: fdroid.apk
+          name: fdroid-${{ matrix.abi }}
+          path: fdroid-${{ matrix.abi }}.apk
 
   compare:
     needs: [ours, fdroid]
@@ -77,11 +88,16 @@ jobs:
           merge-multiple: true
       - run: |
           PATH="$PATH:$(ls -d "$ANDROID_HOME"/build-tools/* | sort -V | tail -1)" # apksigner
-          if pipx run apksigcopier compare --unsigned scottish-tides.apk fdroid.apk; then
-            echo "Reproducible: F-Droid's build takes our signature."
-            exit 0
-          fi
           # Entries whose CRC differs, which usually names the culprit.
           entries() { unzip -v "$1" | awk '$8 !~ /^META-INF\// {print $7, $8}' | sort -k2; }
-          diff <(entries scottish-tides.apk) <(entries fdroid.apk) || true
-          exit 1
+          failed=0
+          for abi in armeabi-v7a arm64-v8a x86 x86_64; do
+            ours=$(ls scottish-tides-*-"$abi".apk)
+            if pipx run apksigcopier compare --unsigned "$ours" "fdroid-$abi.apk"; then
+              echo "$abi: reproducible, F-Droid's build takes our signature."
+            else
+              echo "$abi: DIFFERS"; diff <(entries "$ours") <(entries "fdroid-$abi.apk") || true
+              failed=1
+            fi
+          done
+          exit $failed
