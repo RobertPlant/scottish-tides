@@ -50,6 +50,14 @@ updates:
         update-types: [version-update:semver-major]
       - dependency-name: typescript
         update-types: [version-update:semver-major]
+      # A direct devDep only so eslint-plugin-import can find it (see //lint in
+      # package.json); the rest of typescript-eslint comes in transitively via
+      # eslint-config-expo. The parser pins its siblings exactly, so bumping it
+      # alone — even a patch — nests a second copy of the stack under it and
+      # leaves the parser and eslint-plugin on different versions (#43). Move
+      # the set together by hand: `npm update @typescript-eslint/eslint-plugin
+      # @typescript-eslint/parser`.
+      - dependency-name: "@typescript-eslint/parser"
 
       # Grouping the Expo SDK set keeps it moving together; it does nothing to
       # stop the whole group moving past the SDK together, which is what #28
