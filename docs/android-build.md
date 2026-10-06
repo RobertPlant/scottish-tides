@@ -170,6 +170,12 @@ every React Native app to use, except where a generated `android/` rules it out
   `SYSTEM_ALERT_WINDOW` and the storage permissions that React Native and Expo
   merge in. The app uses none of them, and reviewers ask about each. It only
   touches release builds; debug builds need `INTERNET` to reach Metro.
+- **`plugins/with-release-shrinking.js`** turns on R8 (`minifyEnabled`) and
+  resource shrinking for release builds, which reviewers ask for. R8 can remove
+  code only reached by reflection, and the build still succeeds, so after a
+  dependency change, install a release APK and use the app before tagging.
+  Expo's and React Native's own keep rules cover their modules; add ours to
+  `proguard-rules.pro` via a plugin if something does go missing.
 - **`UpdateCheckData`** reads `versionCode`/`version` from
   `apps/mobile/app.json`. `UpdateCheckMode: Tags` otherwise looks in
   `build.gradle`, which isn't committed.

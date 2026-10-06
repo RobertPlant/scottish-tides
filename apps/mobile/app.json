@@ -2,7 +2,7 @@
   "expo": {
     "name": "Scottish Tides",
     "slug": "scottish-tides",
-    "version": "0.1.7",
+    "version": "0.1.8",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "scottishtides",
@@ -12,7 +12,7 @@
     },
     "android": {
       "package": "com.robertplant.scottishtides",
-      "versionCode": 8,
+      "versionCode": 9,
       "adaptiveIcon": {
         "backgroundColor": "#0b2942",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
@@ -50,6 +50,7 @@
       "./plugins/with-no-dependencies-info",
       "./plugins/with-release-permissions",
       "./plugins/with-abi-split",
+      "./plugins/with-release-shrinking",
       "expo-font",
       "expo-web-browser",
       "expo-status-bar",

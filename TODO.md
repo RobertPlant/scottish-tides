@@ -105,7 +105,10 @@ All of these are enforced in CI.
       `plugins/with-abi-split.js`), no unused permissions (`plugins/with-release-permissions.js`),
       and fdroiddata's React Native template (Node from forky, JDK 21 patch, `gradle: yes`).
       Tagged; the recipe is pinned to it.
-- [ ] Move !51187 to v0.1.7, get its CI green, take it out of draft.
+- [x] Move !51187 to v0.1.7 and get its CI green.
+- [ ] v0.1.8: R8 and resource shrinking (`plugins/with-release-shrinking.js`), the reviewer's
+      first ask on !51187. Smoke-test a release APK on a device before tagging (R8 can strip
+      reflection-only code, which CI can't catch), then move !51187 to 0.1.8 and reply.
 - [ ] iOS binaries still need a Mac or EAS — untried.
 
 ## 6. Feature roadmap (offered, not started)
