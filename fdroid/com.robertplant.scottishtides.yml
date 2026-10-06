@@ -48,8 +48,8 @@ Builds:
     build:
       - export EXPO_NO_TELEMETRY=1
       - cd android
-      - gradle assembleRelease -x lintVitalRelease -PreactNativeArchitectures=armeabi-v7a
-        -PreactNativeDevServerIp=localhost
+      - gradle assembleRelease -x lintVitalRelease "-Dorg.gradle.jvmargs=-Xmx4g -XX:MaxMetaspaceSize=1g"
+        -PreactNativeArchitectures=armeabi-v7a -PreactNativeDevServerIp=localhost
     ndk: r27b
 
   - versionName: 0.1.8
@@ -88,8 +88,8 @@ Builds:
     build:
       - export EXPO_NO_TELEMETRY=1
       - cd android
-      - gradle assembleRelease -x lintVitalRelease -PreactNativeArchitectures=arm64-v8a
-        -PreactNativeDevServerIp=localhost
+      - gradle assembleRelease -x lintVitalRelease "-Dorg.gradle.jvmargs=-Xmx4g -XX:MaxMetaspaceSize=1g"
+        -PreactNativeArchitectures=arm64-v8a -PreactNativeDevServerIp=localhost
     ndk: r27b
 
   - versionName: 0.1.8
@@ -128,8 +128,8 @@ Builds:
     build:
       - export EXPO_NO_TELEMETRY=1
       - cd android
-      - gradle assembleRelease -x lintVitalRelease -PreactNativeArchitectures=x86
-        -PreactNativeDevServerIp=localhost
+      - gradle assembleRelease -x lintVitalRelease "-Dorg.gradle.jvmargs=-Xmx4g -XX:MaxMetaspaceSize=1g"
+        -PreactNativeArchitectures=x86 -PreactNativeDevServerIp=localhost
     ndk: r27b
 
   - versionName: 0.1.8
@@ -168,8 +168,8 @@ Builds:
     build:
       - export EXPO_NO_TELEMETRY=1
       - cd android
-      - gradle assembleRelease -x lintVitalRelease -PreactNativeArchitectures=x86_64
-        -PreactNativeDevServerIp=localhost
+      - gradle assembleRelease -x lintVitalRelease "-Dorg.gradle.jvmargs=-Xmx4g -XX:MaxMetaspaceSize=1g"
+        -PreactNativeArchitectures=x86_64 -PreactNativeDevServerIp=localhost
     ndk: r27b
 
 AllowedAPKSigningKeys: 4b70fec50aaaa91d61ed8bb16046c547b3fb5c99a7cf359c5827adcd72cdaffd

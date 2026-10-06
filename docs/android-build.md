@@ -175,7 +175,10 @@ every React Native app to use, except where a generated `android/` rules it out
   code only reached by reflection, and the build still succeeds, so after a
   dependency change, install a release APK and use the app before tagging.
   Expo's and React Native's own keep rules cover their modules; add ours to
-  `proguard-rules.pro` via a plugin if something does go missing.
+  `proguard-rules.pro` via a plugin if something does go missing. R8 needs more
+  than the 1.5 GB heap `with-low-memory-gradle` caps Gradle at, so CI and the
+  recipe pass `-Dorg.gradle.jvmargs=-Xmx4g …`, which overrides it. A local
+  release build on a ~4 GB box may not have that much to give.
 - **`UpdateCheckData`** reads `versionCode`/`version` from
   `apps/mobile/app.json`. `UpdateCheckMode: Tags` otherwise looks in
   `build.gradle`, which isn't committed.
