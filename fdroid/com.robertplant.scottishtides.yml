@@ -12,9 +12,9 @@ RepoType: git
 Repo: https://github.com/RobertPlant/scottish-tides.git
 
 Builds:
-  - versionName: 0.1.7
-    versionCode: 81
-    commit: 35df4a0f2a6fe2aee211fca6b17dfb0748d433c5
+  - versionName: 0.1.8
+    versionCode: 91
+    commit: v0.1.8
     subdir: apps/mobile
     sudo:
       - echo 'deb https://deb.debian.org/debian forky main' > /etc/apt/sources.list.d/forky.list
@@ -48,13 +48,13 @@ Builds:
     build:
       - export EXPO_NO_TELEMETRY=1
       - cd android
-      - gradle assembleRelease -x lintVitalRelease -PreactNativeArchitectures=armeabi-v7a
-        -PreactNativeDevServerIp=localhost
+      - gradle assembleRelease -x lintVitalRelease "-Dorg.gradle.jvmargs=-Xmx4g -XX:MaxMetaspaceSize=1g"
+        -PreactNativeArchitectures=armeabi-v7a -PreactNativeDevServerIp=localhost
     ndk: r27b
 
-  - versionName: 0.1.7
-    versionCode: 82
-    commit: 35df4a0f2a6fe2aee211fca6b17dfb0748d433c5
+  - versionName: 0.1.8
+    versionCode: 92
+    commit: v0.1.8
     subdir: apps/mobile
     sudo:
       - echo 'deb https://deb.debian.org/debian forky main' > /etc/apt/sources.list.d/forky.list
@@ -88,13 +88,13 @@ Builds:
     build:
       - export EXPO_NO_TELEMETRY=1
       - cd android
-      - gradle assembleRelease -x lintVitalRelease -PreactNativeArchitectures=arm64-v8a
-        -PreactNativeDevServerIp=localhost
+      - gradle assembleRelease -x lintVitalRelease "-Dorg.gradle.jvmargs=-Xmx4g -XX:MaxMetaspaceSize=1g"
+        -PreactNativeArchitectures=arm64-v8a -PreactNativeDevServerIp=localhost
     ndk: r27b
 
-  - versionName: 0.1.7
-    versionCode: 83
-    commit: 35df4a0f2a6fe2aee211fca6b17dfb0748d433c5
+  - versionName: 0.1.8
+    versionCode: 93
+    commit: v0.1.8
     subdir: apps/mobile
     sudo:
       - echo 'deb https://deb.debian.org/debian forky main' > /etc/apt/sources.list.d/forky.list
@@ -128,13 +128,13 @@ Builds:
     build:
       - export EXPO_NO_TELEMETRY=1
       - cd android
-      - gradle assembleRelease -x lintVitalRelease -PreactNativeArchitectures=x86
-        -PreactNativeDevServerIp=localhost
+      - gradle assembleRelease -x lintVitalRelease "-Dorg.gradle.jvmargs=-Xmx4g -XX:MaxMetaspaceSize=1g"
+        -PreactNativeArchitectures=x86 -PreactNativeDevServerIp=localhost
     ndk: r27b
 
-  - versionName: 0.1.7
-    versionCode: 84
-    commit: 35df4a0f2a6fe2aee211fca6b17dfb0748d433c5
+  - versionName: 0.1.8
+    versionCode: 94
+    commit: v0.1.8
     subdir: apps/mobile
     sudo:
       - echo 'deb https://deb.debian.org/debian forky main' > /etc/apt/sources.list.d/forky.list
@@ -168,8 +168,8 @@ Builds:
     build:
       - export EXPO_NO_TELEMETRY=1
       - cd android
-      - gradle assembleRelease -x lintVitalRelease -PreactNativeArchitectures=x86_64
-        -PreactNativeDevServerIp=localhost
+      - gradle assembleRelease -x lintVitalRelease "-Dorg.gradle.jvmargs=-Xmx4g -XX:MaxMetaspaceSize=1g"
+        -PreactNativeArchitectures=x86_64 -PreactNativeDevServerIp=localhost
     ndk: r27b
 
 AllowedAPKSigningKeys: 4b70fec50aaaa91d61ed8bb16046c547b3fb5c99a7cf359c5827adcd72cdaffd
@@ -183,5 +183,5 @@ VercodeOperation:
   - 10 * %c + 4
 UpdateCheckData: 
   apps/mobile/app.json|"versionCode":\s*(\d+)|apps/mobile/app.json|"version":\s*"([\d.]+)"
-CurrentVersion: 0.1.7
-CurrentVersionCode: 84
+CurrentVersion: 0.1.8
+CurrentVersionCode: 94

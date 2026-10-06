@@ -98,8 +98,11 @@ jobs:
         # The recipe's gradleprops. The dev-server IP is otherwise the build
         # machine's, baked into resources.arsc. Toolchain auto-detection is off
         # so a stray JDK 17 on the runner can't be used where F-Droid has none.
+        # The heap override beats the 1.5 GB cap plugins/with-low-memory-gradle.js
+        # writes for low-RAM dev boxes: R8 needs more. Heap doesn't change the APK.
         run: >-
           ./gradlew assembleRelease -x lintVitalRelease
+          "-Dorg.gradle.jvmargs=-Xmx4g -XX:MaxMetaspaceSize=1g"
           -PreactNativeArchitectures=${{ matrix.abi }}
           -PreactNativeDevServerIp=localhost
           -Porg.gradle.java.installations.auto-detect=false
