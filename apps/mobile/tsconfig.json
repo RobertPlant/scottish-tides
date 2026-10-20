@@ -1,5 +1,6 @@
 {
-  "extends": "expo/tsconfig.base",
+  // a path, not "expo/tsconfig.base": expo 58's exports map leaves it out, so eslint's import resolver (get-tsconfig) can't find it
+  "extends": "./node_modules/expo/tsconfig.base.json",
   "compilerOptions": {
     "strict": true,
     "paths": {
