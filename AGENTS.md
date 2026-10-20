@@ -45,6 +45,11 @@ uses the local `modules/platform-location` module (plain `LocationManager`),
 `npm run build:android` inside `devenv shell`. Details and the fdroiddata recipe:
 `docs/android-build.md`, `fdroid/com.robertplant.scottishtides.yml`.
 
+The release signing key is a repo secret used only by the Sign step of
+`.github/workflows/release.yml`. Never route it through Gradle, Expo or EAS
+or onto a command line — the repo and its Actions logs are public. Read
+release logs with a targeted `grep`, never raw `tail`/`head`.
+
 ## RN-Web quirks
 
 - **Don't pass an array `style` through `<Link asChild>`.** expo-router `<Link>`
