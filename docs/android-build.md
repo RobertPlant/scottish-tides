@@ -25,7 +25,11 @@ Locally the release APK is signed with Expo's template debug keystore, so it
 installs straight away (`adb install -r <apk>`). It is **not** a distributable
 signing identity. Real releases are signed with the project key by
 `.github/workflows/release.yml`, and F-Droid ships that same signature (see
-"Reproducible builds" below).
+"Reproducible builds" below). The key only ever enters that workflow's Sign
+step, as environment variables. Keep it that way: never pass it to Gradle,
+Expo or EAS, or on a command line, since the Actions logs are public and the
+runner prints the command line of every process it kills. Read release logs
+with a targeted `grep`, not `tail`.
 
 Bump `expo.android.versionCode` in `app.json` for every release F-Droid should
 pick up, and tag the commit `vX.Y.Z` (the metadata's `UpdateCheckMode: Tags`

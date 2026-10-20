@@ -137,6 +137,10 @@ jobs:
         env:
           APK: ${{ env.APP }}/android/app/build/outputs/apk/release/app-release-unsigned.apk
 
+      # The key lives in this step and nowhere else. Never hand it to Gradle,
+      # Expo or EAS, or put it on a command line: this repo is public, so are
+      # its logs, and the runner prints the command line of any process it
+      # kills.
       - name: Sign
         env:
           KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
@@ -149,19 +153,20 @@ jobs:
           BUILD_TOOLS="$(ls -d "$ANDROID_HOME"/build-tools/* | sort -V | tail -1)"
           VERSION=$(node -p "require('$APP/app.json').expo.version")
           OUT="scottish-tides-$VERSION-${{ matrix.abi }}.apk"
-          echo "$KEYSTORE_B64" | base64 -d > /tmp/release.jks
+          KS="$RUNNER_TEMP/release.jks"
+          trap 'rm -f "$KS"' EXIT
+          echo "$KEYSTORE_B64" | base64 -d > "$KS"
           # Sign Gradle's output as-is (it's already aligned). Re-aligning, by
           # zipalign or apksigner's own default, would change bytes F-Droid's
           # unsigned build has, and our signature would no longer fit it.
           "$BUILD_TOOLS/apksigner" sign \
             --alignment-preserved \
-            --ks /tmp/release.jks \
+            --ks "$KS" \
             --ks-pass env:KEYSTORE_PASSWORD \
             --ks-key-alias "$KEY_ALIAS" \
             --out "$OUT" \
             "$APP/android/app/build/outputs/apk/release/app-release-unsigned.apk"
           "$BUILD_TOOLS/apksigner" verify --print-certs "$OUT"
-          rm -f /tmp/release.jks
 
       - uses: actions/upload-artifact@v7
         with:
