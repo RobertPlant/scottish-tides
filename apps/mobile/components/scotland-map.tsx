@@ -6,7 +6,7 @@
 // zoom — useful for the tightly-clustered Argyll races. Decorative, not for
 // navigation.
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { type ComponentRef, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { type LayoutChangeEvent, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Svg, { Circle, G, Path, Polygon, Rect, Text as SvgText } from 'react-native-svg';
@@ -120,7 +120,7 @@ export function ScotlandMap({
   // Scroll-wheel / trackpad zoom on web. View props don't forward onWheel, so
   // attach a non-passive DOM listener to the frame element and zoom around the
   // cursor, preventing the page from scrolling while pointing at the map.
-  const frameRef = useRef<View>(null);
+  const frameRef = useRef<ComponentRef<typeof View>>(null);
   useEffect(() => {
     if (Platform.OS !== 'web') {
       return;

@@ -78,6 +78,9 @@ updates:
         update-types: [version-update:semver-major]
       - dependency-name: expo-*
         update-types: [version-update:semver-major]
+      # its major is the SDK too, but expo-* doesn't match it (#51)
+      - dependency-name: eslint-config-expo
+        update-types: [version-update:semver-major]
       # Minor too, not just major: #31 was reanimated 4.5.1 -> 4.7.0 and
       # worklets 0.10.1 -> 0.13.0, both minor, both pinned *exactly* by SDK 57,
       # and the static export's node render died on `requestAnimationFrame is

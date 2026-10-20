@@ -2,7 +2,7 @@
 // theme colour, Apple touch metadata and — in production only — registers the
 // service worker for offline use. Paths use the configured base URL.
 
-import { ScrollViewStyleReset } from 'expo-router/html';
+import { ScrollViewStyleReset, useServerDocumentContext } from 'expo-router/html';
 import type { PropsWithChildren } from 'react';
 
 const base = process.env.EXPO_BASE_URL || '';
@@ -12,8 +12,12 @@ const isProd = process.env.NODE_ENV === 'production';
 const swRegister = `if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('${base}/sw.js').catch(function(){})})}`;
 
 export default function Root({ children }: PropsWithChildren) {
+  // expo-router 58 hands the bundle scripts, styles and favicon to the root as nodes,
+  // leave these out and the export ships with no JS
+  const { htmlAttributes, headNodes, bodyAttributes, bodyNodes } = useServerDocumentContext();
+
   return (
-    <html lang="en">
+    <html lang="en" {...htmlAttributes}>
       <head>
         <meta charSet="utf-8" />
         {/* Fallback only. Each screen sets its own via `expo-router/head`; without
@@ -42,8 +46,12 @@ export default function Root({ children }: PropsWithChildren) {
             request data reaches it, and an inline <script> is the only way to
             register the worker from the static shell. */}
         {isProd ? <script dangerouslySetInnerHTML={{ __html: swRegister }} /> : null}
+        {headNodes}
       </head>
-      <body>{children}</body>
+      <body {...bodyAttributes}>
+        {children}
+        {bodyNodes}
+      </body>
     </html>
   );
 }

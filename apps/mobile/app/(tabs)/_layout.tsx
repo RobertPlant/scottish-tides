@@ -20,8 +20,10 @@ export default function TabsLayout() {
         tabBarStyle: { backgroundColor: palette.surface, borderTopColor: palette.border },
       }}
     >
-      {/* `/` just redirects to the selected station — hidden from the tab bar. */}
-      <Tabs.Screen name="index" options={{ href: null }} />
+      {/* `/` just redirects to the selected station, hidden from the tab bar. Not
+          `href: null`: since expo-router 58 that makes the route unreachable too,
+          and `/` lands on a bare /station. */}
+      <Tabs.Screen name="index" options={{ tabBarItemStyle: { display: 'none' } }} />
       <Tabs.Screen
         name="station/[id]"
         options={{
