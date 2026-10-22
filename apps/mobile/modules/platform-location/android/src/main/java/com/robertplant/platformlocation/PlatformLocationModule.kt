@@ -4,12 +4,13 @@ import android.Manifest
 import android.content.Context
 import android.location.Location
 import android.location.LocationManager
+import android.os.Build
 import android.os.CancellationSignal
 import androidx.core.content.ContextCompat
 import androidx.core.location.LocationManagerCompat
 import androidx.core.os.bundleOf
 import androidx.core.util.Consumer
-import expo.modules.interfaces.permissions.Permissions
+import expo.modules.interfaces.permissions.PermissionsStatus
 import expo.modules.kotlin.Promise
 import expo.modules.kotlin.exception.CodedException
 import expo.modules.kotlin.exception.Exceptions
@@ -31,19 +32,30 @@ class PlatformLocationModule : Module() {
   override fun definition() = ModuleDefinition {
     Name("PlatformLocation")
 
+    // Expo's own helper only reports `granted` when every permission is, so
+    // choosing "approximate" in the dialog read as a refusal. Coarse is enough
+    // to pick the nearest station.
     AsyncFunction("requestPermissionsAsync") { promise: Promise ->
-      Permissions.askForPermissionsWithPermissionsManager(
-        appContext.permissions,
-        promise,
-        Manifest.permission.ACCESS_COARSE_LOCATION,
-        Manifest.permission.ACCESS_FINE_LOCATION
+      val permissions = appContext.permissions ?: throw Exceptions.PermissionsModuleNotFound()
+      permissions.askForPermissions(
+        { result ->
+          val granted = result[COARSE]?.status == PermissionsStatus.GRANTED
+          promise.resolve(bundleOf("status" to if (granted) "granted" else "denied", "granted" to granted))
+        },
+        COARSE,
+        FINE
       )
     }
 
     AsyncFunction("getCurrentPositionAsync") { promise: Promise ->
       val context = appContext.reactContext ?: throw Exceptions.ReactContextLost()
       val manager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
-      val providers = PROVIDERS.filter { manager.isProviderEnabled(it) }
+      // Before Android 12 the GPS provider throws without fine location.
+      val gpsAllowed = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S ||
+        appContext.permissions?.hasGrantedPermissions(FINE) == true
+      val providers = PROVIDERS.filter {
+        (it != LocationManager.GPS_PROVIDER || gpsAllowed) && manager.isProviderEnabled(it)
+      }
       if (providers.isEmpty()) {
         throw LocationUnavailableException()
       }
@@ -84,6 +96,8 @@ class PlatformLocationModule : Module() {
   private companion object {
     val PROVIDERS = listOf(LocationManager.GPS_PROVIDER, LocationManager.NETWORK_PROVIDER)
     const val MAX_CACHE_AGE_MS = 5 * 60 * 1000L
+    const val COARSE = Manifest.permission.ACCESS_COARSE_LOCATION
+    const val FINE = Manifest.permission.ACCESS_FINE_LOCATION
   }
 }
 
