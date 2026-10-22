@@ -6,6 +6,7 @@ import { Platform, Pressable, ScrollView, StyleSheet, View } from 'react-native'
 import { Note } from '@/components/note';
 import { ScotlandMap } from '@/components/scotland-map';
 import { ThemedText } from '@/components/themed-text';
+import { useSidePadding } from '@/hooks/use-side-padding';
 import { usePalette } from '@/hooks/use-theme-color';
 import { nearestStation } from '@/lib/geo';
 import { getCurrentCoords } from '@/lib/native-location';
@@ -14,6 +15,7 @@ import { REGION_ORDER, type Station, STATIONS, stationById } from '@/lib/station
 import { RACES } from '@/lib/streams';
 
 export default function MapScreen() {
+  const sidePadding = useSidePadding();
   const palette = usePalette();
   const router = useRouter();
   const { stationId, setStationId, favourites } = useSelectedStation();
@@ -81,7 +83,7 @@ export default function MapScreen() {
 
   return (
     <ScrollView
-      contentContainerStyle={styles.content}
+      contentContainerStyle={[styles.content, sidePadding]}
       style={{ backgroundColor: palette.background }}
     >
       <Head>

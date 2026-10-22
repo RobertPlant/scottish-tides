@@ -18,6 +18,7 @@ import { WeekOverview } from '@/components/week-overview';
 import { useDayNav } from '@/hooks/use-day-nav';
 import { useHydrated } from '@/hooks/use-hydrated';
 import { useNow } from '@/hooks/use-now';
+import { useSidePadding } from '@/hooks/use-side-padding';
 import { usePalette } from '@/hooks/use-theme-color';
 import { sunTimes } from '@/lib/astronomy';
 import { ymdAddDays } from '@/lib/datetime';
@@ -45,6 +46,7 @@ export function StationDayView({
   /** Screen-specific identity header rendered above the day view. */
   header?: ReactNode;
 }) {
+  const sidePadding = useSidePadding();
   const palette = usePalette();
 
   // On web the chart hint is revealed on hover to keep the chart clean; on
@@ -108,7 +110,7 @@ export function StationDayView({
 
   return (
     <ScrollView
-      contentContainerStyle={styles.content}
+      contentContainerStyle={[styles.content, sidePadding]}
       style={{ backgroundColor: palette.background }}
     >
       <GestureDetector gesture={swipe}>
