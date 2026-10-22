@@ -6,3 +6,6 @@ devenv.local.nix
 
 # OS
 .DS_Store
+
+# verify-tidetimes page cache
+tools/.cache/

@@ -26,6 +26,10 @@ green**, which checks predictions against reference vectors generated from
 high/low-water *time* tolerance is amplitude-aware because near-amphidromic flat
 ports (e.g. Port Ellen, ~0.5 m range) have ill-conditioned turning-point timing.
 Regenerate the vectors with `tools/gen-reference.py` if you add a station.
+`tools/verify-tidetimes.ts` checks every station against tidetimes.org.uk;
+re-run it after refitting a station or recalibrating a shift.
+`tools/calibrate-shift.ts` refits a secondary port's shift (Oban) from the same
+source; `--write` updates its JSON.
 
 Station data lives in `apps/mobile/assets/data/*.json` (one file per port:
 constituents + datum + provenance) with a registry in
