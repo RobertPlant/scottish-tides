@@ -96,12 +96,12 @@ test('tidalStats clamps tiny ranges to sane floors', () => {
   assert.equal(neapRange, 0.05);
 });
 
-test('tidalStats adds the secondary-port range shift', () => {
+test('tidalStats scales by the secondary-port height scale', () => {
   const shift = {
     hw_time_min: 0,
     lw_time_min: 0,
-    hw_height_m: 0.5,
-    lw_height_m: -0.3,
+    height_scale: 0.8,
+    height_offset_m: 0.1,
   } as Station['shift'];
   const s = fakeStation(
     '__no_ref__',
@@ -112,16 +112,16 @@ test('tidalStats adds the secondary-port range shift', () => {
     shift,
   );
   const { springRange, neapRange } = tidalStats(s);
-  // rangeShift = 0.5 − (−0.3) = 0.8 added to both.
-  assert.equal(springRange, 5.8);
-  assert.equal(neapRange, 3.8);
+  // 0.8 × 5.0 and 0.8 × 3.0; the offset doesn't change a range.
+  assert.equal(springRange, 4.0);
+  assert.ok(Math.abs(neapRange - 2.4) < 1e-9);
 });
 
 test("a secondary port's day holds exactly its own events", () => {
   const oban = stationById('oban');
   assert.ok(oban);
-  // Oban is Tobermory − 21/18 min, so events within the offset of midnight land
-  // on the other civil day. 25 Aug 2026 has a 23:48 LW (Tobermory 00:09 on the
+  // Oban is Tobermory − 9/13 min, so events within the offset of midnight land
+  // on the other civil day. 25 Aug 2026 has a 23:53 LW (Tobermory 00:06 on the
   // 26th): before the shift was applied ahead of the window trim, the 25th lost
   // it and the 26th listed it first, out of order.
   const aug25 = dayEvents(oban, ukDayStartFromYmd('2026-08-25'));

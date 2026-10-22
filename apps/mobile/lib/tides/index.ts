@@ -12,6 +12,7 @@ export { noaa, NAME2CONST, type Constituent } from './constituents';
 export {
   Tide,
   applyShift,
+  shiftHeight,
   type ConstituentJSON,
   type Shift,
   type StationData,
@@ -86,7 +87,7 @@ export function pruneMinorExtrema(events: TideEvent[], minProminenceM: number): 
  *
  * The base search window is widened by the secondary-port time offset and the
  * trim happens *after* the shift, so the window means what the caller asked for:
- * an Oban (−21 min) day otherwise both lost its own late-evening event and
+ * an Oban (−9/13 min) day otherwise both lost its own late-evening event and
  * inherited one from the previous evening.
  */
 export function predictExtrema(

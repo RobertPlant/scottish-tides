@@ -3,7 +3,7 @@
 import coefficientRefs from '@/assets/data/coefficient-refs.json';
 import { ukEndOfDay } from '@/lib/datetime';
 import type { Station } from '@/lib/stations';
-import { heightSeries, predictExtrema, type TideEvent } from '@/lib/tides';
+import { heightSeries, predictExtrema, shiftHeight, type TideEvent } from '@/lib/tides';
 
 const COEF_REFS = coefficientRefs as Record<string, { springRef: number; neapRef: number }>;
 
@@ -14,35 +14,19 @@ function dayWindow(dayStart: Date): { from: Date; to: Date } {
 /**
  * Apply a secondary-port correction to a continuous curve. The time uses the
  * mean of the HW/LW offsets (they differ by only a few minutes, and the curve is
- * near-flat at the turns, so the error is sub-pixel). The *height* offset is
- * interpolated between the low-water offset (at the window trough) and the
- * high-water offset (at the window peak). A single mean height offset instead
- * detaches every HW/LW marker from the curve by half the HW−LW offset spread —
- * the "bumps" where each marker's stalk pokes through the line — because the
- * markers (see `applyShift`) use the exact per-event offset. Interpolating by
- * height lands the peaks and troughs back on their markers.
+ * near-flat at the turns, so the error is sub-pixel). The height goes through
+ * the same linear map as the HW/LW markers (see `applyShift`), so peaks and
+ * troughs land on their markers.
  */
 function shiftCurve(
   base: { time: Date; height: number }[],
   shift: NonNullable<Station['shift']>,
 ): { time: Date; height: number }[] {
   const dtMs = ((shift.hw_time_min + shift.lw_time_min) / 2) * 60_000;
-  let min = Number.POSITIVE_INFINITY;
-  let max = Number.NEGATIVE_INFINITY;
-  for (const s of base) {
-    if (s.height < min) {
-      min = s.height;
-    }
-    if (s.height > max) {
-      max = s.height;
-    }
-  }
-  const span = max - min;
-  return base.map((s) => {
-    const frac = span > 0 ? (s.height - min) / span : 0.5;
-    const dh = shift.lw_height_m + frac * (shift.hw_height_m - shift.lw_height_m);
-    return { time: new Date(s.time.getTime() + dtMs), height: s.height + dh };
-  });
+  return base.map((s) => ({
+    time: new Date(s.time.getTime() + dtMs),
+    height: shiftHeight(s.height, shift),
+  }));
 }
 
 /** High/low waters for the UK civil day starting at `dayStart`. */
@@ -76,22 +60,22 @@ export interface TidalStats {
  * trough daily ranges — see tools/gen-coefficient-refs.ts), which include K2,
  * N2 and the diurnal contribution that the idealised 2·(M2±S2) formula misses.
  * Falls back to that formula for any gauge without a baked reference. For
- * secondary ports the constant HW−LW shift is added, since it widens/narrows
- * every tide equally.
+ * secondary ports both are multiplied by the height scale, since it scales
+ * every tide's range equally.
  */
 export function tidalStats(station: Station): TidalStats {
-  const rangeShift = station.shift ? station.shift.hw_height_m - station.shift.lw_height_m : 0;
+  const rangeScale = station.shift?.height_scale ?? 1;
   const ref = COEF_REFS[station.data.station];
   let springRange: number;
   let neapRange: number;
   if (ref) {
-    springRange = ref.springRef + rangeShift;
-    neapRange = ref.neapRef + rangeShift;
+    springRange = ref.springRef * rangeScale;
+    neapRange = ref.neapRef * rangeScale;
   } else {
     const amp = (name: string) =>
       station.data.constituents.find((c) => c.name === name)?.amplitude ?? 0;
-    springRange = 2 * (amp('M2') + amp('S2')) + rangeShift;
-    neapRange = 2 * Math.abs(amp('M2') - amp('S2')) + rangeShift;
+    springRange = 2 * (amp('M2') + amp('S2')) * rangeScale;
+    neapRange = 2 * Math.abs(amp('M2') - amp('S2')) * rangeScale;
   }
   return {
     springRange: Math.max(springRange, 0.1),
@@ -116,7 +100,7 @@ export interface TideClass {
   /**
    * Tidal coefficient on the French (SHOM) 20–120 scale: a numerical measure
    * of "springiness". Anchored so mean neaps = 45 and mean springs = 95, then
-   * extrapolated and clamped to [20, 120]. The constant range-shift for
+   * extrapolated and clamped to [20, 120]. The range scale for
    * secondary ports cancels in the (range − neap)/(spring − neap) ratio, so
    * this stays a purely astronomical quantity.
    */
