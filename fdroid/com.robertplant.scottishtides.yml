@@ -12,9 +12,9 @@ RepoType: git
 Repo: https://github.com/RobertPlant/scottish-tides.git
 
 Builds:
-  - versionName: 0.1.8
-    versionCode: 91
-    commit: 0d1246216843cc99ed7846c0974ce3d6df496da7
+  - versionName: 0.1.9
+    versionCode: 101
+    commit: v0.1.9
     subdir: apps/mobile
     sudo:
       - echo 'deb https://deb.debian.org/debian forky main' > /etc/apt/sources.list.d/forky.list
@@ -52,9 +52,9 @@ Builds:
         -PreactNativeArchitectures=armeabi-v7a -PreactNativeDevServerIp=localhost
     ndk: r27b
 
-  - versionName: 0.1.8
-    versionCode: 92
-    commit: 0d1246216843cc99ed7846c0974ce3d6df496da7
+  - versionName: 0.1.9
+    versionCode: 102
+    commit: v0.1.9
     subdir: apps/mobile
     sudo:
       - echo 'deb https://deb.debian.org/debian forky main' > /etc/apt/sources.list.d/forky.list
@@ -92,9 +92,9 @@ Builds:
         -PreactNativeArchitectures=arm64-v8a -PreactNativeDevServerIp=localhost
     ndk: r27b
 
-  - versionName: 0.1.8
-    versionCode: 93
-    commit: 0d1246216843cc99ed7846c0974ce3d6df496da7
+  - versionName: 0.1.9
+    versionCode: 103
+    commit: v0.1.9
     subdir: apps/mobile
     sudo:
       - echo 'deb https://deb.debian.org/debian forky main' > /etc/apt/sources.list.d/forky.list
@@ -132,9 +132,9 @@ Builds:
         -PreactNativeArchitectures=x86 -PreactNativeDevServerIp=localhost
     ndk: r27b
 
-  - versionName: 0.1.8
-    versionCode: 94
-    commit: 0d1246216843cc99ed7846c0974ce3d6df496da7
+  - versionName: 0.1.9
+    versionCode: 104
+    commit: v0.1.9
     subdir: apps/mobile
     sudo:
       - echo 'deb https://deb.debian.org/debian forky main' > /etc/apt/sources.list.d/forky.list
@@ -183,5 +183,5 @@ VercodeOperation:
   - 10 * %c + 4
 UpdateCheckData: 
   apps/mobile/app.json|"versionCode":\s*(\d+)|apps/mobile/app.json|"version":\s*"([\d.]+)"
-CurrentVersion: 0.1.8
-CurrentVersionCode: 94
+CurrentVersion: 0.1.9
+CurrentVersionCode: 104
