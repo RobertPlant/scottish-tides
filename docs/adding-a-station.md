@@ -65,7 +65,26 @@ cd apps/mobile && npm run test:engine
 ```
 
 Green means the bundled engine reproduces the canonical prediction to
-< 2 min / < 0.03 m. Done.
+< 2 min / < 0.03 m.
+
+## 5. Check it against an independent source
+
+The parity gate only proves the port matches the Python; it can't catch a bad fit
+or a mis-calibrated shift. Add the station's tidetimes.org.uk slug to `SLUGS` in
+`tools/verify-tidetimes.ts` and compare a year of its high/low waters:
+
+```sh
+cd apps/mobile && node --import tsx ../../tools/verify-tidetimes.ts --station wick
+```
+
+Re-run it for every station whenever constituents are refitted or a shift is
+recalibrated. A secondary port's shift comes from `tools/calibrate-shift.ts`,
+which prints the fit beside the current values and, with `--write`, updates the
+shift JSON:
+
+```sh
+cd apps/mobile && node --import tsx ../../tools/calibrate-shift.ts --station oban --write
+```
 
 ## A reminder on scope
 

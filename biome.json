@@ -15,7 +15,8 @@
       "!**/assets/data/*.json",
       "!**/lib/tides/__fixtures__/*.json",
       "!**/expo-env.d.ts",
-      "!**/package-lock.json"
+      "!**/package-lock.json",
+      "!tools/.cache"
     ]
   },
   "formatter": {
