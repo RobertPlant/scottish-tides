@@ -6,10 +6,9 @@ Features:
 * High and low water tables, with spring/neap classification and the day's range
 * A whole-year planner heat map, so you can find the big spring tides months ahead
 * Sunrise, sunset and moon phase
-* Water-level threshold windows — when will there be at least N metres?
 * Tidal stream estimates for the major races: Pentland Firth, Corryvreckan, Grey Dogs, Falls of Lora, Dorus Mòr and the Sound of Islay
 * Nearest-station lookup, using the device's own location services (no Google Play Services anywhere in this app)
-* Favourite stations, shareable links to a specific day, and a dark theme
+* Favourite stations and a dark theme
 
 Stations: Oban, Tobermory, Leith, Ullapool, Wick, Aberdeen, Lerwick, Millport, Portpatrick, Port Ellen (Islay), Kinlochbervie and Stornoway.
 

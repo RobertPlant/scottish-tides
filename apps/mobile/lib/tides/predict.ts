@@ -29,14 +29,22 @@ export interface StationData {
   constituents: ConstituentJSON[];
 }
 
-/** Secondary-port correction (e.g. Oban derived from a Tobermory fit). */
+/**
+ * Secondary-port correction (e.g. Oban derived from a Tobermory fit): a time
+ * offset per event type, and height = height_offset_m + height_scale * base.
+ */
 export interface Shift {
   name: string;
   based_on?: string;
   hw_time_min: number;
   lw_time_min: number;
-  hw_height_m: number;
-  lw_height_m: number;
+  height_scale: number;
+  height_offset_m: number;
+}
+
+/** A base-port height as the secondary port sees it. */
+export function shiftHeight(height: number, shift: Shift): number {
+  return shift.height_offset_m + shift.height_scale * height;
 }
 
 const HOUR_MS = 3600_000;
@@ -220,14 +228,13 @@ export class Tide {
   }
 }
 
-/** Apply a secondary-port shift (time + height offset) to each event. */
+/** Apply a secondary-port shift (time offset + height scale) to each event. */
 export function applyShift(events: TideEvent[], shift: Shift): TideEvent[] {
   return events.map((e) => {
     const dtMin = e.type === 'high' ? shift.hw_time_min : shift.lw_time_min;
-    const dh = e.type === 'high' ? shift.hw_height_m : shift.lw_height_m;
     return {
       time: new Date(e.time.getTime() + dtMin * 60_000),
-      height: e.height + dh,
+      height: shiftHeight(e.height, shift),
       type: e.type,
     };
   });

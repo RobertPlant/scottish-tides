@@ -1,12 +1,12 @@
 {
   "name": "Oban",
   "based_on": "Tobermory",
-  "method": "empirical secondary-port offset: mean(Oban actual - Tobermory model)",
-  "calibrated_from": "tidetimes.org.uk Oban vs tobermory.json, 27-30 Jun 2026 (3 days, 11 events)",
-  "calibrated_on": "2026-06-26",
-  "hw_time_min": -21,
-  "lw_time_min": -18,
-  "hw_height_m": -0.52,
-  "lw_height_m": -0.13,
-  "note": "Time offset varies ~13-30 min with spring/neap; height offset stable to +/-0.03 m. Kayak-grade, not for navigation."
+  "method": "tidetimes.org.uk Oban vs its own Tobermory (UKHO-derived), applied to our gauge-fitted Tobermory: median time difference, least-squares height fit",
+  "calibrated_from": "tidetimes.org.uk Oban vs Tobermory, 2025-10-01 to 2026-10-28 (every 1 day(s), 1483 events) via tools/calibrate-shift.ts",
+  "calibrated_on": "2026-10-22",
+  "hw_time_min": -9,
+  "lw_time_min": -13,
+  "height_scale": 0.847,
+  "height_offset_m": 0.085,
+  "note": "Height = offset + scale * Tobermory: Oban's range is ~16% smaller. Half of events land within 5-6 min of the reference; time offset has no useful link to spring/neap, season or diurnal inequality. Kayak-grade, not for navigation."
 }
