@@ -15,6 +15,7 @@ import { ThemedText } from '@/components/themed-text';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useHydrated } from '@/hooks/use-hydrated';
 import { useNow } from '@/hooks/use-now';
+import { useSidePadding } from '@/hooks/use-side-padding';
 import { usePalette } from '@/hooks/use-theme-color';
 import { ymdInUk } from '@/lib/datetime';
 import { coeffFill, type DayCell, type Scheme, yearMonths } from '@/lib/planner';
@@ -39,6 +40,7 @@ const COLS = 31; // widest month; short months trail blank so rows stay aligned
 const YEAR_SPAN = 5; // how far the ‹ › buttons roam from the current year
 
 export function TripPlanner({ station, header }: { station: Station; header?: ReactNode }) {
+  const sidePadding = useSidePadding();
   const palette = usePalette();
   const scheme: Scheme = useColorScheme() ?? 'light';
   const router = useRouter();
@@ -88,7 +90,7 @@ export function TripPlanner({ station, header }: { station: Station; header?: Re
 
   return (
     <ScrollView
-      contentContainerStyle={styles.content}
+      contentContainerStyle={[styles.content, sidePadding]}
       style={{ backgroundColor: palette.background }}
     >
       <View style={styles.inner}>

@@ -11,6 +11,7 @@ import { ThemedText } from '@/components/themed-text';
 import { useDayNav } from '@/hooks/use-day-nav';
 import { useHydrated } from '@/hooks/use-hydrated';
 import { useNow } from '@/hooks/use-now';
+import { useSidePadding } from '@/hooks/use-side-padding';
 import { usePalette } from '@/hooks/use-theme-color';
 import { formatTime } from '@/lib/datetime';
 import { stationById } from '@/lib/stations';
@@ -29,6 +30,7 @@ const EMPTY_STREAM = {
 };
 
 export default function RaceDetail() {
+  const sidePadding = useSidePadding();
   const palette = usePalette();
   const { id, d } = useLocalSearchParams<{ id: string; d?: string }>();
   const race = raceById(id) ?? RACES[0];
@@ -54,7 +56,7 @@ export default function RaceDetail() {
         <title>{`${race.name} tidal stream · Scottish Tides`}</title>
       </Head>
       <ScrollView
-        contentContainerStyle={styles.content}
+        contentContainerStyle={[styles.content, sidePadding]}
         style={{ backgroundColor: palette.background }}
       >
         <View>

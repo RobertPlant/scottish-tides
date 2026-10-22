@@ -3,7 +3,7 @@
     "name": "Scottish Tides",
     "slug": "scottish-tides",
     "version": "0.1.8",
-    "orientation": "portrait",
+    "orientation": "default",
     "icon": "./assets/images/icon.png",
     "scheme": "scottishtides",
     "userInterfaceStyle": "automatic",

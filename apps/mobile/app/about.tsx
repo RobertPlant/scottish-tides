@@ -8,6 +8,7 @@ import { Linking, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
 import { Card } from '@/components/card';
 import { ThemedText } from '@/components/themed-text';
+import { useSidePadding } from '@/hooks/use-side-padding';
 import { usePalette } from '@/hooks/use-theme-color';
 
 const REPO = 'https://github.com/RobertPlant/scottish-tides';
@@ -49,6 +50,7 @@ const CREDITS: Credit[] = [
 ];
 
 export default function About() {
+  const sidePadding = useSidePadding();
   const palette = usePalette();
   const version = Constants.expoConfig?.version ?? '';
 
@@ -65,7 +67,7 @@ export default function About() {
         <title>About · Scottish Tides</title>
       </Head>
       <ScrollView
-        contentContainerStyle={styles.content}
+        contentContainerStyle={[styles.content, sidePadding]}
         style={{ backgroundColor: palette.background }}
       >
         <View>
