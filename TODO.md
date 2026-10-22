@@ -110,11 +110,10 @@ All of these are enforced in CI.
       first ask on !51187. Smoke-test a release APK on a device before tagging (R8 can strip
       reflection-only code, which CI can't catch), then move !51187 to 0.1.8 and reply.
       Device-tested OK and tagged.
-- [ ] !51187 on 0.1.8: CI green, reply to the reviewer, take it out of draft.
-- [ ] v0.1.9: the tester's feedback on !51187 (Oban recalibrated from tidetimes with scaled
+- [x] v0.1.9: the tester's feedback on !51187 (Oban recalibrated from tidetimes with scaled
       heights, approximate location accepted, description trimmed), landscape, and the first
-      release on Expo SDK 58. Device-tested OK. Tag, pin the recipe, move !51187 to 0.1.9,
-      reply to the tester and take it out of draft.
+      release on Expo SDK 58. Device-tested OK, tagged, and the recipe is pinned to it.
+- [ ] !51187 on 0.1.9: CI green, reply to the tester, take it out of draft.
 - [ ] iOS binaries still need a Mac or EAS — untried.
 
 ## 6. Feature roadmap (offered, not started)
