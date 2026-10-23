@@ -1,10 +1,13 @@
 // Service worker for offline use on the Scottish coast (no signal). Strategy:
-// stale-while-revalidate for same-origin GETs — serve from cache instantly,
-// refresh in the background — with a navigation fallback to the cached start
-// page. After one online visit the whole app works offline. Base-path agnostic
+// - pages: network first, cached copy when offline. Serving a cached page first
+//   broke the app after every release: the old page asks for the old build's
+//   hashed scripts, and the deploy has already deleted them.
+// - hashed build files (/_expo/static/): cache first, they never change.
+// - everything else: stale-while-revalidate.
+// After one online visit the whole app works offline. Base-path agnostic
 // (derives the scope from registration).
 
-const CACHE = 'scottide-v2';
+const CACHE = 'scottide-v3';
 
 self.addEventListener('install', () => {
   self.skipWaiting();
@@ -32,36 +35,41 @@ self.addEventListener('fetch', (event) => {
   event.respondWith(
     (async () => {
       const cache = await caches.open(CACHE);
-      const cached = await cache.match(req);
+      const offline = () => new Response('Offline', { status: 503, statusText: 'Offline' });
+      const fromNetwork = () =>
+        fetch(req)
+          .then((res) => {
+            if (res?.ok && res.type === 'basic') {
+              cache.put(req, res.clone());
+            }
+            return res;
+          })
+          .catch(() => null);
 
-      const network = fetch(req)
-        .then((res) => {
-          if (res?.ok && res.type === 'basic') {
-            cache.put(req, res.clone());
-          }
+      if (req.mode === 'navigate') {
+        const res = await fromNetwork();
+        if (res?.ok) {
           return res;
-        })
-        .catch(() => null);
+        }
+        const scope = self.registration.scope;
+        const cached =
+          (await cache.match(req)) ||
+          (await cache.match(scope)) ||
+          (await cache.match(`${scope}index.html`));
+        return cached || res || offline();
+      }
 
+      const cached = await cache.match(req);
       if (cached) {
-        // Keep the worker alive for the background revalidate — without this the
-        // browser is free to kill it the moment the cached response is returned,
-        // so the cache could never refresh and the app would be frozen at v1.
-        event.waitUntil(network);
+        if (!url.pathname.includes('/_expo/static/')) {
+          // Keep the worker alive for the background revalidate, or the browser
+          // can kill it the moment the cached response is returned and the
+          // cache never refreshes.
+          event.waitUntil(fromNetwork());
+        }
         return cached;
       }
-      const res = await network;
-      if (res) {
-        return res;
-      }
-      if (req.mode === 'navigate') {
-        const scope = self.registration.scope;
-        const fallback = (await cache.match(scope)) || (await cache.match(`${scope}index.html`));
-        if (fallback) {
-          return fallback;
-        }
-      }
-      return new Response('Offline', { status: 503, statusText: 'Offline' });
+      return (await fromNetwork()) || offline();
     })(),
   );
 });
