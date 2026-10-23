@@ -14,7 +14,7 @@ Repo: https://github.com/RobertPlant/scottish-tides.git
 Builds:
   - versionName: 0.1.10
     versionCode: 111
-    commit: v0.1.10
+    commit: deedf1cac861b1ee5b0642afa49013c0286cc0b9
     subdir: apps/mobile
     sudo:
       - echo 'deb https://deb.debian.org/debian forky main' > /etc/apt/sources.list.d/forky.list
@@ -54,7 +54,7 @@ Builds:
 
   - versionName: 0.1.10
     versionCode: 112
-    commit: v0.1.10
+    commit: deedf1cac861b1ee5b0642afa49013c0286cc0b9
     subdir: apps/mobile
     sudo:
       - echo 'deb https://deb.debian.org/debian forky main' > /etc/apt/sources.list.d/forky.list
@@ -94,7 +94,7 @@ Builds:
 
   - versionName: 0.1.10
     versionCode: 113
-    commit: v0.1.10
+    commit: deedf1cac861b1ee5b0642afa49013c0286cc0b9
     subdir: apps/mobile
     sudo:
       - echo 'deb https://deb.debian.org/debian forky main' > /etc/apt/sources.list.d/forky.list
@@ -134,7 +134,7 @@ Builds:
 
   - versionName: 0.1.10
     versionCode: 114
-    commit: v0.1.10
+    commit: deedf1cac861b1ee5b0642afa49013c0286cc0b9
     subdir: apps/mobile
     sudo:
       - echo 'deb https://deb.debian.org/debian forky main' > /etc/apt/sources.list.d/forky.list
