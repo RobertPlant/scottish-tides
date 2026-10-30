@@ -14,7 +14,7 @@ let
   # Toolchain versions match Expo SDK 58 / React Native 0.88 (compileSdk 37, target
   # 36, NDK 27, cmake 3.22.1). android-35/34 kept for older transitive modules.
   androidComposition = androidPkgs.androidenv.composeAndroidPackages {
-    platformToolsVersion = "35.0.2";
+    platformToolsVersion = "37.0.1";
     platformVersions = [ "37" "36" "35" "34" ];
     buildToolsVersions = [ "37.0.0" "36.0.0" "35.0.0" ];
     includeNDK = true;
