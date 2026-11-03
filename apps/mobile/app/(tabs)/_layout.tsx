@@ -28,9 +28,7 @@ export default function TabsLayout() {
           title: 'Tides',
           // The Station tab always points at the currently selected station.
           href: { pathname: '/station/[id]', params: { id: stationId } },
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="water-outline" size={size} color={color} />
-          ),
+          tabBarIcon: ({ color, size }) => <Ionicons name="water-outline" size={size} color={color} />,
         }}
       />
       <Tabs.Screen
@@ -39,18 +37,14 @@ export default function TabsLayout() {
           title: 'Plan',
           // Like the Tides tab, the Plan tab tracks the selected station.
           href: { pathname: '/plan/[id]', params: { id: stationId } },
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="calendar-outline" size={size} color={color} />
-          ),
+          tabBarIcon: ({ color, size }) => <Ionicons name="calendar-outline" size={size} color={color} />,
         }}
       />
       <Tabs.Screen
         name="map"
         options={{
           title: 'Map',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="map-outline" size={size} color={color} />
-          ),
+          tabBarIcon: ({ color, size }) => <Ionicons name="map-outline" size={size} color={color} />,
         }}
       />
     </Tabs>

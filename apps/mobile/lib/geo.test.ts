@@ -11,10 +11,7 @@ test('haversineKm: zero to itself, symmetric, ~111 km per degree of latitude', (
   const oneDegLat = haversineKm(0, 0, 1, 0);
   assert.ok(Math.abs(oneDegLat - 111.19) < 0.5, `1° lat ≈ 111 km, got ${oneDegLat}`);
 
-  assert.ok(
-    Math.abs(haversineKm(56, -5, 57, -3) - haversineKm(57, -3, 56, -5)) < 1e-9,
-    'distance must be symmetric',
-  );
+  assert.ok(Math.abs(haversineKm(56, -5, 57, -3) - haversineKm(57, -3, 56, -5)) < 1e-9, 'distance must be symmetric');
 });
 
 test('haversineKm: a degree of longitude shrinks with latitude', () => {

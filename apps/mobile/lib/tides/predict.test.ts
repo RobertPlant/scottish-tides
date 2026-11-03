@@ -15,9 +15,7 @@ import type { StationData, TideEvent } from './predict';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const dataDir = path.join(here, '..', '..', 'assets', 'data');
-const reference = JSON.parse(
-  readFileSync(path.join(here, '__fixtures__', 'reference.json'), 'utf8'),
-) as {
+const reference = JSON.parse(readFileSync(path.join(here, '__fixtures__', 'reference.json'), 'utf8')) as {
   windows: {
     station: string;
     t0: string;
@@ -48,34 +46,24 @@ for (const w of reference.windows) {
   // Timing of HW/LW is ill-conditioned at near-amphidromic flat ports (tiny M2):
   // the curve matches to 5e-5 m but the argmin still wanders minutes. Relax the
   // time gate there; keep it tight (180 s) for normal ports (actual ≤47 s).
-  const m2 = station.constituents.find((c) => c.name === 'M2')?.amplitude ?? 1;
+  const m2 = station.constituents.find(c => c.name === 'M2')?.amplitude ?? 1;
   const timeTolS = m2 < 0.4 ? 900 : 180;
 
   test(`hourly heights match pytides - ${label}`, () => {
-    const times = Array.from(
-      { length: w.spanHours + 1 },
-      (_, i) => new Date(t0.getTime() + i * 3600_000),
-    );
+    const times = Array.from({ length: w.spanHours + 1 }, (_, i) => new Date(t0.getTime() + i * 3600_000));
     const heights = tide.heightsAt(times);
     let maxErr = 0;
     for (let i = 0; i < heights.length; i++) {
       maxErr = Math.max(maxErr, Math.abs(heights[i] - w.hourly[i]));
     }
-    assert.ok(
-      maxErr <= HEIGHT_TOL_M,
-      `max hourly height error ${maxErr.toFixed(4)} m exceeds ${HEIGHT_TOL_M} m`,
-    );
+    assert.ok(maxErr <= HEIGHT_TOL_M, `max hourly height error ${maxErr.toFixed(4)} m exceeds ${HEIGHT_TOL_M} m`);
   });
 
   test(`high/low waters match pytides - ${label}`, () => {
     const t1 = new Date(t0.getTime() + w.spanHours * 3600_000);
     const events: TideEvent[] = tide.extrema(t0, t1);
 
-    assert.equal(
-      events.length,
-      w.extrema.length,
-      `event count ${events.length} != reference ${w.extrema.length}`,
-    );
+    assert.equal(events.length, w.extrema.length, `event count ${events.length} != reference ${w.extrema.length}`);
 
     for (const ref of w.extrema) {
       const refTime = new Date(`${ref.t}Z`).getTime();
@@ -95,10 +83,7 @@ for (const w of reference.windows) {
       assert.ok(best, `no ${ref.type} event near ${ref.t}`);
       const dtS = bestDt / 1000;
       const dh = Math.abs((best as TideEvent).height - ref.h);
-      assert.ok(
-        dtS <= timeTolS,
-        `${ref.type} @ ${ref.t}: time off by ${dtS.toFixed(0)} s (> ${timeTolS})`,
-      );
+      assert.ok(dtS <= timeTolS, `${ref.type} @ ${ref.t}: time off by ${dtS.toFixed(0)} s (> ${timeTolS})`);
       assert.ok(
         dh <= EVENT_HEIGHT_TOL_M,
         `${ref.type} @ ${ref.t}: height off by ${dh.toFixed(4)} m (> ${EVENT_HEIGHT_TOL_M})`,

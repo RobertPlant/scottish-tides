@@ -11,7 +11,7 @@ import { Appearance } from 'react-native';
  */
 export function useColorScheme(): 'light' | 'dark' {
   return useSyncExternalStore(
-    (onChange) => Appearance.addChangeListener(onChange).remove,
+    onChange => Appearance.addChangeListener(onChange).remove,
     () => (Appearance.getColorScheme() === 'dark' ? 'dark' : 'light'),
     () => 'light',
   );

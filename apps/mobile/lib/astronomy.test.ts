@@ -32,10 +32,7 @@ test('moonInfo: phase and illumination stay in range (incl. before the epoch)', 
   for (const offsetDays of [-40, -1, 0, 3, 15, 200]) {
     const info = moonInfo(new Date(NEW_MOON.getTime() + offsetDays * DAY_MS));
     assert.ok(info.phase >= 0 && info.phase < 1, `phase out of range: ${info.phase}`);
-    assert.ok(
-      info.illumination >= 0 && info.illumination <= 1,
-      `illumination out of range: ${info.illumination}`,
-    );
+    assert.ok(info.illumination >= 0 && info.illumination <= 1, `illumination out of range: ${info.illumination}`);
   }
 });
 

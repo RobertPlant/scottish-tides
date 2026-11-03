@@ -23,14 +23,7 @@ import { usePalette } from '@/hooks/use-theme-color';
 import { sunTimes } from '@/lib/astronomy';
 import { ymdAddDays } from '@/lib/datetime';
 import type { Station } from '@/lib/stations';
-import {
-  classifyTide,
-  dayEvents,
-  dayHeightSeries,
-  dayRange,
-  tidalStats,
-  tideClassKey,
-} from '@/lib/tide-day';
+import { classifyTide, dayEvents, dayHeightSeries, dayRange, tidalStats, tideClassKey } from '@/lib/tide-day';
 
 export function StationDayView({
   station,
@@ -78,7 +71,7 @@ export function StationDayView({
         .runOnJS(true)
         .activeOffsetX([-24, 24])
         .failOffsetY([-24, 24])
-        .onEnd((e) => {
+        .onEnd(e => {
           if (e.translationX <= -40) {
             setDay(ymdAddDays(ymd, 1));
           } else if (e.translationX >= 40) {
@@ -88,20 +81,11 @@ export function StationDayView({
     [ymd, setDay],
   );
 
-  const events = useMemo(
-    () => (hydrated ? dayEvents(station, dayStart) : []),
-    [hydrated, station, dayStart],
-  );
-  const series = useMemo(
-    () => (hydrated ? dayHeightSeries(station, dayStart) : []),
-    [hydrated, station, dayStart],
-  );
+  const events = useMemo(() => (hydrated ? dayEvents(station, dayStart) : []), [hydrated, station, dayStart]);
+  const series = useMemo(() => (hydrated ? dayHeightSeries(station, dayStart) : []), [hydrated, station, dayStart]);
   // midday, so sunrise/sunset land on this civil day (UK midnight is the previous UTC day in summer)
   const noon = useMemo(() => new Date(dayStart.getTime() + 12 * 3600_000), [dayStart]);
-  const sun = useMemo(
-    () => sunTimes(noon, station.lat, station.lon),
-    [noon, station.lat, station.lon],
-  );
+  const sun = useMemo(() => sunTimes(noon, station.lat, station.lon), [noon, station.lat, station.lon]);
 
   const stats = useMemo(() => tidalStats(station), [station]);
   const range = useMemo(() => dayRange(events), [events]);
@@ -109,10 +93,7 @@ export function StationDayView({
   const classColor = palette[tideClassKey(tideClass.label)];
 
   return (
-    <ScrollView
-      contentContainerStyle={[styles.content, sidePadding]}
-      style={{ backgroundColor: palette.background }}
-    >
+    <ScrollView contentContainerStyle={[styles.content, sidePadding]} style={{ backgroundColor: palette.background }}>
       <GestureDetector gesture={swipe}>
         <View style={styles.inner}>
           {header}
@@ -130,10 +111,7 @@ export function StationDayView({
                 </ThemedText>
               </DayNav>
 
-              <Card
-                onPointerEnter={() => setChartHovered(true)}
-                onPointerLeave={() => setChartHovered(false)}
-              >
+              <Card onPointerEnter={() => setChartHovered(true)} onPointerLeave={() => setChartHovered(false)}>
                 <TideCurve
                   series={series}
                   events={events}
@@ -144,10 +122,7 @@ export function StationDayView({
                 />
                 <ThemedText
                   type="caption"
-                  style={[
-                    { color: palette.muted },
-                    Platform.OS === 'web' && !chartHovered && styles.hintHidden,
-                  ]}
+                  style={[{ color: palette.muted }, Platform.OS === 'web' && !chartHovered && styles.hintHidden]}
                 >
                   Tap the chart to read the level at any time. Gold band = daylight.
                 </ThemedText>
@@ -178,9 +153,8 @@ export function StationDayView({
               </ThemedText>
             ) : null}
             <ThemedText type="caption" style={{ color: palette.muted }}>
-              Heights vs {station.data.datum?.replace('The data refer to ', '') ?? 'chart datum'}.
-              Astronomical only (no surge). Water levels, not streams — never plan a race transit
-              from these tables.
+              Heights vs {station.data.datum?.replace('The data refer to ', '') ?? 'chart datum'}. Astronomical only (no
+              surge). Water levels, not streams — never plan a race transit from these tables.
             </ThemedText>
           </Note>
         </View>

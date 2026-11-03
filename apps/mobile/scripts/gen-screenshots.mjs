@@ -18,10 +18,7 @@ import { chromium } from '@playwright/test';
 
 const MOBILE_DIR = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const DIST = path.join(MOBILE_DIR, 'dist');
-const OUT_DIR = path.resolve(
-  MOBILE_DIR,
-  '../../fastlane/metadata/android/en-US/images/phoneScreenshots',
-);
+const OUT_DIR = path.resolve(MOBILE_DIR, '../../fastlane/metadata/android/en-US/images/phoneScreenshots');
 const PORT = 8099;
 
 // app.json sets experiments.baseUrl, so the export's asset paths are all
@@ -61,9 +58,7 @@ function nixChrome() {
   if (!root) {
     return undefined;
   }
-  const found = execSync(`find ${root} -name chrome-headless-shell -type f | head -1`)
-    .toString()
-    .trim();
+  const found = execSync(`find ${root} -name chrome-headless-shell -type f | head -1`).toString().trim();
   return found || undefined;
 }
 
@@ -77,7 +72,7 @@ async function waitForServer(url, timeoutMs) {
     } catch {
       // not up yet
     }
-    await new Promise((r) => setTimeout(r, 500));
+    await new Promise(r => setTimeout(r, 500));
   }
   throw new Error(`static server never came up at ${url}`);
 }

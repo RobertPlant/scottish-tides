@@ -10,13 +10,7 @@ import { usePalette } from '@/hooks/use-theme-color';
 import { useSelectedStation } from '@/lib/selected-station';
 import { STATIONS } from '@/lib/stations';
 
-export function StationChips({
-  activeId,
-  onSelect,
-}: {
-  activeId: string;
-  onSelect: (id: string) => void;
-}) {
+export function StationChips({ activeId, onSelect }: { activeId: string; onSelect: (id: string) => void }) {
   const palette = usePalette();
   const { isFavourite } = useSelectedStation();
 
@@ -26,12 +20,8 @@ export function StationChips({
   );
 
   return (
-    <ScrollView
-      horizontal
-      showsHorizontalScrollIndicator={false}
-      contentContainerStyle={styles.chips}
-    >
-      {chipStations.map((s) => {
+    <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chips}>
+      {chipStations.map(s => {
         const active = s.id === activeId;
         const favd = isFavourite(s.id);
         return (
@@ -58,9 +48,7 @@ export function StationChips({
                 ★
               </ThemedText>
             ) : null}
-            <ThemedText
-              style={{ color: active ? palette.background : palette.text, fontWeight: '600' }}
-            >
+            <ThemedText style={{ color: active ? palette.background : palette.text, fontWeight: '600' }}>
               {s.name}
             </ThemedText>
           </Pressable>

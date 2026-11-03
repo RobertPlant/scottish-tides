@@ -16,7 +16,7 @@ export function TideTable({ events, now }: { events: TideEvent[]; now?: Date }) 
 
   return (
     <View>
-      {events.map((e) => {
+      {events.map(e => {
         const color = e.type === 'high' ? palette.high : palette.low;
         // On today's view, show each event's timing relative to now:
         // "in 3h 20m" ahead, "2h 20m ago" behind.
@@ -26,9 +26,7 @@ export function TideTable({ events, now }: { events: TideEvent[]; now?: Date }) 
             <View style={styles.left}>
               <View style={[styles.dot, { backgroundColor: color }]} />
               <View>
-                <ThemedText type="defaultSemiBold">
-                  {e.type === 'high' ? 'High water' : 'Low water'}
-                </ThemedText>
+                <ThemedText type="defaultSemiBold">{e.type === 'high' ? 'High water' : 'Low water'}</ThemedText>
                 {rel ? (
                   <ThemedText type="caption" style={{ color: palette.muted }}>
                     {rel}
@@ -37,9 +35,7 @@ export function TideTable({ events, now }: { events: TideEvent[]; now?: Date }) 
               </View>
             </View>
             <ThemedText style={styles.time}>{formatTime(e.time)}</ThemedText>
-            <ThemedText style={[styles.height, { color: palette.muted }]}>
-              {e.height.toFixed(2)} m
-            </ThemedText>
+            <ThemedText style={[styles.height, { color: palette.muted }]}>{e.height.toFixed(2)} m</ThemedText>
           </View>
         );
       })}

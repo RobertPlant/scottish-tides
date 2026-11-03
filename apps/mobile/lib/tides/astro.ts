@@ -17,13 +17,7 @@ const mod360 = (x: number): number => ((x % 360.0) + 360.0) % 360.0;
 
 /** Degrees from degrees/arcmin/arcsec/milli-arcsec/micro-arcsec. */
 function s2d(degrees: number, arcmins = 0, arcsecs = 0, mas = 0, muas = 0): number {
-  return (
-    degrees +
-    arcmins / 60.0 +
-    arcsecs / (60.0 * 60.0) +
-    mas / (60.0 * 60.0 * 1e3) +
-    muas / (60.0 * 60.0 * 1e6)
-  );
+  return degrees + arcmins / 60.0 + arcsecs / (60.0 * 60.0) + mas / (60.0 * 60.0 * 1e3) + muas / (60.0 * 60.0 * 1e6);
 }
 
 function polynomial(coefficients: number[], argument: number): number {
@@ -81,12 +75,7 @@ const terrestrialObliquityCoefficients = [
   s2d(0, 0, 2.45),
 ].map((c, i) => c * 1e-2 ** i);
 
-const solarPerigeeCoefficients = [
-  280.46645 - 357.5291,
-  36000.76932 - 35999.0503,
-  0.0003032 + 0.0001559,
-  0.00000048,
-];
+const solarPerigeeCoefficients = [280.46645 - 357.5291, 36000.76932 - 35999.0503, 0.0003032 + 0.0001559, 0.00000048];
 
 const solarLongitudeCoefficients = [280.46645, 36000.76983, 0.0003032];
 
@@ -94,22 +83,11 @@ const lunarInclinationCoefficients = [5.145];
 
 // NB: in pytides the 4th element is written across two lines with no comma, so
 // Python parses it as a single subtraction `1/538841 - 1/65194000`. Replicate.
-const lunarLongitudeCoefficients = [
-  218.3164591,
-  481267.88134236,
-  -0.0013268,
-  1 / 538841.0 - 1 / 65194000.0,
-];
+const lunarLongitudeCoefficients = [218.3164591, 481267.88134236, -0.0013268, 1 / 538841.0 - 1 / 65194000.0];
 
 const lunarNodeCoefficients = [125.044555, -1934.1361849, 0.0020762, 1 / 467410.0, -1 / 60616000.0];
 
-const lunarPerigeeCoefficients = [
-  83.353243,
-  4069.0137111,
-  -0.0103238,
-  -1 / 80053.0,
-  1 / 18999000.0,
-];
+const lunarPerigeeCoefficients = [83.353243, 4069.0137111, -0.0103238, -1 / 80053.0, 1 / 18999000.0];
 
 // --- Obliquity / node geometry (I, xi, nu, nu', nu'') ------------------------
 
@@ -150,16 +128,13 @@ function _nu(nDeg: number, iDeg: number, omegaDeg: number): number {
 function _nup(N: number, i: number, omega: number): number {
   const I = d2r * _I(N, i, omega);
   const nu = d2r * _nu(N, i, omega);
-  return (
-    r2d * Math.atan((Math.sin(2 * I) * Math.sin(nu)) / (Math.sin(2 * I) * Math.cos(nu) + 0.3347))
-  );
+  return r2d * Math.atan((Math.sin(2 * I) * Math.sin(nu)) / (Math.sin(2 * I) * Math.cos(nu) + 0.3347));
 }
 
 function _nupp(N: number, i: number, omega: number): number {
   const I = d2r * _I(N, i, omega);
   const nu = d2r * _nu(N, i, omega);
-  const tan2nupp =
-    (Math.sin(I) ** 2 * Math.sin(2 * nu)) / (Math.sin(I) ** 2 * Math.cos(2 * nu) + 0.0727);
+  const tan2nupp = (Math.sin(I) ** 2 * Math.sin(2 * nu)) / (Math.sin(I) ** 2 * Math.cos(2 * nu) + 0.0727);
   return r2d * 0.5 * Math.atan(tan2nupp);
 }
 

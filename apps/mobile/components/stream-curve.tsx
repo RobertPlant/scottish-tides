@@ -35,19 +35,17 @@ export function StreamCurve({ samples, slacks, now, floodName, ebbName, height =
 
   const t0 = samples[0].time.getTime();
   const t1 = samples[samples.length - 1].time.getTime();
-  const maxRate = Math.max(...samples.map((s) => Math.abs(s.rate)), 0.5) * 1.1;
+  const maxRate = Math.max(...samples.map(s => Math.abs(s.rate)), 0.5) * 1.1;
 
   const { plotH, x, hourTicks, nowX } = chartFrame(width, { t0, t1, height, now });
   const zeroY = PAD_TOP + plotH / 2;
   const y = (rate: number) => zeroY - (rate / maxRate) * (plotH / 2);
 
-  const pts = samples.map((s) => ({ x: x(s.time.getTime()), r: s.rate }));
-  const line = pts
-    .map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x.toFixed(1)} ${y(p.r).toFixed(1)}`)
-    .join(' ');
+  const pts = samples.map(s => ({ x: x(s.time.getTime()), r: s.rate }));
+  const line = pts.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x.toFixed(1)} ${y(p.r).toFixed(1)}`).join(' ');
   // Two-tone fill: flood lobes (clamp >=0) and ebb lobes (clamp <=0), each back to zero.
-  const floodArea = `M ${pts[0].x.toFixed(1)} ${zeroY} ${pts.map((p) => `L ${p.x.toFixed(1)} ${y(Math.max(p.r, 0)).toFixed(1)}`).join(' ')} L ${pts[pts.length - 1].x.toFixed(1)} ${zeroY} Z`;
-  const ebbArea = `M ${pts[0].x.toFixed(1)} ${zeroY} ${pts.map((p) => `L ${p.x.toFixed(1)} ${y(Math.min(p.r, 0)).toFixed(1)}`).join(' ')} L ${pts[pts.length - 1].x.toFixed(1)} ${zeroY} Z`;
+  const floodArea = `M ${pts[0].x.toFixed(1)} ${zeroY} ${pts.map(p => `L ${p.x.toFixed(1)} ${y(Math.max(p.r, 0)).toFixed(1)}`).join(' ')} L ${pts[pts.length - 1].x.toFixed(1)} ${zeroY} Z`;
+  const ebbArea = `M ${pts[0].x.toFixed(1)} ${zeroY} ${pts.map(p => `L ${p.x.toFixed(1)} ${y(Math.min(p.r, 0)).toFixed(1)}`).join(' ')} L ${pts[pts.length - 1].x.toFixed(1)} ${zeroY} Z`;
 
   // Y ticks at 0 and ±maxRate/2-ish.
   const tick = Math.max(Math.round((maxRate / 1.1) * 0.5 * 2) / 2, 0.5);
@@ -57,7 +55,7 @@ export function StreamCurve({ samples, slacks, now, floodName, ebbName, height =
     <View style={{ height }} onLayout={onLayout}>
       {width > 0 && (
         <Svg width={width} height={height}>
-          {yTicks.map((v) => (
+          {yTicks.map(v => (
             <G key={`y${v}`}>
               <Line
                 x1={PAD_LEFT}
@@ -67,27 +65,14 @@ export function StreamCurve({ samples, slacks, now, floodName, ebbName, height =
                 stroke={v === 0 ? palette.muted : palette.border}
                 strokeWidth={1}
               />
-              <SvgText
-                x={PAD_LEFT - 4}
-                y={y(v) + 3}
-                fill={palette.muted}
-                fontSize={9}
-                textAnchor="end"
-              >
+              <SvgText x={PAD_LEFT - 4} y={y(v) + 3} fill={palette.muted} fontSize={9} textAnchor="end">
                 {Math.abs(v).toFixed(1)}
               </SvgText>
             </G>
           ))}
 
-          {hourTicks.map((tk) => (
-            <SvgText
-              key={`x${tk.t}`}
-              x={x(tk.t)}
-              y={height - 7}
-              fill={palette.muted}
-              fontSize={9}
-              textAnchor="middle"
-            >
+          {hourTicks.map(tk => (
+            <SvgText key={`x${tk.t}`} x={x(tk.t)} y={height - 7} fill={palette.muted} fontSize={9} textAnchor="middle">
               {tk.label}
             </SvgText>
           ))}
@@ -108,7 +93,7 @@ export function StreamCurve({ samples, slacks, now, floodName, ebbName, height =
             />
           )}
 
-          {slacks.map((s) => {
+          {slacks.map(s => {
             const sx = x(s.getTime());
             if (sx < PAD_LEFT || sx > width - PAD_RIGHT) {
               return null;
@@ -127,13 +112,7 @@ export function StreamCurve({ samples, slacks, now, floodName, ebbName, height =
           <SvgText x={width - PAD_RIGHT} y={PAD_TOP + 9} fill={flood} fontSize={9} textAnchor="end">
             {floodName} ▲
           </SvgText>
-          <SvgText
-            x={width - PAD_RIGHT}
-            y={height - PAD_BOTTOM - 3}
-            fill={ebb}
-            fontSize={9}
-            textAnchor="end"
-          >
+          <SvgText x={width - PAD_RIGHT} y={height - PAD_BOTTOM - 3} fill={ebb} fontSize={9} textAnchor="end">
             {ebbName} ▼
           </SvgText>
         </Svg>

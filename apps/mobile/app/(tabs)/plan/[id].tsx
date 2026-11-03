@@ -9,7 +9,7 @@ import { usePalette } from '@/hooks/use-theme-color';
 import { STATIONS } from '@/lib/stations';
 
 export async function generateStaticParams(): Promise<{ id: string }[]> {
-  return STATIONS.map((s) => ({ id: s.id }));
+  return STATIONS.map(s => ({ id: s.id }));
 }
 
 // The month / year planner for the selected station. Mirrors the Tides tab's

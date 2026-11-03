@@ -167,16 +167,16 @@ export function ScotlandMap({
       .onStart(() => {
         start.current = { ...viewRef.current, fx: 0, fy: 0 };
       })
-      .onUpdate((e) => {
+      .onUpdate(e => {
         const s = start.current;
         setView({ k: s.k, x: s.x + e.translationX, y: s.y + e.translationY });
       });
     const pinch = Gesture.Pinch()
       .runOnJS(true)
-      .onStart((e) => {
+      .onStart(e => {
         start.current = { ...viewRef.current, fx: e.focalX, fy: e.focalY };
       })
-      .onUpdate((e) => {
+      .onUpdate(e => {
         const s = start.current;
         const k = clamp(s.k * e.scale, 1, MAX_ZOOM);
         setView({ k, x: s.fx - (s.fx - s.x) * (k / s.k), y: s.fy - (s.fy - s.y) * (k / s.k) });
@@ -185,7 +185,7 @@ export function ScotlandMap({
     // the station pins, so they get first refusal where the two overlap.
     const tap = Gesture.Tap()
       .runOnJS(true)
-      .onEnd((e) => {
+      .onEnd(e => {
         const h = hitRef.current;
         if (!h) {
           return;
@@ -201,12 +201,12 @@ export function ScotlandMap({
           }
           return best?.item ?? null;
         };
-        const race = near(h.streams, (st) => ({ x: h.sx(st.lon), y: h.sy(st.lat) }));
+        const race = near(h.streams, st => ({ x: h.sx(st.lon), y: h.sy(st.lat) }));
         if (race) {
           h.onSelectStream?.(race.id);
           return;
         }
-        const station = near(h.stations, (s) => ({ x: h.sx(s.lon), y: h.sy(s.lat) }));
+        const station = near(h.stations, s => ({ x: h.sx(s.lon), y: h.sy(s.lat) }));
         if (station) {
           h.onSelect?.(station.id);
         }
@@ -237,21 +237,12 @@ export function ScotlandMap({
     const projY = (lat: number) => (1 - (lat - LAT0) / (LAT1 - LAT0)) * h;
     const ringPath = (ring: [number, number][]) =>
       `${ring
-        .map(
-          ([lon, lat], i) =>
-            `${i === 0 ? 'M' : 'L'} ${projX(lon).toFixed(1)} ${projY(lat).toFixed(1)}`,
-        )
+        .map(([lon, lat], i) => `${i === 0 ? 'M' : 'L'} ${projX(lon).toFixed(1)} ${projY(lat).toFixed(1)}`)
         .join(' ')} Z`;
     // Keyed by first vertex - a build-time constant, so each ring's start point
     // is a stable identity (and unlike the array index, obviously one).
-    return COAST.map((ring) => (
-      <Path
-        key={`${ring[0][0]},${ring[0][1]}`}
-        d={ringPath(ring)}
-        fill={land}
-        stroke={coast}
-        strokeWidth={0.5}
-      />
+    return COAST.map(ring => (
+      <Path key={`${ring[0][0]},${ring[0][1]}`} d={ringPath(ring)} fill={land} stroke={coast} strokeWidth={0.5} />
     ));
   }, [width, land, coast]);
 
@@ -273,7 +264,7 @@ export function ScotlandMap({
             <Svg width={width} height={height}>
               <Rect x={0} y={0} width={width} height={height} fill={sea} />
               <G transform={`translate(${view.x} ${view.y}) scale(${view.k})`}>{coastPaths}</G>
-              {stations.map((s) => {
+              {stations.map(s => {
                 const selected = s.id === selectedId;
                 return (
                   <Circle
@@ -287,7 +278,7 @@ export function ScotlandMap({
                   />
                 );
               })}
-              {stations.map((s) => {
+              {stations.map(s => {
                 // Flip labels near the right edge so they don't clip.
                 const cx = sx(s.lon);
                 const rightSide = cx > width * 0.66;
@@ -312,14 +303,7 @@ export function ScotlandMap({
                     >
                       {s.name}
                     </SvgText>
-                    <SvgText
-                      x={lx}
-                      y={ly}
-                      fontSize={11}
-                      fontWeight={weight}
-                      textAnchor={anchor}
-                      fill={palette.text}
-                    >
+                    <SvgText x={lx} y={ly} fontSize={11} fontWeight={weight} textAnchor={anchor} fill={palette.text}>
                       {s.name}
                     </SvgText>
                   </G>
@@ -336,14 +320,7 @@ export function ScotlandMap({
                 return (
                   <G key={`stream-${st.id}`}>
                     <Polygon points={pts} fill={palette.low} stroke="#ffffff" strokeWidth={1.5} />
-                    <SvgText
-                      x={cx}
-                      y={cy + 4}
-                      fontSize={11}
-                      fontWeight="700"
-                      textAnchor="middle"
-                      fill="#ffffff"
-                    >
+                    <SvgText x={cx} y={cy + 4} fontSize={11} fontWeight="700" textAnchor="middle" fill="#ffffff">
                       {i + 1}
                     </SvgText>
                   </G>
@@ -377,9 +354,7 @@ export function ScotlandMap({
         ) : null}
       </View>
 
-      <Text style={[styles.noteText, { color: palette.muted }]}>
-        Schematic — not for navigation
-      </Text>
+      <Text style={[styles.noteText, { color: palette.muted }]}>Schematic — not for navigation</Text>
     </View>
   );
 }

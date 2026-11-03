@@ -27,7 +27,7 @@ function shiftCurve(
   shift: NonNullable<Station['shift']>,
 ): { time: Date; height: number }[] {
   const dtMs = getMeanShiftMs(shift);
-  return base.map((s) => ({
+  return base.map(s => ({
     time: new Date(s.time.getTime() + dtMs),
     height: shiftHeight(s.height, shift),
   }));
@@ -44,11 +44,7 @@ export function dayEvents(station: Station, dayStart: Date): TideEvent[] {
  * the base gauge's curve *shape* by the secondary-port offset (see `shiftCurve`);
  * the high/low markers from `dayEvents` remain exact and sit on the curve.
  */
-export function dayHeightSeries(
-  station: Station,
-  dayStart: Date,
-  stepMinutes = 10,
-): { time: Date; height: number }[] {
+export function dayHeightSeries(station: Station, dayStart: Date, stepMinutes = 10): { time: Date; height: number }[] {
   const { from, to } = dayWindow(dayStart);
   return seaLevelSeries(station, from, to, stepMinutes);
 }
@@ -76,8 +72,7 @@ export function tidalStats(station: Station): TidalStats {
     springRange = ref.springRef * rangeScale;
     neapRange = ref.neapRef * rangeScale;
   } else {
-    const amp = (name: string) =>
-      station.data.constituents.find((c) => c.name === name)?.amplitude ?? 0;
+    const amp = (name: string) => station.data.constituents.find(c => c.name === name)?.amplitude ?? 0;
     springRange = 2 * (amp('M2') + amp('S2')) * rangeScale;
     neapRange = 2 * Math.abs(amp('M2') - amp('S2')) * rangeScale;
   }
@@ -89,8 +84,8 @@ export function tidalStats(station: Station): TidalStats {
 
 /** Range of a day's events: highest high water minus lowest low water. */
 export function dayRange(events: TideEvent[]): number {
-  const highs = events.filter((e) => e.type === 'high').map((e) => e.height);
-  const lows = events.filter((e) => e.type === 'low').map((e) => e.height);
+  const highs = events.filter(e => e.type === 'high').map(e => e.height);
+  const lows = events.filter(e => e.type === 'low').map(e => e.height);
   if (highs.length === 0 || lows.length === 0) {
     return 0;
   }
@@ -176,12 +171,7 @@ export function seaLevelSeries(
 
   // sample the base port earlier by the offset, so the shifted curve covers [from, to]
   const dtMs = getMeanShiftMs(shift);
-  const base = heightSeries(
-    station.data,
-    new Date(from.getTime() - dtMs),
-    new Date(to.getTime() - dtMs),
-    stepMinutes,
-  );
+  const base = heightSeries(station.data, new Date(from.getTime() - dtMs), new Date(to.getTime() - dtMs), stepMinutes);
 
   return shiftCurve(base, shift);
 }

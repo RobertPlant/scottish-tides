@@ -48,20 +48,15 @@ export default function MapScreen() {
     }
   };
 
-  const favStations = favourites
-    .map((id) => stationById(id))
-    .filter((s): s is Station => Boolean(s));
+  const favStations = favourites.map(id => stationById(id)).filter((s): s is Station => Boolean(s));
 
-  const byRegion = REGION_ORDER.map((region) => ({
+  const byRegion = REGION_ORDER.map(region => ({
     region,
-    items: STATIONS.filter((s) => s.region === region),
-  })).filter((g) => g.items.length > 0);
+    items: STATIONS.filter(s => s.region === region),
+  })).filter(g => g.items.length > 0);
 
   return (
-    <ScrollView
-      contentContainerStyle={[styles.content, sidePadding]}
-      style={{ backgroundColor: palette.background }}
-    >
+    <ScrollView contentContainerStyle={[styles.content, sidePadding]} style={{ backgroundColor: palette.background }}>
       <Head>
         <title>Ports &amp; tidal streams · Scottish Tides</title>
       </Head>
@@ -95,13 +90,7 @@ export default function MapScreen() {
       ) : null}
 
       {byRegion.map(({ region, items }) => (
-        <Group
-          key={region}
-          title={region.toUpperCase()}
-          items={items}
-          palette={palette}
-          onOpen={open}
-        />
+        <Group key={region} title={region.toUpperCase()} items={items} palette={palette} onOpen={open} />
       ))}
 
       <View style={styles.group}>
@@ -113,14 +102,11 @@ export default function MapScreen() {
             ⚠ Estimates — not a tidal stream atlas
           </ThemedText>
           <ThemedText type="caption" style={{ color: palette.muted }}>
-            Slack times and rates are modelled from the tide and published peak figures. Timing and
-            direction are approximate. Verify against the pilot/atlas before committing — these
-            races can kill.
+            Slack times and rates are modelled from the tide and published peak figures. Timing and direction are
+            approximate. Verify against the pilot/atlas before committing — these races can kill.
           </ThemedText>
         </Note>
-        <View
-          style={[styles.card, { backgroundColor: palette.surface, borderColor: palette.border }]}
-        >
+        <View style={[styles.card, { backgroundColor: palette.surface, borderColor: palette.border }]}>
           {RACES.map((r, i) => (
             <Pressable
               key={r.id}
@@ -144,9 +130,7 @@ export default function MapScreen() {
                   {r.area}
                 </ThemedText>
               </View>
-              <ThemedText style={[styles.rate, { color: palette.accent }]}>
-                ~{r.springPeakKn} kn
-              </ThemedText>
+              <ThemedText style={[styles.rate, { color: palette.accent }]}>~{r.springPeakKn} kn</ThemedText>
               <ThemedText style={{ color: palette.muted }}>›</ThemedText>
             </Pressable>
           ))}
@@ -154,8 +138,8 @@ export default function MapScreen() {
       </View>
 
       <ThemedText type="caption" style={[styles.footer, { color: palette.muted }]}>
-        More ports as the data is fitted. Each station is a small set of harmonic constituents
-        bundled in the app — predictions run entirely offline.
+        More ports as the data is fitted. Each station is a small set of harmonic constituents bundled in the app —
+        predictions run entirely offline.
       </ThemedText>
 
       <Pressable
@@ -164,9 +148,7 @@ export default function MapScreen() {
         accessibilityLabel="About and data sources"
         style={styles.aboutLink}
       >
-        <ThemedText style={{ color: palette.accent, fontWeight: '600' }}>
-          About &amp; data sources →
-        </ThemedText>
+        <ThemedText style={{ color: palette.accent, fontWeight: '600' }}>About &amp; data sources →</ThemedText>
       </Pressable>
     </ScrollView>
   );
@@ -193,19 +175,12 @@ function Row({
     // The star sits BESIDE the row button, not inside it: nesting two
     // Pressables put a <button> inside a <button> on web, which is invalid
     // HTML and threw a hydration error.
-    <View
-      style={[
-        styles.row,
-        !last && { borderBottomWidth: StyleSheet.hairlineWidth, borderColor: palette.border },
-      ]}
-    >
+    <View style={[styles.row, !last && { borderBottomWidth: StyleSheet.hairlineWidth, borderColor: palette.border }]}>
       <Pressable
         onPress={() => toggleFavourite(s.id)}
         hitSlop={8}
         accessibilityRole="button"
-        accessibilityLabel={
-          favd ? `Remove ${s.name} from favourites` : `Add ${s.name} to favourites`
-        }
+        accessibilityLabel={favd ? `Remove ${s.name} from favourites` : `Add ${s.name} to favourites`}
         style={styles.star}
       >
         <ThemedText
@@ -260,9 +235,7 @@ function Group({
       <ThemedText type="caption" style={[styles.groupTitle, { color: palette.muted }]}>
         {title}
       </ThemedText>
-      <View
-        style={[styles.card, { backgroundColor: palette.surface, borderColor: palette.border }]}
-      >
+      <View style={[styles.card, { backgroundColor: palette.surface, borderColor: palette.border }]}>
         {items.map((s, i) => (
           <Row key={s.id} s={s} last={i === items.length - 1} palette={palette} onOpen={onOpen} />
         ))}

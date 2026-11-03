@@ -173,5 +173,5 @@ export const STATIONS: Station[] = [
 ];
 
 export function stationById(id: string): Station | undefined {
-  return STATIONS.find((s) => s.id === id);
+  return STATIONS.find(s => s.id === id);
 }

@@ -44,21 +44,17 @@ export function WeekOverview({
 
   // The window is anchored to the selected day, not always today - so only call
   // it "Next 7 days" when it really starts today; otherwise show the date range.
-  const title =
-    fromYmd === todayYmd
-      ? 'Next 7 days'
-      : `${formatDay(days[0].start)} – ${formatDay(days[6].start)}`;
+  const title = fromYmd === todayYmd ? 'Next 7 days' : `${formatDay(days[0].start)} – ${formatDay(days[6].start)}`;
 
   return (
     <Card gap={8}>
       <View style={styles.heading}>
         <ThemedText type="defaultSemiBold">{title}</ThemedText>
         <ThemedText type="caption" style={{ color: palette.muted }}>
-          Typical here: {stats.springRange.toFixed(1)} m springs · {stats.neapRange.toFixed(1)} m
-          neaps
+          Typical here: {stats.springRange.toFixed(1)} m springs · {stats.neapRange.toFixed(1)} m neaps
         </ThemedText>
       </View>
-      {days.map((d) => {
+      {days.map(d => {
         const selected = d.ymd === selectedYmd;
         const barColor = palette[tideClassKey(d.cls.label)];
         return (
@@ -76,23 +72,14 @@ export function WeekOverview({
               selected && { backgroundColor: `${palette.tint}14`, borderRadius: 8 },
             ]}
           >
-            <ThemedText style={[styles.day, selected && { fontWeight: '700' }]}>
-              {formatDay(d.start)}
-            </ThemedText>
+            <ThemedText style={[styles.day, selected && { fontWeight: '700' }]}>{formatDay(d.start)}</ThemedText>
             <View style={[styles.track, { backgroundColor: palette.border }]}>
               <View
-                style={[
-                  styles.fill,
-                  { width: `${Math.round(d.cls.fraction * 100)}%`, backgroundColor: barColor },
-                ]}
+                style={[styles.fill, { width: `${Math.round(d.cls.fraction * 100)}%`, backgroundColor: barColor }]}
               />
             </View>
-            <ThemedText style={[styles.range, { color: palette.muted }]}>
-              {d.range.toFixed(1)} m
-            </ThemedText>
-            <ThemedText style={[styles.coef, { color: palette.muted }]}>
-              {d.cls.coefficient}
-            </ThemedText>
+            <ThemedText style={[styles.range, { color: palette.muted }]}>{d.range.toFixed(1)} m</ThemedText>
+            <ThemedText style={[styles.coef, { color: palette.muted }]}>{d.cls.coefficient}</ThemedText>
             <ThemedText style={[styles.tag, { color: barColor }]}>{d.cls.label}</ThemedText>
           </Pressable>
         );

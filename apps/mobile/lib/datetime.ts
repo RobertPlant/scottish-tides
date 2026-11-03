@@ -56,17 +56,10 @@ function ukOffsetMs(instant: Date): number {
     minute: '2-digit',
     second: '2-digit',
   }).formatToParts(instant);
-  const get = (t: string) => Number(parts.find((p) => p.type === t)?.value);
+  const get = (t: string) => Number(parts.find(p => p.type === t)?.value);
   // The same wall-clock components read as if they were UTC, minus the real
   // instant, is the zone's offset.
-  const asUtc = Date.UTC(
-    get('year'),
-    get('month') - 1,
-    get('day'),
-    get('hour'),
-    get('minute'),
-    get('second'),
-  );
+  const asUtc = Date.UTC(get('year'), get('month') - 1, get('day'), get('hour'), get('minute'), get('second'));
   return asUtc - instant.getTime();
 }
 
@@ -94,7 +87,7 @@ export function ymdInUk(d: Date): string {
     month: '2-digit',
     day: '2-digit',
   }).formatToParts(d);
-  const get = (t: string) => parts.find((p) => p.type === t)?.value ?? '';
+  const get = (t: string) => parts.find(p => p.type === t)?.value ?? '';
   return `${get('year')}-${get('month')}-${get('day')}`;
 }
 

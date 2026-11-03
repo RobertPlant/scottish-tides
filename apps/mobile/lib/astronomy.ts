@@ -38,8 +38,7 @@ export function sunTimes(date: Date, lat: number, lon: number): SunTimes {
   const delta = Math.asin(Math.sin(lambda) * Math.sin(OBLIQUITY * RAD));
 
   const cosOmega =
-    (Math.sin(-0.833 * RAD) - Math.sin(lat * RAD) * Math.sin(delta)) /
-    (Math.cos(lat * RAD) * Math.cos(delta));
+    (Math.sin(-0.833 * RAD) - Math.sin(lat * RAD) * Math.sin(delta)) / (Math.cos(lat * RAD) * Math.cos(delta));
 
   if (cosOmega < -1) {
     return { sunrise: null, sunset: null, daylightMinutes: 24 * 60, alwaysUp: true };

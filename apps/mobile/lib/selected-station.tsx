@@ -1,15 +1,7 @@
 // Selected station + favourites, shared across tabs and persisted (AsyncStorage).
 // Last station is restored on launch; favourites are starred ports pinned first.
 
-import {
-  createContext,
-  type ReactNode,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-} from 'react';
+import { createContext, type ReactNode, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 
 import { STATIONS } from '@/lib/stations';
 import { loadFavourites, loadLastStation, saveFavourites, saveLastStation } from '@/lib/storage';
@@ -26,7 +18,7 @@ interface SelectedStationContext {
 
 const Ctx = createContext<SelectedStationContext | null>(null);
 
-const DEFAULT_ID = STATIONS.find((s) => s.id === 'oban')?.id ?? STATIONS[0]?.id ?? 'oban';
+const DEFAULT_ID = STATIONS.find(s => s.id === 'oban')?.id ?? STATIONS[0]?.id ?? 'oban';
 
 export function SelectedStationProvider({ children }: { children: ReactNode }) {
   const [stationId, setStationIdState] = useState(DEFAULT_ID);
@@ -40,10 +32,10 @@ export function SelectedStationProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const restore = async () => {
       const [id, ids] = await Promise.all([loadLastStation(), loadFavourites()]);
-      if (id && STATIONS.some((s) => s.id === id)) {
+      if (id && STATIONS.some(s => s.id === id)) {
         setStationIdState(id);
       }
-      setFavourites(ids.filter((fid) => STATIONS.some((s) => s.id === fid)));
+      setFavourites(ids.filter(fid => STATIONS.some(s => s.id === fid)));
       setReady(true);
     };
     void restore();
@@ -55,8 +47,8 @@ export function SelectedStationProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const toggleFavourite = useCallback((id: string) => {
-    setFavourites((prev) => {
-      const next = prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id];
+    setFavourites(prev => {
+      const next = prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id];
       void saveFavourites(next);
       return next;
     });

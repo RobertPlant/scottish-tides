@@ -66,13 +66,13 @@ export function TideCurve({ series, events, now, height = 200, scrubbable = fals
   // Merge the exact high/low-water points into the sampled series so the drawn
   // line passes through each marker (the 10-min sampling otherwise cuts peaks).
   const merged = [
-    ...series.map((s) => ({ t: s.time.getTime(), h: s.height })),
-    ...events.map((e) => ({ t: e.time.getTime(), h: e.height })),
+    ...series.map(s => ({ t: s.time.getTime(), h: s.height })),
+    ...events.map(e => ({ t: e.time.getTime(), h: e.height })),
   ]
-    .filter((p) => p.t >= t0 && p.t <= t1)
+    .filter(p => p.t >= t0 && p.t <= t1)
     .sort((a, b) => a.t - b.t);
 
-  const hs = merged.map((p) => p.h);
+  const hs = merged.map(p => p.h);
   const dataMin = Math.min(...hs);
   const dataMax = Math.max(...hs);
 
@@ -117,9 +117,7 @@ export function TideCurve({ series, events, now, height = 200, scrubbable = fals
   const dayFill = '#ffcf4d'; // warm gold, theme-agnostic
   const dayEdge = '#e0a020'; // deeper gold for the dawn/dusk lines
 
-  const line = merged
-    .map((p, i) => `${i === 0 ? 'M' : 'L'} ${x(p.t).toFixed(1)} ${y(p.h).toFixed(1)}`)
-    .join(' ');
+  const line = merged.map((p, i) => `${i === 0 ? 'M' : 'L'} ${x(p.t).toFixed(1)} ${y(p.h).toFixed(1)}`).join(' ');
   const area = `${line} L ${x(t1).toFixed(1)} ${baseY.toFixed(1)} L ${x(t0).toFixed(1)} ${baseY.toFixed(1)} Z`;
 
   // Interpolate height + trend at an arbitrary time - used for both the "now"
@@ -154,8 +152,8 @@ export function TideCurve({ series, events, now, height = 200, scrubbable = fals
     .enabled(scrubbable)
     .minDistance(0)
     .runOnJS(true)
-    .onBegin((e) => onScrub(e.x))
-    .onUpdate((e) => onScrub(e.x));
+    .onBegin(e => onScrub(e.x))
+    .onUpdate(e => onScrub(e.x));
 
   const scrub =
     scrubbable && scrubT !== null
@@ -181,7 +179,7 @@ export function TideCurve({ series, events, now, height = 200, scrubbable = fals
                 opacity={isDark ? 0.16 : 0.3}
               />
             )}
-            {dayEdges.map((ex) => (
+            {dayEdges.map(ex => (
               <Line
                 key={`sun${ex.toFixed(0)}`}
                 x1={ex}
@@ -195,7 +193,7 @@ export function TideCurve({ series, events, now, height = 200, scrubbable = fals
             ))}
 
             {/* Height gridlines + axis labels */}
-            {yTicks.map((v) => (
+            {yTicks.map(v => (
               <G key={`y${v}`}>
                 <Line
                   x1={PAD_LEFT}
@@ -205,20 +203,14 @@ export function TideCurve({ series, events, now, height = 200, scrubbable = fals
                   stroke={palette.border}
                   strokeWidth={1}
                 />
-                <SvgText
-                  x={PAD_LEFT - 4}
-                  y={y(v) + 3}
-                  fill={palette.muted}
-                  fontSize={9}
-                  textAnchor="end"
-                >
+                <SvgText x={PAD_LEFT - 4} y={y(v) + 3} fill={palette.muted} fontSize={9} textAnchor="end">
                   {v.toFixed(decimals)}
                 </SvgText>
               </G>
             ))}
 
             {/* Hour ticks + labels */}
-            {hourTicks.map((tick) => (
+            {hourTicks.map(tick => (
               <G key={`x${tick.t}`}>
                 <Line
                   x1={x(tick.t)}
@@ -229,13 +221,7 @@ export function TideCurve({ series, events, now, height = 200, scrubbable = fals
                   strokeWidth={1}
                   opacity={0.5}
                 />
-                <SvgText
-                  x={x(tick.t)}
-                  y={height - 7}
-                  fill={palette.muted}
-                  fontSize={9}
-                  textAnchor="middle"
-                >
+                <SvgText x={x(tick.t)} y={height - 7} fill={palette.muted} fontSize={9} textAnchor="middle">
                   {tick.label}
                 </SvgText>
               </G>
@@ -257,9 +243,7 @@ export function TideCurve({ series, events, now, height = 200, scrubbable = fals
                 strokeDasharray="3 3"
               />
             )}
-            {nowX !== null && nowPoint && (
-              <Circle cx={nowX} cy={y(nowPoint.h)} r={4} fill={palette.text} />
-            )}
+            {nowX !== null && nowPoint && <Circle cx={nowX} cy={y(nowPoint.h)} r={4} fill={palette.text} />}
             {/* Current-level readout at the top of the now line (today only) */}
             {nowX !== null &&
               nowPoint &&
@@ -271,14 +255,7 @@ export function TideCurve({ series, events, now, height = 200, scrubbable = fals
                 return (
                   <G>
                     <Rect x={lx} y={1} width={w} height={16} rx={4} fill={color} />
-                    <SvgText
-                      x={lx + w / 2}
-                      y={12.5}
-                      fill="#ffffff"
-                      fontSize={10}
-                      fontWeight="700"
-                      textAnchor="middle"
-                    >
+                    <SvgText x={lx + w / 2} y={12.5} fill="#ffffff" fontSize={10} fontWeight="700" textAnchor="middle">
                       {label}
                     </SvgText>
                   </G>
@@ -286,7 +263,7 @@ export function TideCurve({ series, events, now, height = 200, scrubbable = fals
               })()}
 
             {/* High/low water markers */}
-            {events.map((e) => {
+            {events.map(e => {
               const ex = x(e.time.getTime());
               if (ex < PAD_LEFT || ex > width - PAD_RIGHT) {
                 return null;
@@ -312,14 +289,7 @@ export function TideCurve({ series, events, now, height = 200, scrubbable = fals
             {/* Scrub marker */}
             {scrub && (
               <G>
-                <Line
-                  x1={scrub.sx}
-                  y1={PAD_TOP - 4}
-                  x2={scrub.sx}
-                  y2={baseY}
-                  stroke={palette.accent}
-                  strokeWidth={1}
-                />
+                <Line x1={scrub.sx} y1={PAD_TOP - 4} x2={scrub.sx} y2={baseY} stroke={palette.accent} strokeWidth={1} />
                 <Circle
                   cx={scrub.sx}
                   cy={scrub.sy}

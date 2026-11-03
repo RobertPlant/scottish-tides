@@ -71,16 +71,7 @@ test('formatRelative reads future "in" and past "ago"', () => {
 test('parseYmd accepts real calendar dates only', () => {
   assert.equal(parseYmd('2026-12-15'), '2026-12-15');
   assert.equal(parseYmd('2028-02-29'), '2028-02-29');
-  for (const bad of [
-    '2026-13-01',
-    '2026-00-10',
-    '2026-02-31',
-    '2027-02-29',
-    '2026-1-01',
-    'today',
-    '',
-    undefined,
-  ]) {
+  for (const bad of ['2026-13-01', '2026-00-10', '2026-02-31', '2027-02-29', '2026-1-01', 'today', '', undefined]) {
     assert.equal(parseYmd(bad), undefined, String(bad));
   }
 });

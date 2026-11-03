@@ -14,7 +14,7 @@ async function assertNoErrorOverlay(page: Page): Promise<void> {
 
 test('home shows the current level on the chart and station chips', async ({ page }) => {
   const errors: string[] = [];
-  page.on('pageerror', (e) => errors.push(e.message));
+  page.on('pageerror', e => errors.push(e.message));
 
   await page.goto('/');
   await expect(page.getByText('Oban').first()).toBeAttached();
@@ -61,7 +61,7 @@ test('station detail: the date picker changes the day', async ({ page }) => {
 
 test('deep link to a station renders on direct load (refresh-safe routing)', async ({ page }) => {
   const errors: string[] = [];
-  page.on('pageerror', (e) => errors.push(e.message));
+  page.on('pageerror', e => errors.push(e.message));
 
   await page.goto('/station/leith');
   await expect(page.getByText('Leith').first()).toBeAttached();
@@ -75,7 +75,7 @@ test('deep link to a station renders on direct load (refresh-safe routing)', asy
 
 test('planner shows the year heatmap with the neap→spring legend', async ({ page }) => {
   const errors: string[] = [];
-  page.on('pageerror', (e) => errors.push(e.message));
+  page.on('pageerror', e => errors.push(e.message));
 
   await page.goto('/plan/oban');
   await expect(page.getByText('Oban').first()).toBeAttached();
@@ -136,10 +136,7 @@ test('tapping a day opens it when the Tides tab is already open', async ({ page 
 
   await page.goto('/station/oban');
   await tapUntil(page.getByRole('tab', { name: /Plan/ }).first(), /\/plan\//);
-  await tapUntil(
-    page.getByRole('button', { name: new RegExp(`^${ymd}:`) }).first(),
-    new RegExp(`d=${ymd}`),
-  );
+  await tapUntil(page.getByRole('button', { name: new RegExp(`^${ymd}:`) }).first(), new RegExp(`d=${ymd}`));
   await expect(page.locator('body')).toContainText(longDate);
 
   // the Tides tab links without ?d=, which mustn't drop the day back to today
