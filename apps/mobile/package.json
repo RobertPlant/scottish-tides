@@ -39,7 +39,8 @@
   "overrides": {
     "glob": "^14.0.2",
     "uuid": "^14.0.1",
-    "zod": "^4.6.6"
+    "zod": "^4.6.6",
+    "minimatch@^10": "^11.0.1"
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "2.2.0",
