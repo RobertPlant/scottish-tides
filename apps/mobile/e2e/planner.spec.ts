@@ -49,3 +49,28 @@ test('tapping a day opens it on the Tides tab', async ({ page }) => {
 
   await assertNoErrorOverlay(page);
 });
+
+test('tapping a day opens it when the Tides tab is already open', async ({ page }) => {
+  // the Tides tab stays mounted under the tab bar, so a new ?d= has to move it
+  const now = new Date();
+  const day = now.getDate() === 15 ? 16 : 15;
+  const ymd = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${day}`;
+  const longDate = new Date(ymd).toLocaleDateString('en-GB', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  });
+
+  await page.goto('/station/oban');
+  await page.waitForTimeout(1500);
+  await page.getByRole('tab', { name: /Plan/ }).first().click();
+  await page.waitForTimeout(1500);
+  await page
+    .getByRole('button', { name: new RegExp(`^${ymd}:`) })
+    .first()
+    .click();
+  await expect(page).toHaveURL(new RegExp(`d=${ymd}`));
+  await expect(page.locator('body')).toContainText(longDate);
+
+  await assertNoErrorOverlay(page);
+});

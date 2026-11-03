@@ -10,6 +10,7 @@ import {
   formatLongDay,
   formatRelative,
   formatTime,
+  parseYmd,
   ukDayStartFromYmd,
   ymdAddDays,
   ymdInUk,
@@ -65,4 +66,21 @@ test('formatRelative reads future "in" and past "ago"', () => {
   assert.equal(formatRelative(new Date('2026-01-01T10:55:00Z'), now), '1h 5m ago');
   assert.equal(formatRelative(new Date('2026-01-01T12:30:00Z'), now), 'in 30m');
   assert.equal(formatRelative(now, now), 'in 0m');
+});
+
+test('parseYmd accepts real calendar dates only', () => {
+  assert.equal(parseYmd('2026-12-15'), '2026-12-15');
+  assert.equal(parseYmd('2028-02-29'), '2028-02-29');
+  for (const bad of [
+    '2026-13-01',
+    '2026-00-10',
+    '2026-02-31',
+    '2027-02-29',
+    '2026-1-01',
+    'today',
+    '',
+    undefined,
+  ]) {
+    assert.equal(parseYmd(bad), undefined, String(bad));
+  }
 });
