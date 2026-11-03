@@ -21,7 +21,7 @@ test('monthDays returns every day in order with correct fields', () => {
   assert.equal(days[0].ymd, '2026-07-01');
   assert.equal(days[30].ymd, '2026-07-31');
   assert.deepEqual(
-    days.map((d) => d.day),
+    days.map(d => d.day),
     Array.from({ length: 31 }, (_, i) => i + 1),
   );
   // 2026-07-01 is a Wednesday → Monday-first index 2, not a weekend.
@@ -41,7 +41,7 @@ test('yearMonths covers all twelve months with correct day counts', () => {
   const months = yearMonths(station, 2024); // leap year
   assert.equal(months.length, 12);
   assert.deepEqual(
-    months.map((m) => m.month),
+    months.map(m => m.month),
     Array.from({ length: 12 }, (_, i) => i + 1),
   );
   assert.equal(months[1].days.length, 29); // Feb 2024

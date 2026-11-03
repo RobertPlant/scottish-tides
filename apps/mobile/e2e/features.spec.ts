@@ -93,11 +93,9 @@ test('tapping the chart shows the scrub readout', async ({ page }) => {
   await expect(readout.first()).toBeAttached();
 });
 
-test('about screen: reached from the map, shows licence, credits and disclaimer', async ({
-  page,
-}) => {
+test('about screen: reached from the map, shows licence, credits and disclaimer', async ({ page }) => {
   const errors: string[] = [];
-  page.on('pageerror', (e) => errors.push(e.message));
+  page.on('pageerror', e => errors.push(e.message));
 
   await page.goto('/map');
   await page.waitForTimeout(800); // let the dev bundle hydrate before pressing

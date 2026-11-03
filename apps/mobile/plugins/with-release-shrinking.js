@@ -10,9 +10,9 @@ const SHRINK_PROPS = {
 
 /** @param {import('expo/config').ExpoConfig} config */
 module.exports = function withReleaseShrinking(config) {
-  return withGradleProperties(config, (cfg) => {
+  return withGradleProperties(config, cfg => {
     for (const [key, value] of Object.entries(SHRINK_PROPS)) {
-      const existing = cfg.modResults.find((item) => item.type === 'property' && item.key === key);
+      const existing = cfg.modResults.find(item => item.type === 'property' && item.key === key);
       if (existing) {
         existing.value = value;
       } else {

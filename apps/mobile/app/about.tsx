@@ -67,10 +67,7 @@ export default function About() {
       <Head>
         <title>About · Scottish Tides</title>
       </Head>
-      <ScrollView
-        contentContainerStyle={[styles.content, sidePadding]}
-        style={{ backgroundColor: palette.background }}
-      >
+      <ScrollView contentContainerStyle={[styles.content, sidePadding]} style={{ backgroundColor: palette.background }}>
         <View>
           <ThemedText type="title">Scottish Tides</ThemedText>
           {version ? (
@@ -79,16 +76,15 @@ export default function About() {
             </ThemedText>
           ) : null}
           <ThemedText style={{ marginTop: 8 }}>
-            Offline tide predictions and tidal-stream estimates for Scottish waters. All predictions
-            run on-device — no account, no tracking, no network needed.
+            Offline tide predictions and tidal-stream estimates for Scottish waters. All predictions run on-device — no
+            account, no tracking, no network needed.
           </ThemedText>
         </View>
 
         <Card gap={8}>
           <ThemedText type="defaultSemiBold">Source &amp; licence</ThemedText>
           <ThemedText type="caption" style={{ color: palette.muted }}>
-            Free software under the GNU General Public License v3.0. You can use, study, share and
-            improve it.
+            Free software under the GNU General Public License v3.0. You can use, study, share and improve it.
           </ThemedText>
           <Pressable
             onPress={() => open(REPO)}
@@ -117,9 +113,7 @@ export default function About() {
                 // Only the rows that actually open something are actionable;
                 // the rest are plain text and shouldn't announce as buttons.
                 accessibilityRole={c.url ? 'button' : undefined}
-                accessibilityLabel={
-                  c.url ? `${c.what}. ${c.detail} Opens in your browser.` : undefined
-                }
+                accessibilityLabel={c.url ? `${c.what}. ${c.detail} Opens in your browser.` : undefined}
                 style={[
                   styles.creditRow,
                   i < CREDITS.length - 1 && {
@@ -145,10 +139,9 @@ export default function About() {
         <Card gap={8}>
           <ThemedText type="defaultSemiBold">Disclaimer</ThemedText>
           <ThemedText type="caption" style={{ color: palette.muted }}>
-            Heights are astronomical predictions and exclude weather (surge). Tidal streams are
-            modelled estimates, not a stream atlas. Never use this app as your sole source for
-            navigation or for planning a race transit — always cross-check the official pilot, chart
-            and tidal-stream atlas.
+            Heights are astronomical predictions and exclude weather (surge). Tidal streams are modelled estimates, not
+            a stream atlas. Never use this app as your sole source for navigation or for planning a race transit —
+            always cross-check the official pilot, chart and tidal-stream atlas.
           </ThemedText>
         </Card>
       </ScrollView>

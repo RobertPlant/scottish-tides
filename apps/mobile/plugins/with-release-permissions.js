@@ -16,7 +16,7 @@ const REMOVED = [
 
 const MANIFEST = `<manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
-${REMOVED.map((p) => `    <uses-permission android:name="${p}" tools:node="remove" />`).join('\n')}
+${REMOVED.map(p => `    <uses-permission android:name="${p}" tools:node="remove" />`).join('\n')}
 </manifest>
 `;
 
@@ -24,7 +24,7 @@ ${REMOVED.map((p) => `    <uses-permission android:name="${p}" tools:node="remov
 module.exports = function withReleasePermissions(config) {
   return withDangerousMod(config, [
     'android',
-    (cfg) => {
+    cfg => {
       const dir = path.join(cfg.modRequest.platformProjectRoot, 'app/src/release');
       fs.mkdirSync(dir, { recursive: true });
       fs.writeFileSync(path.join(dir, 'AndroidManifest.xml'), MANIFEST);

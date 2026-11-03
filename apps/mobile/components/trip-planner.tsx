@@ -22,20 +22,7 @@ import { coeffFill, type DayCell, type Scheme, yearMonths } from '@/lib/planner'
 import type { Station } from '@/lib/stations';
 import { tidalStats } from '@/lib/tide-day';
 
-const MONTHS_SHORT = [
-  'Jan',
-  'Feb',
-  'Mar',
-  'Apr',
-  'May',
-  'Jun',
-  'Jul',
-  'Aug',
-  'Sep',
-  'Oct',
-  'Nov',
-  'Dec',
-];
+const MONTHS_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 const COLS = 31; // widest month; short months trail blank so rows stay aligned
 const YEAR_SPAN = 5; // how far the ‹ › buttons roam from the current year
 
@@ -64,10 +51,7 @@ export function TripPlanner({ station, header }: { station: Station; header?: Re
   // block on mount and on every ‹ › press. If this grows (e.g. the opinionated
   // "best window" layer in TODO.md, which would add stream/daylight solves on
   // top), it needs deferring off the first paint rather than more memoising.
-  const months = useMemo(
-    () => (hydrated ? yearMonths(station, year, stats) : []),
-    [hydrated, station, year, stats],
-  );
+  const months = useMemo(() => (hydrated ? yearMonths(station, year, stats) : []), [hydrated, station, year, stats]);
 
   const minYear = nowY - YEAR_SPAN;
   const maxYear = nowY + YEAR_SPAN;
@@ -89,10 +73,7 @@ export function TripPlanner({ station, header }: { station: Station; header?: Re
   };
 
   return (
-    <ScrollView
-      contentContainerStyle={[styles.content, sidePadding]}
-      style={{ backgroundColor: palette.background }}
-    >
+    <ScrollView contentContainerStyle={[styles.content, sidePadding]} style={{ backgroundColor: palette.background }}>
       <View style={styles.inner}>
         {header}
 
@@ -100,14 +81,11 @@ export function TripPlanner({ station, header }: { station: Station; header?: Re
           <>
             <View style={styles.navRow}>
               <Pressable
-                onPress={() => setYear((y) => y - 1)}
+                onPress={() => setYear(y => y - 1)}
                 disabled={!canPrev}
                 accessibilityRole="button"
                 accessibilityLabel="Previous year"
-                style={[
-                  styles.navBtn,
-                  { borderColor: palette.border, opacity: canPrev ? 1 : 0.35 },
-                ]}
+                style={[styles.navBtn, { borderColor: palette.border, opacity: canPrev ? 1 : 0.35 }]}
               >
                 <ThemedText style={{ color: palette.accent }}>‹</ThemedText>
               </Pressable>
@@ -115,24 +93,17 @@ export function TripPlanner({ station, header }: { station: Station; header?: Re
                 {year}
               </ThemedText>
               <Pressable
-                onPress={() => setYear((y) => y + 1)}
+                onPress={() => setYear(y => y + 1)}
                 disabled={!canNext}
                 accessibilityRole="button"
                 accessibilityLabel="Next year"
-                style={[
-                  styles.navBtn,
-                  { borderColor: palette.border, opacity: canNext ? 1 : 0.35 },
-                ]}
+                style={[styles.navBtn, { borderColor: palette.border, opacity: canNext ? 1 : 0.35 }]}
               >
                 <ThemedText style={{ color: palette.accent }}>›</ThemedText>
               </Pressable>
             </View>
             {year !== nowY ? (
-              <Pressable
-                onPress={() => setYear(nowY)}
-                accessibilityRole="button"
-                style={styles.todayLink}
-              >
+              <Pressable onPress={() => setYear(nowY)} accessibilityRole="button" style={styles.todayLink}>
                 <ThemedText style={{ color: palette.accent }}>This year</ThemedText>
               </Pressable>
             ) : null}
@@ -148,11 +119,8 @@ export function TripPlanner({ station, header }: { station: Station; header?: Re
                     <ThemedText type="caption" style={[styles.yearLabel, { color: palette.muted }]}>
                       {MONTHS_SHORT[month - 1]}
                     </ThemedText>
-                    <View
-                      style={styles.yearCells}
-                      onLayout={month === 1 ? onCellsLayout : undefined}
-                    >
-                      {days.map((d) => (
+                    <View style={styles.yearCells} onLayout={month === 1 ? onCellsLayout : undefined}>
+                      {days.map(d => (
                         <DayBlock
                           key={d.ymd}
                           cell={d}
@@ -167,10 +135,7 @@ export function TripPlanner({ station, header }: { station: Station; header?: Re
                       ))}
                       {padCols > 0 ? (
                         <View
-                          style={[
-                            styles.dayBlock,
-                            cellW != null ? { width: cellW * padCols } : { flex: padCols },
-                          ]}
+                          style={[styles.dayBlock, cellW != null ? { width: cellW * padCols } : { flex: padCols }]}
                         />
                       ) : null}
                     </View>
@@ -185,13 +150,13 @@ export function TripPlanner({ station, header }: { station: Station; header?: Re
 
         <Note>
           <ThemedText type="caption" style={{ color: palette.muted }}>
-            Each day is shaded by its tidal range on this station&apos;s neap→spring scale. Springs
-            mean a wider range and stronger tidal streams; neaps are gentler. Which is
-            &ldquo;favourable&rdquo; depends on your trip — this is an overview, not advice.
+            Each day is shaded by its tidal range on this station&apos;s neap→spring scale. Springs mean a wider range
+            and stronger tidal streams; neaps are gentler. Which is &ldquo;favourable&rdquo; depends on your trip — this
+            is an overview, not advice.
           </ThemedText>
           <ThemedText type="caption" style={{ color: palette.muted }}>
-            Astronomical only (no weather/surge). Tap a day to open its curve, HW/LW times, and sun
-            & moon on the Tides tab.
+            Astronomical only (no weather/surge). Tap a day to open its curve, HW/LW times, and sun & moon on the Tides
+            tab.
           </ThemedText>
         </Note>
       </View>
@@ -227,11 +192,7 @@ function DayBlock({
       onPress={() => onPick(cell.ymd)}
       accessibilityRole="button"
       accessibilityLabel={`${cell.ymd}: ${cell.cls.label}, ${cell.range.toFixed(1)} metres range`}
-      style={[
-        styles.dayBlock,
-        sizeStyle,
-        { backgroundColor: bg, borderColor: border, borderWidth: isToday ? 1.5 : 1 },
-      ]}
+      style={[styles.dayBlock, sizeStyle, { backgroundColor: bg, borderColor: border, borderWidth: isToday ? 1.5 : 1 }]}
     />
   );
 }
@@ -245,11 +206,8 @@ function Legend({ scheme, palette }: { scheme: Scheme; palette: ReturnType<typeo
           Neaps
         </ThemedText>
         <View style={styles.legendBar}>
-          {stops.map((t) => (
-            <View
-              key={t}
-              style={{ flex: 1, backgroundColor: coeffFill(t, scheme).bg, height: '100%' }}
-            />
+          {stops.map(t => (
+            <View key={t} style={{ flex: 1, backgroundColor: coeffFill(t, scheme).bg, height: '100%' }} />
           ))}
         </View>
         <ThemedText type="caption" style={{ color: palette.muted }}>

@@ -105,7 +105,7 @@ export class Tide {
   /** Node factors u (rad) and f for each constituent at a given instant. */
   private nodeFactors(prep: Prepared[], t: Date): { u: number; f: number }[] {
     const a = astro(t);
-    return prep.map((p) => ({
+    return prep.map(p => ({
       u: d2r * mod360(p.constituent.u(a)),
       f: p.constituent.f(a),
     }));
@@ -125,7 +125,7 @@ export class Tide {
 
     // Group sample indices by 240h partition from t0.
     const blocks = new Map<number, number[]>();
-    const hours = times.map((t) => hoursBetween(t0, t));
+    const hours = times.map(t => hoursBetween(t0, t));
     hours.forEach((h, idx) => {
       const block = Math.floor(h / PARTITION_H);
       const list = blocks.get(block);
@@ -230,7 +230,7 @@ export class Tide {
 
 /** Apply a secondary-port shift (time offset + height scale) to each event. */
 export function applyShift(events: TideEvent[], shift: Shift): TideEvent[] {
-  return events.map((e) => {
+  return events.map(e => {
     const dtMin = e.type === 'high' ? shift.hw_time_min : shift.lw_time_min;
     return {
       time: new Date(e.time.getTime() + dtMin * 60_000),

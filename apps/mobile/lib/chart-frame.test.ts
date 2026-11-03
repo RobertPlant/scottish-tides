@@ -11,7 +11,7 @@ import { ukDayStartFromYmd, ukEndOfDay } from './datetime';
 const labelsFor = (ymd: string) => {
   const t0 = ukDayStartFromYmd(ymd);
   return chartFrame(300, { t0: t0.getTime(), t1: ukEndOfDay(t0).getTime(), height: 200 })
-    .hourTicks.map((t) => t.label)
+    .hourTicks.map(t => t.label)
     .join(' ');
 };
 

@@ -50,9 +50,7 @@ export function monthDays(
   stats: TidalStats = tidalStats(station),
 ): DayCell[] {
   const n = daysInMonth(year, month);
-  return Array.from({ length: n }, (_, i) =>
-    dayCell(station, `${year}-${pad2(month)}-${pad2(i + 1)}`, stats),
-  );
+  return Array.from({ length: n }, (_, i) => dayCell(station, `${year}-${pad2(month)}-${pad2(i + 1)}`, stats));
 }
 
 /** All twelve months of a year, each with its ordered days. */

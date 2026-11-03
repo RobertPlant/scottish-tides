@@ -18,7 +18,7 @@ import { stationById } from '@/lib/stations';
 import { predictStreamDay, RACES, raceById } from '@/lib/streams';
 
 export async function generateStaticParams(): Promise<{ id: string }[]> {
-  return RACES.map((r) => ({ id: r.id }));
+  return RACES.map(r => ({ id: r.id }));
 }
 
 const EMPTY_STREAM = {
@@ -55,10 +55,7 @@ export default function RaceDetail() {
       <Head>
         <title>{`${race.name} tidal stream · Scottish Tides`}</title>
       </Head>
-      <ScrollView
-        contentContainerStyle={[styles.content, sidePadding]}
-        style={{ backgroundColor: palette.background }}
-      >
+      <ScrollView contentContainerStyle={[styles.content, sidePadding]} style={{ backgroundColor: palette.background }}>
         <View>
           <ThemedText type="title">{race.name}</ThemedText>
           <ThemedText type="caption" style={{ color: palette.muted }}>
@@ -97,21 +94,16 @@ export default function RaceDetail() {
                 <ThemedText style={{ color: palette.muted }}>—</ThemedText>
               ) : (
                 <ThemedText style={{ color: palette.tint }}>
-                  {stream.slacks.map((s) => formatTime(s)).join('   ·   ')}
+                  {stream.slacks.map(s => formatTime(s)).join('   ·   ')}
                 </ThemedText>
               )}
 
               <ThemedText type="defaultSemiBold" style={{ marginTop: 8 }}>
                 Peak streams
               </ThemedText>
-              {stream.peaks.map((p) => (
+              {stream.peaks.map(p => (
                 <View key={p.time.toISOString()} style={styles.peakRow}>
-                  <View
-                    style={[
-                      styles.dot,
-                      { backgroundColor: p.rate > 0 ? palette.high : palette.low },
-                    ]}
-                  />
+                  <View style={[styles.dot, { backgroundColor: p.rate > 0 ? palette.high : palette.low }]} />
                   <ThemedText style={{ flex: 1 }}>{p.dirName}</ThemedText>
                   <ThemedText style={styles.peakTime}>{formatTime(p.time)}</ThemedText>
                   <ThemedText style={[styles.peakRate, { color: palette.muted }]}>
@@ -125,13 +117,12 @@ export default function RaceDetail() {
 
         <Note>
           <ThemedText type="caption" style={{ color: palette.muted }}>
-            Timed off HW/LW at {ref?.name ?? 'the reference port'}; rate scaled by the day&apos;s
-            spring/neap
+            Timed off HW/LW at {ref?.name ?? 'the reference port'}; rate scaled by the day&apos;s spring/neap
             {hydrated ? ` (${Math.round(stream.springNeapFraction * 100)}% towards springs)` : ''}.
           </ThemedText>
           <ThemedText type="caption" style={{ color: palette.muted }}>
-            {race.source} Model only — slack/direction approximate. Not for navigation; check the
-            tidal stream atlas and pilot.
+            {race.source} Model only — slack/direction approximate. Not for navigation; check the tidal stream atlas and
+            pilot.
           </ThemedText>
         </Note>
       </ScrollView>

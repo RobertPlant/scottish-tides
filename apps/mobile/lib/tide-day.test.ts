@@ -6,14 +6,7 @@ import { test } from 'node:test';
 
 import { ukDayStartFromYmd, ukEndOfDay, ymdAddDays, ymdInUk } from './datetime';
 import { type Station, stationById } from './stations';
-import {
-  classifyTide,
-  dayEvents,
-  dayHeightSeries,
-  dayRange,
-  type TidalStats,
-  tidalStats,
-} from './tide-day';
+import { classifyTide, dayEvents, dayHeightSeries, dayRange, type TidalStats, tidalStats } from './tide-day';
 import { predictExtrema, type StationData, type TideEvent } from './tides';
 
 const ev = (type: 'high' | 'low', height: number): TideEvent => ({
@@ -180,18 +173,18 @@ test('Port Ellen days join up into one continuous run of events', () => {
   // Pruning a single day can't see past midnight, so 10 Feb ended on a LW and
   // 11 Feb started on a HW, losing the real 01:47 LW in between.
   const days = Array.from({ length: 90 }, (_, n) => ymdAddDays('2026-01-01', n));
-  const perDay = days.flatMap((ymd) => dayEvents(portEllen, ukDayStartFromYmd(ymd)));
+  const perDay = days.flatMap(ymd => dayEvents(portEllen, ukDayStartFromYmd(ymd)));
   const from = ukDayStartFromYmd(days[0]);
   const to = ukEndOfDay(ukDayStartFromYmd(days[days.length - 1]));
   const continuous = predictExtrema(
     portEllen.data,
     new Date(from.getTime() - 86_400_000),
     new Date(to.getTime() + 86_400_000),
-  ).filter((event) => event.time >= from && event.time <= to);
+  ).filter(event => event.time >= from && event.time <= to);
   // the turning-point search lands a minute either way depending on where the window starts
   assert.deepEqual(
-    perDay.map((event) => event.type),
-    continuous.map((event) => event.type),
+    perDay.map(event => event.type),
+    continuous.map(event => event.type),
   );
   perDay.forEach((event, index) => {
     const driftMs = Math.abs(event.time.getTime() - continuous[index].time.getTime());

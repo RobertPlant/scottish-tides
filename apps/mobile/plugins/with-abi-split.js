@@ -22,7 +22,7 @@ android {
 
 /** @param {import('expo/config').ExpoConfig} config */
 module.exports = function withAbiSplit(config) {
-  return withAppBuildGradle(config, (cfg) => {
+  return withAppBuildGradle(config, cfg => {
     if (!cfg.modResults.contents.includes('indexOf(abis[0])')) {
       cfg.modResults.contents += BLOCK;
     }

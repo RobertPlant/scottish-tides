@@ -23,12 +23,7 @@ function clamp(ymd: string, min: string, max: string): string {
 }
 
 // the ?d= day if it's a real date, kept inside the bounds, else today
-function getUrlDay(
-  urlYmd: string | undefined,
-  todayYmd: string,
-  minYmd: string,
-  maxYmd: string,
-): string {
+function getUrlDay(urlYmd: string | undefined, todayYmd: string, minYmd: string, maxYmd: string): string {
   const parsed = parseYmd(urlYmd);
 
   return parsed ? clamp(parsed, minYmd, maxYmd) : todayYmd;

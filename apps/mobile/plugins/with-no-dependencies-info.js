@@ -13,7 +13,7 @@ android {
 
 /** @param {import('expo/config').ExpoConfig} config */
 module.exports = function withNoDependenciesInfo(config) {
-  return withAppBuildGradle(config, (cfg) => {
+  return withAppBuildGradle(config, cfg => {
     if (!cfg.modResults.contents.includes('dependenciesInfo')) {
       cfg.modResults.contents += BLOCK;
     }

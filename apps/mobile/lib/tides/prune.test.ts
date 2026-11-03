@@ -10,13 +10,7 @@ import { fileURLToPath } from 'node:url';
 
 import { predictExtrema, type StationData, Tide } from './index';
 
-const dataDir = path.join(
-  path.dirname(fileURLToPath(import.meta.url)),
-  '..',
-  '..',
-  'assets',
-  'data',
-);
+const dataDir = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', '..', 'assets', 'data');
 const load = (f: string): StationData => JSON.parse(readFileSync(path.join(dataDir, f), 'utf8'));
 
 const FROM = new Date('2026-06-26T00:00:00Z');
@@ -27,10 +21,7 @@ test('Port Ellen: sub-5cm wiggles are pruned, leaving a sensible day', () => {
   const raw = new Tide(load('port_ellen.json')).extrema(FROM, TO);
   const pruned = predictExtrema(load('port_ellen.json'), FROM, TO, undefined, PROM);
 
-  assert.ok(
-    pruned.length < raw.length,
-    `expected pruning to remove events (${raw.length} -> ${pruned.length})`,
-  );
+  assert.ok(pruned.length < raw.length, `expected pruning to remove events (${raw.length} -> ${pruned.length})`);
   assert.ok(pruned.length <= 5, `still too many events: ${pruned.length}`);
 
   // Events must alternate high/low and every interior extremum clears the
@@ -62,11 +53,11 @@ test('pruning never leaves a day with only one kind of water', () => {
   const pruned = predictExtrema(load('port_ellen.json'), from, to, undefined, PROM);
 
   assert.ok(
-    pruned.some((e) => e.type === 'high') && pruned.some((e) => e.type === 'low'),
-    `expected both a high and a low, got ${pruned.map((e) => e.type).join(',')}`,
+    pruned.some(e => e.type === 'high') && pruned.some(e => e.type === 'low'),
+    `expected both a high and a low, got ${pruned.map(e => e.type).join(',')}`,
   );
   const range =
-    Math.max(...pruned.filter((e) => e.type === 'high').map((e) => e.height)) -
-    Math.min(...pruned.filter((e) => e.type === 'low').map((e) => e.height));
+    Math.max(...pruned.filter(e => e.type === 'high').map(e => e.height)) -
+    Math.min(...pruned.filter(e => e.type === 'low').map(e => e.height));
   assert.ok(range > 0.3, `range ${range.toFixed(2)} m should reflect the day's real movement`);
 });

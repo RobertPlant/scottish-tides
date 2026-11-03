@@ -11,11 +11,7 @@ export function Card({ children, gap = 12, style, ...rest }: ViewProps & { gap?:
   return (
     <View
       {...rest}
-      style={[
-        styles.card,
-        { backgroundColor: palette.surface, borderColor: palette.border, gap },
-        style,
-      ]}
+      style={[styles.card, { backgroundColor: palette.surface, borderColor: palette.border, gap }, style]}
     >
       {children}
     </View>

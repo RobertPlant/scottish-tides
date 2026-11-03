@@ -181,8 +181,8 @@ const _K2 = new BaseConstituent('K2', 'B BZZ ZZZ', nc.u_K2, nc.f_K2);
 const _M3 = new BaseConstituent(
   'M3',
   'C ZZZ ZZZ',
-  (a) => nc.u_Modd(a, 3),
-  (a) => nc.f_Modd(a, 3),
+  a => nc.u_Modd(a, 3),
+  a => nc.f_Modd(a, 3),
 );
 
 // --- Compound constituents ---------------------------------------------------

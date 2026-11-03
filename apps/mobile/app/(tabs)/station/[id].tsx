@@ -13,7 +13,7 @@ import { STATIONS } from '@/lib/stations';
 // Pre-render one static HTML page per station so shareable links like
 // /station/oban survive a hard refresh on GitHub Pages.
 export async function generateStaticParams(): Promise<{ id: string }[]> {
-  return STATIONS.map((s) => ({ id: s.id }));
+  return STATIONS.map(s => ({ id: s.id }));
 }
 
 // The canonical, shareable day view. It's the app's home (the first tab

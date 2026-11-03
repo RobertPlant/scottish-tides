@@ -44,10 +44,7 @@ export function pruneMinorExtrema(events: TideEvent[], minProminenceM: number): 
     let minIdx = -1;
     let minProm = Infinity;
     for (let i = 1; i < evs.length - 1; i++) {
-      const prom = Math.min(
-        Math.abs(evs[i].height - evs[i - 1].height),
-        Math.abs(evs[i].height - evs[i + 1].height),
-      );
+      const prom = Math.min(Math.abs(evs[i].height - evs[i - 1].height), Math.abs(evs[i].height - evs[i + 1].height));
       if (prom < minProm) {
         minProm = prom;
         minIdx = i;
@@ -67,9 +64,9 @@ export function pruneMinorExtrema(events: TideEvent[], minProminenceM: number): 
     }
   }
 
-  if (!evs.some((e) => e.type === 'high') || !evs.some((e) => e.type === 'low')) {
-    const highs = events.filter((e) => e.type === 'high');
-    const lows = events.filter((e) => e.type === 'low');
+  if (!evs.some(e => e.type === 'high') || !evs.some(e => e.type === 'low')) {
+    const highs = events.filter(e => e.type === 'high');
+    const lows = events.filter(e => e.type === 'low');
     // Only when the day really has both - a window can legitimately hold a
     // single turn of the tide, and there is nothing to fall back to then.
     if (highs.length > 0 && lows.length > 0) {
@@ -102,9 +99,7 @@ export function predictExtrema(
   minProminenceM = 0.05,
 ): TideEvent[] {
   const tide = new Tide(data);
-  const shiftPadMs = shift
-    ? Math.max(Math.abs(shift.hw_time_min), Math.abs(shift.lw_time_min)) * 60_000
-    : 0;
+  const shiftPadMs = shift ? Math.max(Math.abs(shift.hw_time_min), Math.abs(shift.lw_time_min)) * 60_000 : 0;
   const padMs = shiftPadMs + PRUNE_CONTEXT_MS;
   const raw = tide.extrema(new Date(from.getTime() - padMs), new Date(to.getTime() + padMs));
   const shifted = shift ? applyShift(raw, shift) : raw;
@@ -119,7 +114,7 @@ export function predictExtrema(
 }
 
 function hasBothKinds(events: TideEvent[]): boolean {
-  return events.some((e) => e.type === 'high') && events.some((e) => e.type === 'low');
+  return events.some(e => e.type === 'high') && events.some(e => e.type === 'low');
 }
 
 /** Continuous height samples for charting, `stepMinutes` apart over [from, to]. */

@@ -96,10 +96,7 @@ export function f_M1(a: Astro): number {
   const P = d2r * a.P.value;
   const I = d2r * a.I.value;
   const Q_a_inv =
-    (0.25 +
-      1.5 * cos(I) * cos(2 * P) * cos(0.5 * I) ** -0.5 +
-      2.25 * cos(I) ** 2 * cos(0.5 * I) ** -4) **
-    0.5;
+    (0.25 + 1.5 * cos(I) * cos(2 * P) * cos(0.5 * I) ** -0.5 + 2.25 * cos(I) ** 2 * cos(0.5 * I) ** -4) ** 0.5;
   return f_O1(a) * Q_a_inv;
 }
 

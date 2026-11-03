@@ -165,13 +165,12 @@ export const RACES: Race[] = [
     springPeakKn: 5,
     neapPeakKn: 2.5,
     warning: 'A steady, strong tidal river — time a transit with the stream, not against.',
-    source:
-      'Slack ≈ HW Oban −0:40 / +5:30 (Rhinns-of-Islay figures, approximate); peak ~5 kn springs.',
+    source: 'Slack ≈ HW Oban −0:40 / +5:30 (Rhinns-of-Islay figures, approximate); peak ~5 kn springs.',
   },
 ];
 
 export function raceById(id: string): Race | undefined {
-  return RACES.find((r) => r.id === id);
+  return RACES.find(r => r.id === id);
 }
 
 export interface StreamSample {
@@ -209,9 +208,7 @@ export function predictStreamDay(race: Race, dayStart: Date): StreamDay {
     return { samples: [], slacks: [], peaks: [], springNeapFraction: 0, peakRate: 0 };
   }
   const { fraction } = classifyDay(ref, dayStart).cls;
-  return race.type === 'sill'
-    ? predictSill(race, ref, dayStart, fraction)
-    : predictGate(race, ref, dayStart, fraction);
+  return race.type === 'sill' ? predictSill(race, ref, dayStart, fraction) : predictGate(race, ref, dayStart, fraction);
 }
 
 // --- 'gate' races: slack near reference HW/LW, sinusoid between -----------------
@@ -226,7 +223,7 @@ function predictGate(race: Race, ref: Station, dayStart: Date, fraction: number)
   const floodFromLwToHw = race.floodFromLwToHw ?? true;
 
   const slacks = events
-    .map((e) => ({
+    .map(e => ({
       t: e.time.getTime() + (e.type === 'high' ? hwOff : lwOff) * 60_000,
       afterLow: e.type === 'low',
     }))
@@ -254,14 +251,14 @@ function predictGate(race: Race, ref: Station, dayStart: Date, fraction: number)
   for (let t = start; t <= end; t += 15 * 60_000) {
     samples.push({ time: new Date(t), rate: rateAt(t) });
   }
-  const daySlacks = slacks.filter((s) => s.t >= start && s.t <= end).map((s) => new Date(s.t));
+  const daySlacks = slacks.filter(s => s.t >= start && s.t <= end).map(s => new Date(s.t));
   const peaks: StreamPeak[] = segments
-    .map((seg) => ({
+    .map(seg => ({
       time: new Date((seg.s0 + seg.s1) / 2),
       rate: seg.flood ? peakRate : -peakRate,
       dirName: seg.flood ? race.floodName : race.ebbName,
     }))
-    .filter((p) => p.time.getTime() >= start && p.time.getTime() <= end);
+    .filter(p => p.time.getTime() >= start && p.time.getTime() <= end);
 
   return { samples, slacks: daySlacks, peaks, springNeapFraction: fraction, peakRate };
 }
@@ -299,7 +296,7 @@ function predictSill(race: Race, ref: Station, dayStart: Date, fraction: number)
     }
     return { time: s.time, rate: (s.height - loch) * scale }; // + = sea above loch = flood in
   });
-  const samples = all.filter((s) => s.time.getTime() >= start && s.time.getTime() <= end);
+  const samples = all.filter(s => s.time.getTime() >= start && s.time.getTime() <= end);
 
   const { slacks, peaks } = deriveEvents(samples, race.floodName, race.ebbName);
   const peakRate = samples.reduce((m, s) => Math.max(m, Math.abs(s.rate)), 0);
@@ -319,9 +316,7 @@ function deriveEvents(
     const b = samples[i].rate;
     if ((a <= 0 && b > 0) || (a >= 0 && b < 0)) {
       const f = a !== b ? a / (a - b) : 0;
-      const t =
-        samples[i - 1].time.getTime() +
-        f * (samples[i].time.getTime() - samples[i - 1].time.getTime());
+      const t = samples[i - 1].time.getTime() + f * (samples[i].time.getTime() - samples[i - 1].time.getTime());
       slacks.push(new Date(t));
       crossings.push(i);
     }
