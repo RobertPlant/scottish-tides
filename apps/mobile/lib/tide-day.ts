@@ -11,6 +11,10 @@ function dayWindow(dayStart: Date): { from: Date; to: Date } {
   return { from: dayStart, to: ukEndOfDay(dayStart) };
 }
 
+function getMeanShiftMs(shift: NonNullable<Station['shift']>): number {
+  return ((shift.hw_time_min + shift.lw_time_min) / 2) * 60_000;
+}
+
 /**
  * Apply a secondary-port correction to a continuous curve. The time uses the
  * mean of the HW/LW offsets (they differ by only a few minutes, and the curve is
@@ -22,7 +26,7 @@ function shiftCurve(
   base: { time: Date; height: number }[],
   shift: NonNullable<Station['shift']>,
 ): { time: Date; height: number }[] {
-  const dtMs = ((shift.hw_time_min + shift.lw_time_min) / 2) * 60_000;
+  const dtMs = getMeanShiftMs(shift);
   return base.map((s) => ({
     time: new Date(s.time.getTime() + dtMs),
     height: shiftHeight(s.height, shift),
@@ -136,6 +140,19 @@ export function seaLevelSeries(
   to: Date,
   stepMinutes = 10,
 ): { time: Date; height: number }[] {
-  const base = heightSeries(station.data, from, to, stepMinutes);
-  return station.shift ? shiftCurve(base, station.shift) : base;
+  const { shift } = station;
+  if (!shift) {
+    return heightSeries(station.data, from, to, stepMinutes);
+  }
+
+  // sample the base port earlier by the offset, so the shifted curve covers [from, to]
+  const dtMs = getMeanShiftMs(shift);
+  const base = heightSeries(
+    station.data,
+    new Date(from.getTime() - dtMs),
+    new Date(to.getTime() - dtMs),
+    stepMinutes,
+  );
+
+  return shiftCurve(base, shift);
 }
