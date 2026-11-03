@@ -20,15 +20,18 @@ import ullapoolData from '@/assets/data/ullapool.json';
 import wickData from '@/assets/data/wick.json';
 import type { Shift, StationData } from '@/lib/tides';
 
-export type Region =
-  | 'Clyde'
-  | 'South-West'
-  | 'West Coast'
-  | 'Outer Hebrides'
-  | 'North-West'
-  | 'Northern Isles'
-  | 'North-East'
-  | 'East Coast';
+export const REGION_ORDER = [
+  'Clyde',
+  'South-West',
+  'West Coast',
+  'Outer Hebrides',
+  'North-West',
+  'Northern Isles',
+  'North-East',
+  'East Coast',
+] as const;
+
+export type Region = (typeof REGION_ORDER)[number];
 
 export interface Station {
   id: string;
@@ -172,14 +175,3 @@ export const STATIONS: Station[] = [
 export function stationById(id: string): Station | undefined {
   return STATIONS.find((s) => s.id === id);
 }
-
-export const REGION_ORDER: Region[] = [
-  'Clyde',
-  'South-West',
-  'West Coast',
-  'Outer Hebrides',
-  'North-West',
-  'Northern Isles',
-  'North-East',
-  'East Coast',
-];

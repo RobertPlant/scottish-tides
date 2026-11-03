@@ -1,13 +1,11 @@
 import Ionicons from '@react-native-vector-icons/ionicons/static';
 import { Tabs } from 'expo-router';
 
-import { Colors } from '@/constants/theme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
+import { usePalette } from '@/hooks/use-theme-color';
 import { useSelectedStation } from '@/lib/selected-station';
 
 export default function TabsLayout() {
-  const scheme = useColorScheme() ?? 'light';
-  const palette = Colors[scheme];
+  const palette = usePalette();
   const { stationId } = useSelectedStation();
 
   return (

@@ -117,7 +117,25 @@ export interface TideClass {
  * which had the same three-way ternary each.
  */
 export function tideClassKey(label: TideClass['label']): 'accent' | 'muted' | 'tint' {
-  return label === 'Springs' ? 'accent' : label === 'Neaps' ? 'muted' : 'tint';
+  if (label === 'Springs') {
+    return 'accent';
+  }
+  if (label === 'Neaps') {
+    return 'muted';
+  }
+
+  return 'tint';
+}
+
+function labelTideFraction(fraction: number): TideClass['label'] {
+  if (fraction >= 0.66) {
+    return 'Springs';
+  }
+  if (fraction <= 0.34) {
+    return 'Neaps';
+  }
+
+  return 'Mid-range';
 }
 
 /** Classify a day's range between the station's neap and spring ranges. */
@@ -125,9 +143,20 @@ export function classifyTide(range: number, stats: TidalStats): TideClass {
   const span = stats.springRange - stats.neapRange;
   const raw = span > 0 ? (range - stats.neapRange) / span : 0.5;
   const fraction = Math.min(Math.max(raw, 0), 1);
-  const label = fraction >= 0.66 ? 'Springs' : fraction <= 0.34 ? 'Neaps' : 'Mid-range';
+  const label = labelTideFraction(fraction);
   const coefficient = Math.round(Math.min(Math.max(45 + raw * 50, 20), 120));
   return { label, fraction, coefficient };
+}
+
+/** Range and spring/neap class of the UK civil day starting at `dayStart`. */
+export function classifyDay(
+  station: Station,
+  dayStart: Date,
+  stats: TidalStats = tidalStats(station),
+): { range: number; cls: TideClass } {
+  const range = dayRange(dayEvents(station, dayStart));
+
+  return { range, cls: classifyTide(range, stats) };
 }
 
 /**

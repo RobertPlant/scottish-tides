@@ -1,5 +1,5 @@
-// One coarse fix for the "nearest station to me" button, on iOS.
-// Android has its own implementation in `native-location.android.ts` — see the
+// One coarse fix for the "nearest station to me" button, on iOS and web.
+// Android has its own implementation in `native-location.android.ts` - see the
 // note there for why the two platforms differ.
 
 import * as Location from 'expo-location';

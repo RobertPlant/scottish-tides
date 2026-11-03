@@ -2,18 +2,11 @@
 // the station's neap↔spring scale, plus the sequential colour ramp the grid and
 // year heatmap are painted with. Pure (no React/RN) so it stays unit-testable —
 // the screens layer the UI on top. Builds on the same per-day engine helpers as
-// the 7-day overview (dayEvents/dayRange/classifyTide).
+// the 7-day overview (classifyDay).
 
 import { ukDayStartFromYmd } from '@/lib/datetime';
 import type { Station } from '@/lib/stations';
-import {
-  classifyTide,
-  dayEvents,
-  dayRange,
-  type TidalStats,
-  type TideClass,
-  tidalStats,
-} from '@/lib/tide-day';
+import { classifyDay, type TidalStats, type TideClass, tidalStats } from '@/lib/tide-day';
 
 export interface DayCell {
   ymd: string; // YYYY-MM-DD
@@ -43,8 +36,7 @@ export function daysInMonth(year: number, month: number): number {
 
 /** Classify a single civil day for a station. */
 export function dayCell(station: Station, ymd: string, stats: TidalStats): DayCell {
-  const range = dayRange(dayEvents(station, ukDayStartFromYmd(ymd)));
-  const cls = classifyTide(range, stats);
+  const { range, cls } = classifyDay(station, ukDayStartFromYmd(ymd), stats);
   const [year, month, day] = ymd.split('-').map(Number);
   const weekday = weekdayMonFirst(ymd);
   return { ymd, day, month, year, weekday, isWeekend: weekday >= 5, range, cls };

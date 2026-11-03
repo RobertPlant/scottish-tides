@@ -5,7 +5,7 @@ import { StyleSheet, View } from 'react-native';
 import { Card } from '@/components/card';
 import { ThemedText } from '@/components/themed-text';
 import { usePalette } from '@/hooks/use-theme-color';
-import { moonInfo, sunTimes } from '@/lib/astronomy';
+import { moonInfo, type SunTimes } from '@/lib/astronomy';
 import { formatTime } from '@/lib/datetime';
 
 function hm(totalMinutes: number): string {
@@ -14,18 +14,22 @@ function hm(totalMinutes: number): string {
   return `${h}h ${m}m`;
 }
 
-export function SunMoonCard({ date, lat, lon }: { date: Date; lat: number; lon: number }) {
+function formatDaylight(sun: SunTimes): string {
+  if (sun.alwaysUp) {
+    return 'Sun up all day';
+  }
+  if (!sun.sunrise || !sun.sunset) {
+    return 'No sunrise';
+  }
+
+  return `${formatTime(sun.sunrise)} – ${formatTime(sun.sunset)}`;
+}
+
+export function SunMoonCard({ noon, sun }: { noon: Date; sun: SunTimes }) {
   const palette = usePalette();
-  // Use mid-day of the civil date for a stable moon value.
-  const noon = new Date(date.getTime() + 12 * 3600_000);
-  const sun = sunTimes(noon, lat, lon);
   const moon = moonInfo(noon);
 
-  const daylight = sun.alwaysUp
-    ? 'Sun up all day'
-    : sun.sunrise && sun.sunset
-      ? `${formatTime(sun.sunrise)} – ${formatTime(sun.sunset)}`
-      : 'No sunrise';
+  const daylight = formatDaylight(sun);
 
   return (
     <Card style={styles.card}>

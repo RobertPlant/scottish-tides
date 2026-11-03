@@ -96,11 +96,11 @@ export function StationDayView({
     () => (hydrated ? dayHeightSeries(station, dayStart) : []),
     [hydrated, station, dayStart],
   );
-  // Evaluate at midday so the returned sunrise/sunset land on this civil day
-  // (UK midnight is the previous UTC day in summer) — matches SunMoonCard.
+  // midday, so sunrise/sunset land on this civil day (UK midnight is the previous UTC day in summer)
+  const noon = useMemo(() => new Date(dayStart.getTime() + 12 * 3600_000), [dayStart]);
   const sun = useMemo(
-    () => sunTimes(new Date(dayStart.getTime() + 12 * 3600_000), station.lat, station.lon),
-    [dayStart, station.lat, station.lon],
+    () => sunTimes(noon, station.lat, station.lon),
+    [noon, station.lat, station.lon],
   );
 
   const stats = useMemo(() => tidalStats(station), [station]);
@@ -154,7 +154,7 @@ export function StationDayView({
                 <TideTable events={events} now={isToday ? now : undefined} />
               </Card>
 
-              <SunMoonCard date={dayStart} lat={station.lat} lon={station.lon} />
+              <SunMoonCard noon={noon} sun={sun} />
 
               <WeekOverview
                 station={station}
