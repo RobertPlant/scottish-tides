@@ -113,18 +113,18 @@ const lunarPerigeeCoefficients = [
 
 // --- Obliquity / node geometry (I, xi, nu, nu', nu'') ------------------------
 
-function _I(N: number, i: number, omega: number): number {
-  N = d2r * N;
-  i = d2r * i;
-  omega = d2r * omega;
+function _I(nDeg: number, iDeg: number, omegaDeg: number): number {
+  const N = d2r * nDeg;
+  const i = d2r * iDeg;
+  const omega = d2r * omegaDeg;
   const cosI = Math.cos(i) * Math.cos(omega) - Math.sin(i) * Math.sin(omega) * Math.cos(N);
   return r2d * Math.acos(cosI);
 }
 
-function _xi(N: number, i: number, omega: number): number {
-  N = d2r * N;
-  i = d2r * i;
-  omega = d2r * omega;
+function _xi(nDeg: number, iDeg: number, omegaDeg: number): number {
+  const N = d2r * nDeg;
+  const i = d2r * iDeg;
+  const omega = d2r * omegaDeg;
   let e1 = (Math.cos(0.5 * (omega - i)) / Math.cos(0.5 * (omega + i))) * Math.tan(0.5 * N);
   let e2 = (Math.sin(0.5 * (omega - i)) / Math.sin(0.5 * (omega + i))) * Math.tan(0.5 * N);
   e1 = Math.atan(e1);
@@ -134,10 +134,10 @@ function _xi(N: number, i: number, omega: number): number {
   return -(e1 + e2) * r2d;
 }
 
-function _nu(N: number, i: number, omega: number): number {
-  N = d2r * N;
-  i = d2r * i;
-  omega = d2r * omega;
+function _nu(nDeg: number, iDeg: number, omegaDeg: number): number {
+  const N = d2r * nDeg;
+  const i = d2r * iDeg;
+  const omega = d2r * omegaDeg;
   let e1 = (Math.cos(0.5 * (omega - i)) / Math.cos(0.5 * (omega + i))) * Math.tan(0.5 * N);
   let e2 = (Math.sin(0.5 * (omega - i)) / Math.sin(0.5 * (omega + i))) * Math.tan(0.5 * N);
   e1 = Math.atan(e1);
