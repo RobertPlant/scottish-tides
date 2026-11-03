@@ -20,6 +20,8 @@ export {
   type TideEventType,
 } from './predict';
 
+const PRUNE_CONTEXT_MS = 12 * 3600_000;
+
 /**
  * Drop insignificant high/low waters by prominence. Near-amphidromic ports (e.g.
  * Port Ellen, where overtides dominate a tiny M2) genuinely have double-highs and
@@ -88,7 +90,9 @@ export function pruneMinorExtrema(events: TideEvent[], minProminenceM: number): 
  * The base search window is widened by the secondary-port time offset and the
  * trim happens *after* the shift, so the window means what the caller asked for:
  * an Oban (−9/13 min) day otherwise both lost its own late-evening event and
- * inherited one from the previous evening.
+ * inherited one from the previous evening. Pruning also gets half a day either
+ * side, so the first and last events of a window have neighbours to be judged
+ * against, and one day's list joins up with the next.
  */
 export function predictExtrema(
   data: StationData,
@@ -98,12 +102,24 @@ export function predictExtrema(
   minProminenceM = 0.05,
 ): TideEvent[] {
   const tide = new Tide(data);
-  const padMs = shift
+  const shiftPadMs = shift
     ? Math.max(Math.abs(shift.hw_time_min), Math.abs(shift.lw_time_min)) * 60_000
     : 0;
+  const padMs = shiftPadMs + PRUNE_CONTEXT_MS;
   const raw = tide.extrema(new Date(from.getTime() - padMs), new Date(to.getTime() + padMs));
   const shifted = shift ? applyShift(raw, shift) : raw;
-  return pruneMinorExtrema(shifted, minProminenceM).filter((e) => e.time >= from && e.time <= to);
+  const isInWindow = (event: TideEvent) => event.time >= from && event.time <= to;
+  const pruned = pruneMinorExtrema(shifted, minProminenceM).filter(isInWindow);
+  if (hasBothKinds(pruned)) {
+    return pruned;
+  }
+
+  // a long stand can leave the window one turn only, so prune it alone to keep a range
+  return pruneMinorExtrema(shifted.filter(isInWindow), minProminenceM);
+}
+
+function hasBothKinds(events: TideEvent[]): boolean {
+  return events.some((e) => e.type === 'high') && events.some((e) => e.type === 'low');
 }
 
 /** Continuous height samples for charting, `stepMinutes` apart over [from, to]. */

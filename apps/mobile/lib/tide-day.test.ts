@@ -4,10 +4,17 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
-import { ukDayStartFromYmd, ukEndOfDay, ymdInUk } from './datetime';
+import { ukDayStartFromYmd, ukEndOfDay, ymdAddDays, ymdInUk } from './datetime';
 import { type Station, stationById } from './stations';
-import { classifyTide, dayEvents, dayRange, type TidalStats, tidalStats } from './tide-day';
-import type { StationData, TideEvent } from './tides';
+import {
+  classifyTide,
+  dayEvents,
+  dayHeightSeries,
+  dayRange,
+  type TidalStats,
+  tidalStats,
+} from './tide-day';
+import { predictExtrema, type StationData, type TideEvent } from './tides';
 
 const ev = (type: 'high' | 'low', height: number): TideEvent => ({
   type,
@@ -149,4 +156,45 @@ test('a UK day is its civil day, not 24 hours (BST transitions)', () => {
   const to = ukEndOfDay(ukDayStartFromYmd('2026-10-25'));
   assert.equal(to.getTime() - ukDayStartFromYmd('2026-10-25').getTime(), 25 * 3600_000);
   assert.equal(ymdInUk(new Date(to.getTime() - 1)), '2026-10-25');
+});
+
+test("a secondary port's curve spans its civil day", () => {
+  const oban = stationById('oban');
+  assert.ok(oban);
+  // 3 Jan 2026 has a 23:57 LW. Shifting the samples but not the window ran the
+  // curve from 23:49 to 23:49, so that marker fell off the end.
+  const dayStart = ukDayStartFromYmd('2026-01-03');
+  const series = dayHeightSeries(oban, dayStart);
+  const first = series[0].time.getTime();
+  const last = series[series.length - 1].time.getTime();
+  assert.equal(first, dayStart.getTime());
+  assert.equal(last, ukEndOfDay(dayStart).getTime());
+  for (const e of dayEvents(oban, dayStart)) {
+    assert.ok(e.time.getTime() >= first && e.time.getTime() <= last, e.time.toISOString());
+  }
+});
+
+test('Port Ellen days join up into one continuous run of events', () => {
+  const portEllen = stationById('port-ellen');
+  assert.ok(portEllen);
+  // Pruning a single day can't see past midnight, so 10 Feb ended on a LW and
+  // 11 Feb started on a HW, losing the real 01:47 LW in between.
+  const days = Array.from({ length: 90 }, (_, n) => ymdAddDays('2026-01-01', n));
+  const perDay = days.flatMap((ymd) => dayEvents(portEllen, ukDayStartFromYmd(ymd)));
+  const from = ukDayStartFromYmd(days[0]);
+  const to = ukEndOfDay(ukDayStartFromYmd(days[days.length - 1]));
+  const continuous = predictExtrema(
+    portEllen.data,
+    new Date(from.getTime() - 86_400_000),
+    new Date(to.getTime() + 86_400_000),
+  ).filter((event) => event.time >= from && event.time <= to);
+  // the turning-point search lands a minute either way depending on where the window starts
+  assert.deepEqual(
+    perDay.map((event) => event.type),
+    continuous.map((event) => event.type),
+  );
+  perDay.forEach((event, index) => {
+    const driftMs = Math.abs(event.time.getTime() - continuous[index].time.getTime());
+    assert.ok(driftMs <= 5 * 60_000, `${event.type} ${event.time.toISOString()}`);
+  });
 });

@@ -105,6 +105,19 @@ export function ymdAddDays(ymd: string, n: number): string {
   return d.toISOString().slice(0, 10);
 }
 
+/** A YYYY-MM-DD string if it names a real calendar date, else undefined. */
+export function parseYmd(value: string | undefined): string | undefined {
+  const isShaped = value !== undefined && /^\d{4}-\d{2}-\d{2}$/.test(value);
+  if (!isShaped) {
+    return undefined;
+  }
+
+  const date = new Date(`${value}T00:00:00Z`);
+  const isRealDate = !Number.isNaN(date.getTime()) && date.toISOString().slice(0, 10) === value;
+
+  return isRealDate ? value : undefined;
+}
+
 /** The UK civil-midnight instant for a YYYY-MM-DD calendar date. */
 export function ukDayStartFromYmd(ymd: string): Date {
   const [y, m, day] = ymd.split('-').map(Number);

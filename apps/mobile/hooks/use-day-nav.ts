@@ -6,14 +6,24 @@ import { useRouter } from 'expo-router';
 import { useCallback, useMemo, useState } from 'react';
 
 import { useNow } from '@/hooks/use-now';
-import { ukDayStartFromYmd, ymdAddDays, ymdInUk } from '@/lib/datetime';
-
-const YMD_RE = /^\d{4}-\d{2}-\d{2}$/;
+import { parseYmd, ukDayStartFromYmd, ymdAddDays, ymdInUk } from '@/lib/datetime';
 
 // Module-level so `setDay` can use it without taking a per-render closure as a
 // hook dependency — the initial-day clamp and the setter had a copy each.
 // ISO YYYY-MM-DD compares correctly as a string.
 const clamp = (d: string, min: string, max: string) => (d < min ? min : d > max ? max : d);
+
+// the ?d= day if it's a real date, kept inside the bounds, else today
+function getUrlDay(
+  urlYmd: string | undefined,
+  todayYmd: string,
+  minYmd: string,
+  maxYmd: string,
+): string {
+  const parsed = parseYmd(urlYmd);
+
+  return parsed ? clamp(parsed, minYmd, maxYmd) : todayYmd;
+}
 
 export interface DayNavState {
   ymd: string;
@@ -45,9 +55,13 @@ export function useDayNav({
   // Clamped here rather than in the UI so every route in — Prev/Next, the swipe
   // gesture, the week strip, a hand-edited ?d= — obeys the same bounds. The date
   // field already refuses out-of-range input; the others used to walk past it.
-  const [ymd, setYmd] = useState(() =>
-    initialYmd && YMD_RE.test(initialYmd) ? clamp(initialYmd, minYmd, maxYmd) : todayYmd,
-  );
+  const [ymd, setYmd] = useState(() => getUrlDay(initialYmd, todayYmd, minYmd, maxYmd));
+  // a mounted screen gets a new ?d= when the planner pushes to it, so follow it
+  const [seenUrlYmd, setSeenUrlYmd] = useState(initialYmd);
+  if (initialYmd !== seenUrlYmd) {
+    setSeenUrlYmd(initialYmd);
+    setYmd(getUrlDay(initialYmd, todayYmd, minYmd, maxYmd));
+  }
 
   const dayStart = useMemo(() => ukDayStartFromYmd(ymd), [ymd]);
 
