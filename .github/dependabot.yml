@@ -103,8 +103,6 @@ updates:
       - dependency-name: react
       - dependency-name: react-dom
       - dependency-name: react-native
-      - dependency-name: react-native-reanimated
-      - dependency-name: react-native-worklets
       - dependency-name: react-native-svg
       - dependency-name: "@react-native-async-storage/async-storage"
       - dependency-name: "@react-native-community/datetimepicker"

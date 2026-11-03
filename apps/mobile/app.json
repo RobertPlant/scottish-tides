@@ -52,7 +52,6 @@
       "./plugins/with-abi-split",
       "./plugins/with-release-shrinking",
       "expo-font",
-      "expo-web-browser",
       "expo-status-bar",
       "@react-native-vector-icons/ionicons"
     ],
