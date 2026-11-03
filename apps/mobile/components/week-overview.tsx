@@ -21,7 +21,7 @@ export function WeekOverview({
   station: Station;
   fromYmd: string;
   selectedYmd: string;
-  /** Today from the day-nav's ticking clock — never a render-time `new Date()`. */
+  /** Today from the day-nav's ticking clock - never a render-time `new Date()`. */
   todayYmd: string;
   onSelectDay: (ymd: string) => void;
 }) {
@@ -31,7 +31,7 @@ export function WeekOverview({
   // Memoised: this is seven harmonic extrema solves (~3-4 ms on a desktop, more
   // on a phone). The parent re-renders on its 60-second "now" tick and on chart
   // hover, and the week only actually changes when the station or anchor day
-  // does — without this it was recomputed on every one of those renders.
+  // does - without this it was recomputed on every one of those renders.
   const days = useMemo(
     () =>
       Array.from({ length: 7 }, (_, i) => {
@@ -42,7 +42,7 @@ export function WeekOverview({
     [station, fromYmd, stats],
   );
 
-  // The window is anchored to the selected day, not always today — so only call
+  // The window is anchored to the selected day, not always today - so only call
   // it "Next 7 days" when it really starts today; otherwise show the date range.
   const title =
     fromYmd === todayYmd

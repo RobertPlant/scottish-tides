@@ -1,4 +1,4 @@
-// Offline sun & moon for trip planning — sunrise/sunset (daylight window) and
+// Offline sun & moon for trip planning - sunrise/sunset (daylight window) and
 // moon phase. Independent of the tide engine. Accuracy is "good enough for
 // planning" (~1 min on sun times, phase to a few %), all computed on device.
 

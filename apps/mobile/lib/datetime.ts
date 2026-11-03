@@ -12,7 +12,7 @@ export function formatTime(d: Date): string {
   });
 }
 
-/** "14" — the UK local hour, 00–23. For chart axis ticks. */
+/** "14" - the UK local hour, 00–23. For chart axis ticks. */
 export function formatHour(d: Date): string {
   return d.toLocaleTimeString('en-GB', {
     hour: '2-digit',
@@ -42,7 +42,7 @@ export function formatLongDay(d: Date): string {
   });
 }
 
-/** UK (Europe/London) UTC offset in ms at `instant` — e.g. +3_600_000 during
+/** UK (Europe/London) UTC offset in ms at `instant` - e.g. +3_600_000 during
  *  BST, 0 during GMT. Purely `Intl`-based, so it never depends on the host
  *  machine's own timezone. */
 function ukOffsetMs(instant: Date): number {

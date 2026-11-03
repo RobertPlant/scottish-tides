@@ -40,7 +40,7 @@ export default function RaceDetail() {
   const nav = useDayNav({ initialYmd: d, syncUrl: true });
   const { dayStart, isToday } = nav;
   // Slack times for a day the static export can't know are worse than none at
-  // all on a page about when it is safe to transit — see use-hydrated.ts. The
+  // all on a page about when it is safe to transit - see use-hydrated.ts. The
   // race's identity and its warning are constant, so those still pre-render.
   const hydrated = useHydrated();
 

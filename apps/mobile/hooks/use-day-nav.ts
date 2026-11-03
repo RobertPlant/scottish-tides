@@ -9,7 +9,7 @@ import { useNow } from '@/hooks/use-now';
 import { parseYmd, ukDayStartFromYmd, ymdAddDays, ymdInUk } from '@/lib/datetime';
 
 // Module-level so `setDay` can use it without taking a per-render closure as a
-// hook dependency — the initial-day clamp and the setter had a copy each.
+// hook dependency - the initial-day clamp and the setter had a copy each.
 // ISO YYYY-MM-DD compares correctly as a string.
 function clamp(ymd: string, min: string, max: string): string {
   if (ymd < min) {
@@ -61,8 +61,8 @@ export function useDayNav({
   const todayYmd = ymdInUk(useNow());
   const minYmd = ymdAddDays(todayYmd, -730);
   const maxYmd = ymdAddDays(todayYmd, 730);
-  // Clamped here rather than in the UI so every route in — Prev/Next, the swipe
-  // gesture, the week strip, a hand-edited ?d= — obeys the same bounds. The date
+  // Clamped here rather than in the UI so every route in - Prev/Next, the swipe
+  // gesture, the week strip, a hand-edited ?d= - obeys the same bounds. The date
   // field already refuses out-of-range input; the others used to walk past it.
   const [ymd, setYmd] = useState(() => getUrlDay(initialYmd, todayYmd, minYmd, maxYmd));
   // a mounted screen gets a new ?d= when the planner pushes to it, so follow it.

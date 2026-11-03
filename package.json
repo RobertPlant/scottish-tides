@@ -8,5 +8,5 @@
     "lint": "biome lint apps/mobile",
     "check": "biome check --write apps/mobile"
   },
-  "//": "biome is provided by devenv via pkgs.biome — no node_modules at this level"
+  "//": "biome is provided by devenv via pkgs.biome - no node_modules at this level"
 }

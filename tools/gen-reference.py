@@ -37,7 +37,7 @@ REPO = Path(__file__).resolve().parent.parent
 DATA = REPO / "apps" / "mobile" / "assets" / "data"
 OUT = REPO / "apps" / "mobile" / "lib" / "tides" / "__fixtures__" / "reference.json"
 
-# (station file, ISO start (UTC)) — a spread of seasons/years to exercise the
+# (station file, ISO start (UTC)) - a spread of seasons/years to exercise the
 # nodal corrections and the S2/K2, K1/P1 splits.
 WINDOWS = [
     ("tobermory.json", "2026-07-01T00:00:00"),

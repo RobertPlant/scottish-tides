@@ -25,7 +25,7 @@ jobs:
       - run: npm ci
         working-directory: apps/mobile
       # Biome comes from devenv (pkgs.biome) locally; CI has no nix, so pin the
-      # same version here — formatter output drifts between Biome majors, and an
+      # same version here - formatter output drifts between Biome majors, and an
       # unpinned CI copy would flag code the devshell considers correctly
       # formatted. Bump in step with devenv's biome. `ci` never writes.
       - name: Format + lint (Biome)
@@ -35,7 +35,7 @@ jobs:
         working-directory: apps/mobile
       # Biome and ESLint don't overlap: Biome brings its recommended set, ESLint
       # brings react-hooks and import rules via eslint-config-expo. This step
-      # exists because ESLint sat broken for days without anyone noticing —
+      # exists because ESLint sat broken for days without anyone noticing -
       # nothing ran it.
       - name: Lint (ESLint)
         run: npm run lint
@@ -60,7 +60,7 @@ jobs:
         run: npm run test:engine
       - name: Install Playwright browser
         run: npx playwright install --with-deps chromium
-      # Builds the static export and serves dist/ (see playwright.config.ts) —
+      # Builds the static export and serves dist/ (see playwright.config.ts) -
       # the dev server can't reproduce the export-only bugs this is here to catch.
       - name: End-to-end tests (against the static export)
         run: npm run test:e2e

@@ -66,7 +66,7 @@ test('sill race (Falls of Lora): valid, range-scaled structure', () => {
 });
 
 // The sill model derives its rate from the sea↔loch head (headRateScale), not
-// from springPeakKn/neapPeakKn like the gates — so nothing tied the two together
+// from springPeakKn/neapPeakKn like the gates - so nothing tied the two together
 // and a tweak to the scale could have sent the Falls to 20 kn with every test
 // still green, on a page about when a rapid is survivable. Swept over a year
 // rather than one day because the whole point is the spring/neap envelope.

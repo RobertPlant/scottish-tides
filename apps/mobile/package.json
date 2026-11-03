@@ -10,10 +10,10 @@
     "android": "expo run:android",
     "ios": "expo run:ios",
     "web": "expo start --web",
-    "//lint": "`expo lint` (the wrapper) resolves eslint-config-expo's nested deps from its own module context and fails; calling eslint directly is what the wrapper does anyway. eslint-import-resolver-typescript and @typescript-eslint/parser are direct devDeps for the same reason — eslint-plugin-import requires both by bare name from the project root, and npm nests them under eslint-config-expo where that lookup misses them (the error is a wall of bogus `Parse errors in imported module`). eslint and typescript are held below their latest majors: see the ignore list in .github/dependabot.yml.",
+    "//lint": "`expo lint` (the wrapper) resolves eslint-config-expo's nested deps from its own module context and fails; calling eslint directly is what the wrapper does anyway. eslint-import-resolver-typescript and @typescript-eslint/parser are direct devDeps for the same reason - eslint-plugin-import requires both by bare name from the project root, and npm nests them under eslint-config-expo where that lookup misses them (the error is a wall of bogus `Parse errors in imported module`). eslint and typescript are held below their latest majors: see the ignore list in .github/dependabot.yml.",
     "lint": "eslint .",
     "test:engine": "node --import tsx --test lib/tides/*.test.ts",
-    "//test:unit": "Every *.test.ts anywhere in the app (node excludes node_modules). The old `lib/*.test.ts` was non-recursive, so a test added under components/, hooks/ or any new lib/ subdir would never have run — in CI least of all. This re-runs the engine parity tests too (~0.3 s); test:engine stays as the focused script for engine work, and as its own named CI step.",
+    "//test:unit": "Every *.test.ts anywhere in the app (node excludes node_modules). The old `lib/*.test.ts` was non-recursive, so a test added under components/, hooks/ or any new lib/ subdir would never have run - in CI least of all. This re-runs the engine parity tests too (~0.3 s); test:engine stays as the focused script for engine work, and as its own named CI step.",
     "test:unit": "node --import tsx --test \"**/*.test.ts\"",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
@@ -28,7 +28,7 @@
         "exclude": [
           "expo-location"
         ],
-        "//buildFromSource": "Expo modules ship precompiled AARs (node_modules/*/local-maven-repo) and Android links those by default. F-Droid builds everything from source, so compile every module here too — the GitHub APK then matches F-Droid's.",
+        "//buildFromSource": "Expo modules ship precompiled AARs (node_modules/*/local-maven-repo) and Android links those by default. F-Droid builds everything from source, so compile every module here too - the GitHub APK then matches F-Droid's.",
         "buildFromSource": [
           ".*"
         ]

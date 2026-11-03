@@ -1,4 +1,4 @@
-// Sun (daylight window) and moon (phase/illumination) — planning-grade accuracy.
+// Sun (daylight window) and moon (phase/illumination) - planning-grade accuracy.
 
 import assert from 'node:assert/strict';
 import { test } from 'node:test';

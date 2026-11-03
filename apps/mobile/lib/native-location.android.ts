@@ -1,5 +1,5 @@
 // Android uses our own LocationManager module rather than `expo-location`,
-// which hard-depends on the proprietary Google Play Services location library —
+// which hard-depends on the proprietary Google Play Services location library -
 // forbidden in F-Droid's main repo (docs/android-build.md). `expo-location` is
 // also excluded from Android autolinking in package.json, so this platform
 // split is what keeps it out of the bundle too.

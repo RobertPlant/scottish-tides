@@ -122,7 +122,7 @@ export function TideCurve({ series, events, now, height = 200, scrubbable = fals
     .join(' ');
   const area = `${line} L ${x(t1).toFixed(1)} ${baseY.toFixed(1)} L ${x(t0).toFixed(1)} ${baseY.toFixed(1)} Z`;
 
-  // Interpolate height + trend at an arbitrary time — used for both the "now"
+  // Interpolate height + trend at an arbitrary time - used for both the "now"
   // marker and the scrub readout, which had a copy of this loop each.
   const sampleAt = (tMs: number): { h: number; rising: boolean } => {
     for (let i = 1; i < merged.length; i++) {

@@ -1,7 +1,7 @@
 // The station named by the route, kept in step with the persisted selection.
-// Both station-carrying tabs (/station/[id] and /plan/[id]) need exactly this —
+// Both station-carrying tabs (/station/[id] and /plan/[id]) need exactly this -
 // resolve the id, mirror it into the context so the other tab follows, and
-// switch by replacing the URL — and each had its own copy.
+// switch by replacing the URL - and each had its own copy.
 
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useCallback, useEffect } from 'react';

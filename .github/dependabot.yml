@@ -1,7 +1,7 @@
 version: 2
 
 # Without this file Dependabot only ever raises *security* updates (and even
-# those go quiet when no safe path exists — see the uuid override in
+# those go quiet when no safe path exists - see the uuid override in
 # apps/mobile/package.json). This turns on ordinary version updates too.
 updates:
   - package-ecosystem: npm
@@ -14,7 +14,7 @@ updates:
     groups:
       # The Expo SDK set is version-locked: expo, react-native, React itself and
       # every expo-*/@expo/* package have to move together or the app won't
-      # build. One PR per package is just a pile of red CI — the first run
+      # build. One PR per package is just a pile of red CI - the first run
       # proved it, bumping react to 19.2.8 while react-dom stayed on 19.2.3,
       # which broke the bundler so hard the dev server never came up.
       expo-sdk:
@@ -33,14 +33,14 @@ updates:
       # Everything left over is transitive: lockfile-only bumps nothing here
       # asks for by name. Dependabot puts a dependency in the first group it
       # matches, so this catch-all sits last and only ever sees what the two
-      # groups above didn't claim. Without it each one is its own PR — js-yaml,
+      # groups above didn't claim. Without it each one is its own PR - js-yaml,
       # browserslist and baseline-browser-mapping opened three in a week.
       transitive:
         patterns:
           - "*"
     # The lint toolchain is only coherent with the versions eslint-config-expo
     # was built against, and nothing here pins that for it. A grouped dev-tooling
-    # bump to eslint 10 + typescript 7 (#5) broke `npm run lint` outright — twice
+    # bump to eslint 10 + typescript 7 (#5) broke `npm run lint` outright - twice
     # over, since eslint-plugin-react uses APIs eslint 10 removed and no
     # published typescript-eslint supports typescript 7. CI now runs eslint, so
     # a repeat would at least go red; keeping majors out of the automatic group
@@ -53,7 +53,7 @@ updates:
       # A direct devDep only so eslint-plugin-import can find it (see //lint in
       # package.json); the rest of typescript-eslint comes in transitively via
       # eslint-config-expo. The parser pins its siblings exactly, so bumping it
-      # alone — even a patch — nests a second copy of the stack under it and
+      # alone - even a patch - nests a second copy of the stack under it and
       # leaves the parser and eslint-plugin on different versions (#43). Move
       # the set together by hand: `npm update @typescript-eslint/eslint-plugin
       # @typescript-eslint/parser`.
@@ -61,9 +61,9 @@ updates:
 
       # Grouping the Expo SDK set keeps it moving together; it does nothing to
       # stop the whole group moving past the SDK together, which is what #28
-      # was. Both jobs went red for unrelated reasons — react-native 0.87 drops
+      # was. Both jobs went red for unrelated reasons - react-native 0.87 drops
       # the ./rn-get-polyfills subpath that SDK 57's bundler imports, and
-      # @types/react 19.3 rejects the useRef<View> in scotland-map.tsx — which
+      # @types/react 19.3 rejects the useRef<View> in scotland-map.tsx - which
       # is the shape of the problem: these versions are only ever tested as a
       # set, by Expo, and the set is named by the SDK.
       #

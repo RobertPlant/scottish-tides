@@ -1,6 +1,6 @@
 // The trip planner: a whole-year heatmap for one station. Every day is painted
-// on the neap↔spring ramp so you can scan for the tides you want — bigger
-// springs (stronger streams, wider range) or gentler neaps — with weekends
+// on the neap↔spring ramp so you can scan for the tides you want - bigger
+// springs (stronger streams, wider range) or gentler neaps - with weekends
 // outlined so a weekend trip is easy to spot. Tap any day to open it on the
 // Tides tab. Purely a visual overview: it makes no judgement about which tides
 // are "good" (that depends on your trip); see the note at the foot.
@@ -46,12 +46,12 @@ export function TripPlanner({ station, header }: { station: Station; header?: Re
   const router = useRouter();
 
   // Which year is "this year", and which cell is today, are clock facts the
-  // static export doesn't have — see use-hydrated.ts. The heatmap (and its 365
+  // static export doesn't have - see use-hydrated.ts. The heatmap (and its 365
   // harmonic solves) therefore waits for the client.
   const hydrated = useHydrated();
   // Off the ticking clock, not a bare render-time `new Date()`: the heatmap is a
   // page you leave open, and the React Compiler is free to cache a render-time
-  // value that has no dependencies — either way today's cell keeps its ring on
+  // value that has no dependencies - either way today's cell keeps its ring on
   // yesterday. Same rule as use-day-nav.
   const todayYmd = ymdInUk(useNow());
   const nowY = Number(todayYmd.slice(0, 4));

@@ -55,7 +55,7 @@ test('Normal port (Leith) is unaffected by pruning', () => {
 
 test('pruning never leaves a day with only one kind of water', () => {
   // 5 Oct 2026 at Port Ellen: seven raw extrema, none clearing 5 cm against its
-  // neighbours, which collapsed to a single 17:43 high water — a day the app
+  // neighbours, which collapsed to a single 17:43 high water - a day the app
   // then showed as "0.0 m range, Neaps 20" though the curve moves 0.45 m.
   const from = new Date('2026-10-05T00:00:00+01:00');
   const to = new Date('2026-10-06T00:00:00+01:00');

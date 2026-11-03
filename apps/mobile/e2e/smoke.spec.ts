@@ -2,7 +2,7 @@ import { expect, type Locator, type Page, test } from '@playwright/test';
 
 // React Native Web quirks (see AGENTS.md):
 // - text rendered with numberOfLines uses -webkit-box clamping, which Playwright
-//   reports as hidden — assert with toBeAttached(), not toBeVisible().
+//   reports as hidden - assert with toBeAttached(), not toBeVisible().
 // - expo-router keeps the anchor tab mounted under pushed Stack screens, so the
 //   Home screen's content co-exists with a station detail; scope with .first().
 
@@ -37,7 +37,7 @@ test('map tab lists ports from around the coast', async ({ page }) => {
 test('station detail: the date picker changes the day', async ({ page }) => {
   await page.goto('/station/oban');
   // The anchored Tides tab stays mounted (with its own date picker) beneath the
-  // pushed station detail, so two date inputs exist — the detail is rendered last.
+  // pushed station detail, so two date inputs exist - the detail is rendered last.
   const input = page.locator('input[type=date]').last();
   // Waiting for the input *is* waiting for hydration: DayNav (which owns it)
   // renders only behind the useHydrated gate, so it cannot exist until React has

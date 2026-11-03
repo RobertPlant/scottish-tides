@@ -1,7 +1,7 @@
 // Config plugin: keep Gradle's memory footprint small so `expo prebuild` +
 // `./gradlew assembleRelease` don't get OOM-killed on low-RAM build machines
 // (this app is developed on a ~4 GB box). These settings change only *how* the
-// build runs — heap size, worker count, no parallel project execution — not the
+// build runs - heap size, worker count, no parallel project execution - not the
 // resulting APK, so they're safe to keep on permanently.
 //
 // Without this, every `expo prebuild` regenerates android/gradle.properties from

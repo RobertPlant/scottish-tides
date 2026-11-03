@@ -61,7 +61,7 @@ export interface TidalStats {
 /**
  * Mean spring/neap range for a station. Prefers the empirically-calibrated
  * references in coefficient-refs.json (mean of realised spring-peak / neap-
- * trough daily ranges — see tools/gen-coefficient-refs.ts), which include K2,
+ * trough daily ranges - see tools/gen-coefficient-refs.ts), which include K2,
  * N2 and the diurnal contribution that the idealised 2·(M2±S2) formula misses.
  * Falls back to that formula for any gauge without a baked reference. For
  * secondary ports both are multiplied by the height scale, since it scales
@@ -112,7 +112,7 @@ export interface TideClass {
 }
 
 /**
- * Which palette colour a tide class is drawn in — the key, not the colour, so
+ * Which palette colour a tide class is drawn in - the key, not the colour, so
  * this stays in the pure layer. Shared by the day badge and the week strip,
  * which had the same three-way ternary each.
  */

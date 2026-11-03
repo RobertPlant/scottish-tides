@@ -1,4 +1,4 @@
-// Regenerate apps/mobile/assets/data/scotland-coast.json — the schematic map's
+// Regenerate apps/mobile/assets/data/scotland-coast.json - the schematic map's
 // coastline. Source: Natural Earth 1:10m country boundaries (via world-atlas),
 // GB (ISO 826) clipped to the Scotland bounding box and decimated.
 //
