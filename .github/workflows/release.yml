@@ -1,7 +1,7 @@
 name: Release APK
 
 # Tag a commit v<version> and this builds, signs and publishes one APK per ABI
-# as public release assets — the download links for people not using F-Droid.
+# as public release assets - the download links for people not using F-Droid.
 #
 # F-Droid builds are reproducible: F-Droid rebuilds the tag per ABI, checks each
 # matches the APK here byte for byte (signature aside), then ships it with OUR
@@ -13,7 +13,7 @@ name: Release APK
 on:
   push:
     tags: ['v*']
-  # Manual runs build and sign exactly the same way but publish nothing — the
+  # Manual runs build and sign exactly the same way but publish nothing - the
   # APK is left as a build artifact, so the signing path can be exercised
   # without minting a junk release.
   workflow_dispatch:

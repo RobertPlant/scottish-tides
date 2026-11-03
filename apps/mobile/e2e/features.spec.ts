@@ -40,7 +40,7 @@ test('swipe left/right changes the day', async ({ page }) => {
   await page.waitForTimeout(1500); // hydrate so the pan responder is live
   await expect(page.locator('body')).toContainText('14 July 2026');
 
-  // Drag horizontally across the sun/moon card — a non-chart, non-pressable
+  // Drag horizontally across the sun/moon card - a non-chart, non-pressable
   // area, so the day-view pan responder handles it (the chart keeps its scrub,
   // and the week-day rows keep their tap-to-select).
   const swipe = async (dir: 'left' | 'right') => {
@@ -73,7 +73,7 @@ test('tapping the chart shows the scrub readout', async ({ page }) => {
   await page.goto('/station/oban?d=2026-07-14');
   await page.waitForTimeout(1500); // hydrate so the chart responder is live
 
-  // The readout is "HH:MM · X.XX m ▲/▼" — the time prefix distinguishes it from
+  // The readout is "HH:MM · X.XX m ▲/▼" - the time prefix distinguishes it from
   // the (untimed) current-level pill. It only exists once you touch the chart.
   const readout = page.getByText(/\d{2}:\d{2} · \d+\.\d{2} m [▲▼]/);
   await expect(readout).toHaveCount(0);
@@ -213,7 +213,7 @@ test.describe('tides near me', () => {
 test('the last station opens on next launch', async ({ page }) => {
   // "/" redirects to the selected station, which is restored from AsyncStorage
   // (async). Redirecting before that read lands lands on the default port and the
-  // station screen then saves the default back over the stored one — so this
+  // station screen then saves the default back over the stored one - so this
   // only fails for someone whose last station wasn't the default.
   await page.goto('/station/leith');
   await expect(page.locator('body')).toContainText('Firth of Forth');

@@ -2,7 +2,7 @@
 //
 // A faithful TypeScript port of pytides2's `astro.py` (the engine behind
 // ~/org/scripts/tides.py). Every formula and constant mirrors the Python so the
-// two stay numerically identical — see lib/tides/*.test.ts for the parity gate.
+// two stay numerically identical - see lib/tides/*.test.ts for the parity gate.
 //
 // All angles are in degrees unless noted. `value` is the angle at time t;
 // `speed` is its time-derivative in degrees/hour (null where unused).

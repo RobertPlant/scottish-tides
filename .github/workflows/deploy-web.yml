@@ -38,7 +38,7 @@ jobs:
         run: npx expo export --platform web
       # The export renders every route once, at build time. Anything derived
       # from the clock is therefore frozen at the build and served as though it
-      # were current — which for a tide app means plausible, wrong tide times
+      # were current - which for a tide app means plausible, wrong tide times
       # before hydration, plus a hydration mismatch (React #418). The screens
       # gate that on `useHydrated`; this makes sure it stays gated.
       - name: Assert no build-time clock data in the HTML

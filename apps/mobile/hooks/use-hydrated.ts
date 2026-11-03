@@ -3,7 +3,7 @@
 //
 // The web build is a static export (app.json `web.output: "static"`), so every
 // page is rendered once at build time and shipped as HTML. Anything derived from
-// the clock — which day "today" is, the tide times on it, "in 1h 26m" — is
+// the clock - which day "today" is, the tide times on it, "in 1h 26m" - is
 // therefore frozen at the build, and disagrees with the client, which both
 // breaks hydration (React error #418) and paints stale tide times until the
 // bundle takes over. Screens gate that content on this so the exported HTML

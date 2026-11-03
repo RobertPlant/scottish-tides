@@ -3,7 +3,7 @@
 // station pins (round) and/or tidal-race markers (numbered diamonds) projected
 // on top. An equirectangular projection with longitude scaled by cos(latitude)
 // keeps Scotland from looking squashed. Pinch / drag (or the +/- buttons) to
-// zoom — useful for the tightly-clustered Argyll races. Decorative, not for
+// zoom - useful for the tightly-clustered Argyll races. Decorative, not for
 // navigation.
 
 import { type ComponentRef, useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -17,7 +17,7 @@ import { usePalette } from '@/hooks/use-theme-color';
 import type { Station } from '@/lib/stations';
 
 // Real coastline: Natural Earth 10m (via world-atlas), GB clipped to the Scotland
-// bounding box below, decimated. See tools — regenerate if the box changes.
+// bounding box below, decimated. See tools - regenerate if the box changes.
 const COAST = coastRings as [number, number][][];
 
 const LON0 = -8.2;
@@ -157,7 +157,7 @@ export function ScotlandMap({
   const start = useRef<ViewState & { fx: number; fy: number }>({ k: 1, x: 0, y: 0, fx: 0, fy: 0 });
   /* eslint-disable react-hooks/refs -- These are gesture callbacks, not render
      code: they run on touch, long after the render that built them. Reading the
-     live view/projection out of a ref is the point — rebuilding the gesture on
+     live view/projection out of a ref is the point - rebuilding the gesture on
      every frame of a pan (which is what a dependency on `view` would mean) is
      exactly what this avoids. */
   const gesture = useMemo(() => {
@@ -242,7 +242,7 @@ export function ScotlandMap({
             `${i === 0 ? 'M' : 'L'} ${projX(lon).toFixed(1)} ${projY(lat).toFixed(1)}`,
         )
         .join(' ')} Z`;
-    // Keyed by first vertex — a build-time constant, so each ring's start point
+    // Keyed by first vertex - a build-time constant, so each ring's start point
     // is a stable identity (and unlike the array index, obviously one).
     return COAST.map((ring) => (
       <Path
@@ -391,7 +391,7 @@ function ZoomButton({
   palette,
 }: {
   label: string;
-  /** Spoken name — the visible label is a bare glyph ("+", "−", "1×"). */
+  /** Spoken name - the visible label is a bare glyph ("+", "−", "1×"). */
   a11yLabel: string;
   onPress: () => void;
   palette: ReturnType<typeof usePalette>;
@@ -416,7 +416,7 @@ const styles = StyleSheet.create({
     padding: 0,
     // Scotland is tall and narrow (and Shetland pushes the top up to ~61°N), so
     // at full column width the map turns into a giant block on desktop. Cap it
-    // and centre it — it's a locator, not a chart.
+    // and centre it - it's a locator, not a chart.
     width: '100%',
     maxWidth: 460,
     alignSelf: 'center',

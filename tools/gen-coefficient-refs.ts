@@ -1,4 +1,4 @@
-// Regenerate apps/mobile/assets/data/coefficient-refs.json — the per-gauge
+// Regenerate apps/mobile/assets/data/coefficient-refs.json - the per-gauge
 // reference ranges that calibrate the tidal coefficient (French SHOM 20–120
 // scale) so that "mean springs" reads ~95 and "mean neaps" ~45.
 //

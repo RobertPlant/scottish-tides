@@ -6,7 +6,7 @@
 // Deliberately shoots the PRODUCTION export rather than the Metro dev server:
 // in dev, React Native's LogBox paints a red error toast over the UI and it
 // ends up baked into the store screenshots. The web build is the same React
-// tree as the native app, so this is a fair representation of the Android UI —
+// tree as the native app, so this is a fair representation of the Android UI -
 // and an emulator won't fit on the low-memory builder box anyway.
 
 import { execSync, spawn } from 'node:child_process';
@@ -25,7 +25,7 @@ const OUT_DIR = path.resolve(
 const PORT = 8099;
 
 // app.json sets experiments.baseUrl, so the export's asset paths are all
-// prefixed — serve it under that prefix or nothing loads.
+// prefixed - serve it under that prefix or nothing loads.
 const BASE_PATH = '/scottish-tides';
 const BASE_URL = `http://localhost:${PORT}${BASE_PATH}`;
 
@@ -43,7 +43,7 @@ const SHOTS = [
 ];
 
 // The export writes one .html per route, but expo-router only matches
-// extensionless paths — hitting /map.html renders "Unmatched Route". GitHub
+// extensionless paths - hitting /map.html renders "Unmatched Route". GitHub
 // Pages resolves the suffix server-side, so do the same here.
 const HTML_FALLBACK_SERVER = `
 import http.server, os, sys
@@ -92,7 +92,7 @@ if (!process.env.SKIP_EXPORT) {
   });
 }
 if (!existsSync(DIST)) {
-  throw new Error(`no export at ${DIST} — drop SKIP_EXPORT`);
+  throw new Error(`no export at ${DIST} - drop SKIP_EXPORT`);
 }
 
 // Serve dist/ under BASE_PATH via a symlink, the way Pages does.
@@ -109,7 +109,7 @@ mkdirSync(OUT_DIR, { recursive: true });
 
 // Chrome renders <input type=date> in its UI locale, not the page's, so the
 // date field comes out as US mm/dd/yyyy unless the browser process itself is
-// en-GB. It's LANG that decides this — `--lang` alone does nothing here.
+// en-GB. It's LANG that decides this - `--lang` alone does nothing here.
 const browser = await chromium.launch({
   executablePath: nixChrome(),
   args: [`--lang=${LOCALE}`],

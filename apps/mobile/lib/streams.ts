@@ -1,4 +1,4 @@
-// Tidal STREAMS for the well-known races — an estimate, not an atlas.
+// Tidal STREAMS for the well-known races - an estimate, not an atlas.
 //
 // IMPORTANT: this is a planning aid, NOT a tidal stream atlas. The model is
 // deliberately simple and uses *published* peak rates (common knowledge, not
@@ -7,7 +7,7 @@
 //   - the rate follows a sinusoid between slacks (the "50/90" idea),
 //   - the peak scales between the race's neap and spring figures by the day's
 //     spring/neap fraction (from the tide engine).
-// Slack timing and direction are approximate — verify against the pilot/atlas.
+// Slack timing and direction are approximate - verify against the pilot/atlas.
 // These races (Corryvreckan, Pentland Firth) can kill.
 
 import { ukEndOfDay } from '@/lib/datetime';
@@ -24,8 +24,8 @@ export interface Race {
   /** Bundled station whose tide drives the streams. */
   referenceStationId: string;
   /**
-   * 'gate' — a strait that goes slack near the reference HW/LW (Pentland etc.).
-   * 'sill' — a basin behind a rock sill (Falls of Lora): the rate follows the
+   * 'gate' - a strait that goes slack near the reference HW/LW (Pentland etc.).
+   * 'sill' - a basin behind a rock sill (Falls of Lora): the rate follows the
    * head between the sea and the lagged loch level, giving asymmetric windows.
    */
   type: 'gate' | 'sill';
@@ -45,7 +45,7 @@ export interface Race {
   floodFromLwToHw?: boolean;
 
   // sill-type only: the basin lags the sea, and (because the sill restricts
-  // outflow) drains slower than it fills — an asymmetric low-pass.
+  // outflow) drains slower than it fills - an asymmetric low-pass.
   lochTauFillHours?: number;
   lochTauDrainHours?: number;
   /** Knots of stream per metre of head (sea − loch). */
@@ -281,7 +281,7 @@ function predictSill(race: Race, ref: Station, dayStart: Date, fraction: number)
   // Sea level over a padded window so the reservoir filter has warmed up. 16 h
   // was not enough: the loch starts at sea level, and at τ_drain = 8 h that
   // initial guess is still worth up to 5 min of slack-time error on the day
-  // itself — against a model calibrated to ~12 min. Measured against a 240 h
+  // itself - against a model calibrated to ~12 min. Measured against a 240 h
   // warm-up, the error is 5.2 min at 16 h, 0.6 at 24 h and 0.06 (≈ 4 s) from
   // 48 h on, so 48 h is where it stops mattering. Costs one extra harmonic
   // pass over ~430 samples, on one screen.

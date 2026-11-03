@@ -47,7 +47,7 @@ in
     PLAYWRIGHT_SKIP_VALIDATE_HOST_REQUIREMENTS = "true";
 
     # This box has no fonts of its own, so headless Chrome rendered the 📍 on
-    # the "Tides near me" button as a tofu box — which then landed in the
+    # the "Tides near me" button as a tofu box - which then landed in the
     # F-Droid screenshots. Roboto is what Android actually renders with, so
     # pinning it here makes the captures MORE faithful to the phone, not less.
     FONTCONFIG_FILE = pkgs.makeFontsConf {

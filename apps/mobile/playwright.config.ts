@@ -26,7 +26,7 @@ function nixHeadlessShell(): string | undefined {
     }
     for (const name of names) {
       const p = path.join(dir, name);
-      // statSync follows symlinks — the nix browsers dir links e.g.
+      // statSync follows symlinks - the nix browsers dir links e.g.
       // chromium_headless_shell-1223 -> the real chromium store path.
       let st: fs.Stats;
       try {
@@ -66,7 +66,7 @@ export default defineConfig({
 
   // The static export, not `expo start --web`. The dev server renders every
   // route in the browser, so it cannot see the failures that only exist in the
-  // shipped artifact — build-time-frozen tide data and missing <title> both got
+  // shipped artifact - build-time-frozen tide data and missing <title> both got
   // to production past a green e2e run. `expo serve` hosts dist/ with the
   // export's own route manifest (clean URLs), so no extra dependency.
   webServer: {
@@ -75,7 +75,7 @@ export default defineConfig({
     // Never reuse, not even locally: a `npm run web` left open on this port is
     // exactly the dev server this suite was moved off, and reusing it would
     // silently test that instead of the export. Playwright fails loudly if the
-    // port is busy — free it (or stop the dev server) and re-run. The cost is
+    // port is busy - free it (or stop the dev server) and re-run. The cost is
     // an export per run.
     reuseExistingServer: false,
     timeout: 300_000,

@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
-# Build a Scottish Tides Android APK locally — no EAS/cloud, the F-Droid path.
+# Build a Scottish Tides Android APK locally - no EAS/cloud, the F-Droid path.
 #
 # Wraps the two environment-specific bits so you don't have to remember them:
 #   * runs inside the devenv shell (Android SDK/NDK, JDK 17), and
-#   * points the Android Gradle Plugin at the Nix-patched aapt2 — the one AGP
+#   * points the Android Gradle Plugin at the Nix-patched aapt2 - the one AGP
 #     downloads from Maven is an unpatched ELF that won't start on NixOS.
 #
 # Usage (from anywhere in the repo):

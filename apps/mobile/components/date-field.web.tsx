@@ -1,4 +1,4 @@
-// Web date picker: the browser's native <input type="date"> — accessible, no
+// Web date picker: the browser's native <input type="date"> - accessible, no
 // dependency, opens the OS/browser calendar. (Native uses date-field.tsx.)
 
 import type { ChangeEvent } from 'react';
@@ -20,7 +20,7 @@ export function DateField({ value, onChange, min, max }: DateFieldProps) {
   return (
     <input
       type="date"
-      // No visible <label> in the picker row, so name it explicitly — otherwise
+      // No visible <label> in the picker row, so name it explicitly - otherwise
       // this is an unlabelled form control on the web build.
       aria-label="Date"
       value={value}

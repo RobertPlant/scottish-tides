@@ -56,7 +56,7 @@ export function StationDayView({
   // Keep "now" live so the current-time marker/readout stays current.
   const now = useNow();
   // Everything below the header is "what the tide is doing today", which the
-  // static export cannot know — see use-hydrated.ts. Until the client takes
+  // static export cannot know - see use-hydrated.ts. Until the client takes
   // over, this screen is its header and nothing else.
   const hydrated = useHydrated();
 
@@ -65,12 +65,12 @@ export function StationDayView({
 
   // Swipe left → next day, swipe right → previous day. gesture-handler rather
   // than PanResponder, whose panHandlers spread onStartShouldSetResponder and
-  // friends onto the View — RN-Web 0.21 passes those to the DOM node and React
+  // friends onto the View - RN-Web 0.21 passes those to the DOM node and React
   // logs "Unknown event handler property" for each. activeOffsetX/failOffsetY
   // state the old "clearly-horizontal drags only" rule declaratively, so the
   // chart keeps its own scrub and vertical scrolling still reaches the
   // ScrollView. Rebuilt when the day changes (rather than reading the latest day
-  // out of a ref during render) — a day only ever changes between gestures.
+  // out of a ref during render) - a day only ever changes between gestures.
   const setDay = nav.setDay;
   const swipe = useMemo(
     () =>

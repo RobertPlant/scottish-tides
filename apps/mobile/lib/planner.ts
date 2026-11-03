@@ -1,6 +1,6 @@
 // Month / year trip-planner derivations: a calendar of days, each classified on
 // the station's neap↔spring scale, plus the sequential colour ramp the grid and
-// year heatmap are painted with. Pure (no React/RN) so it stays unit-testable —
+// year heatmap are painted with. Pure (no React/RN) so it stays unit-testable -
 // the screens layer the UI on top. Builds on the same per-day engine helpers as
 // the 7-day overview (classifyDay).
 

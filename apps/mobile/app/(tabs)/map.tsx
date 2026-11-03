@@ -24,7 +24,7 @@ export default function MapScreen() {
 
   const open = (id: string) => {
     setStationId(id);
-    // Station is a tab now — switch to it rather than pushing a stacked copy.
+    // Station is a tab now - switch to it rather than pushing a stacked copy.
     router.navigate({ pathname: '/station/[id]', params: { id } });
   };
   const openStream = (id: string) => router.push({ pathname: '/stream/[id]', params: { id } });
@@ -175,7 +175,7 @@ export default function MapScreen() {
 // Hoisted out of MapScreen: a component declared inside another component is a
 // new type on every render, so React unmounts and remounts the whole station
 // list (losing its scroll position and any pressed state) whenever the screen
-// re-renders — e.g. while "Locating…".
+// re-renders - e.g. while "Locating…".
 function Row({
   s,
   last,

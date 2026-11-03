@@ -1,5 +1,5 @@
 // Tiny persistence wrapper (AsyncStorage: localStorage on web, native store on
-// device). All best-effort — failures degrade to in-memory only.
+// device). All best-effort - failures degrade to in-memory only.
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -11,7 +11,7 @@ export async function loadFavourites(): Promise<string[]> {
     const v = await AsyncStorage.getItem(FAV_KEY);
     const parsed = v ? JSON.parse(v) : [];
     // Anything but an array (corrupt entry, an older format) would throw at the
-    // caller's .filter(), outside its try — the restore promise then rejects,
+    // caller's .filter(), outside its try - the restore promise then rejects,
     // `ready` never flips and the app sits blank forever.
     return Array.isArray(parsed) ? (parsed as string[]) : [];
   } catch {
