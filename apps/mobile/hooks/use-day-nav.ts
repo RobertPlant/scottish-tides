@@ -56,11 +56,18 @@ export function useDayNav({
   // gesture, the week strip, a hand-edited ?d= — obeys the same bounds. The date
   // field already refuses out-of-range input; the others used to walk past it.
   const [ymd, setYmd] = useState(() => getUrlDay(initialYmd, todayYmd, minYmd, maxYmd));
-  // a mounted screen gets a new ?d= when the planner pushes to it, so follow it
+  // a mounted screen gets a new ?d= when the planner pushes to it, so follow it.
+  // A ?d= that disappears (the Tides tab links without one) keeps the day, and
+  // while our own setParams is in flight an older ?d= is our echo, not a jump.
   const [seenUrlYmd, setSeenUrlYmd] = useState(initialYmd);
+  const [pendingUrlYmd, setPendingUrlYmd] = useState<string>();
   if (initialYmd !== seenUrlYmd) {
     setSeenUrlYmd(initialYmd);
-    setYmd(getUrlDay(initialYmd, todayYmd, minYmd, maxYmd));
+    if (initialYmd === pendingUrlYmd) {
+      setPendingUrlYmd(undefined);
+    } else if (pendingUrlYmd === undefined && initialYmd !== undefined) {
+      setYmd(getUrlDay(initialYmd, todayYmd, minYmd, maxYmd));
+    }
   }
 
   const dayStart = useMemo(() => ukDayStartFromYmd(ymd), [ymd]);
@@ -69,11 +76,12 @@ export function useDayNav({
     (next: string) => {
       const clamped = clamp(next, minYmd, maxYmd);
       setYmd(clamped);
-      if (syncUrl) {
+      if (syncUrl && clamped !== initialYmd) {
+        setPendingUrlYmd(clamped);
         router.setParams({ d: clamped });
       }
     },
-    [router, syncUrl, minYmd, maxYmd],
+    [router, syncUrl, minYmd, maxYmd, initialYmd],
   );
 
   return { ymd, dayStart, todayYmd, isToday: ymd === todayYmd, minYmd, maxYmd, setDay };
