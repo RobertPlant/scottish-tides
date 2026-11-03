@@ -42,7 +42,7 @@ const YEAR_SPAN = 5; // how far the ‹ › buttons roam from the current year
 export function TripPlanner({ station, header }: { station: Station; header?: ReactNode }) {
   const sidePadding = useSidePadding();
   const palette = usePalette();
-  const scheme: Scheme = useColorScheme() ?? 'light';
+  const scheme: Scheme = useColorScheme();
   const router = useRouter();
 
   // Which year is "this year", and which cell is today, are clock facts the
@@ -221,7 +221,7 @@ function DayBlock({
   const { bg } = coeffFill(cell.cls.fraction, scheme);
   // Cells sit flush (no gaps → no dead zones between tap targets); a
   // surface-coloured hairline separates neighbours, recoloured for weekends/today.
-  const border = isToday ? todayRing : cell.isWeekend ? weekendRing : gridLine;
+  const border = getCellBorder(isToday, cell.isWeekend, { todayRing, weekendRing, gridLine });
   return (
     <Pressable
       onPress={() => onPick(cell.ymd)}
@@ -296,3 +296,18 @@ const styles = StyleSheet.create({
   },
   legendSwatch: { width: 16, height: 16, borderRadius: 4, borderWidth: 1.5 },
 });
+
+function getCellBorder(
+  isToday: boolean,
+  isWeekend: boolean,
+  colours: { todayRing: string; weekendRing: string; gridLine: string },
+): string {
+  if (isToday) {
+    return colours.todayRing;
+  }
+  if (isWeekend) {
+    return colours.weekendRing;
+  }
+
+  return colours.gridLine;
+}

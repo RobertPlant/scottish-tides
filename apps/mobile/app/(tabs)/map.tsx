@@ -1,7 +1,7 @@
 import Head from 'expo-router/head';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { Platform, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
 import { Note } from '@/components/note';
 import { ScotlandMap } from '@/components/scotland-map';
@@ -31,44 +31,20 @@ export default function MapScreen() {
 
   const findNearest = async () => {
     setLocErr(null);
-
-    // Web: use the browser geolocation API (its own permission prompt).
-    if (Platform.OS === 'web') {
-      if (typeof navigator === 'undefined' || !navigator.geolocation) {
-        setLocErr('Location is not available in this browser.');
-        return;
-      }
-      setLocating(true);
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          setLocating(false);
-          const { station } = nearestStation(pos.coords.latitude, pos.coords.longitude);
-          open(station.id);
-        },
-        () => {
-          setLocating(false);
-          setLocErr('Could not get your location.');
-        },
-        { enableHighAccuracy: false, timeout: 10_000, maximumAge: 300_000 },
-      );
-      return;
-    }
-
-    // Native: ask for foreground location permission, then locate.
     setLocating(true);
     try {
       const coords = await getCurrentCoords();
       if (!coords) {
-        setLocating(false);
         setLocErr('Location permission denied — enable it in Settings to use this.');
         return;
       }
-      setLocating(false);
+
       const { station } = nearestStation(coords.latitude, coords.longitude);
       open(station.id);
     } catch {
-      setLocating(false);
       setLocErr('Could not get your location.');
+    } finally {
+      setLocating(false);
     }
   };
 

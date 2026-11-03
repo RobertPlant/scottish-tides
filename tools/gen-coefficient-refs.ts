@@ -20,6 +20,7 @@ import { fileURLToPath } from 'node:url';
 
 import { Tide } from '../apps/mobile/lib/tides';
 import type { StationData } from '../apps/mobile/lib/tides';
+import { dayRange } from '../apps/mobile/lib/tide-day';
 
 const DATA_DIR = path.join(
   path.dirname(fileURLToPath(import.meta.url)),
@@ -32,14 +33,9 @@ const DATA_DIR = path.join(
 const SIM_DAYS = 731; // ~2 years: covers the synodic, anomalistic and annual beats
 const WINDOW = 3; // half-window (days) for local spring-peak / neap-trough detection
 
-function dayRange(tide: Tide, dayStart: Date): number {
-  const evs = tide.extrema(dayStart, new Date(dayStart.getTime() + 24 * 3600e3));
-  const highs = evs.filter((e) => e.type === 'high').map((e) => e.height);
-  const lows = evs.filter((e) => e.type === 'low').map((e) => e.height);
-  if (highs.length === 0 || lows.length === 0) {
-    return 0;
-  }
-  return Math.max(...highs) - Math.min(...lows);
+// raw extrema over a UTC day, unpruned, so the references match what they were fitted on
+function rawDayRange(tide: Tide, dayStart: Date): number {
+  return dayRange(tide.extrema(dayStart, new Date(dayStart.getTime() + 24 * 3600e3)));
 }
 
 const mean = (xs: number[]) => xs.reduce((a, b) => a + b, 0) / xs.length;
@@ -49,7 +45,7 @@ function refs(data: StationData): { springRef: number; neapRef: number } {
   const start = Date.UTC(2025, 0, 1);
   const r: number[] = [];
   for (let d = 0; d < SIM_DAYS; d++) {
-    r.push(dayRange(tide, new Date(start + d * 24 * 3600e3)));
+    r.push(rawDayRange(tide, new Date(start + d * 24 * 3600e3)));
   }
 
   const peaks: number[] = [];

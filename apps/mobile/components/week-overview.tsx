@@ -9,7 +9,7 @@ import { ThemedText } from '@/components/themed-text';
 import { usePalette } from '@/hooks/use-theme-color';
 import { formatDay, ukDayStartFromYmd, ymdAddDays } from '@/lib/datetime';
 import type { Station } from '@/lib/stations';
-import { classifyTide, dayEvents, dayRange, tidalStats, tideClassKey } from '@/lib/tide-day';
+import { classifyDay, tidalStats, tideClassKey } from '@/lib/tide-day';
 
 export function WeekOverview({
   station,
@@ -37,10 +37,7 @@ export function WeekOverview({
       Array.from({ length: 7 }, (_, i) => {
         const ymd = ymdAddDays(fromYmd, i);
         const start = ukDayStartFromYmd(ymd);
-        const events = dayEvents(station, start);
-        const range = dayRange(events);
-        const cls = classifyTide(range, stats);
-        return { ymd, start, range, cls };
+        return { ymd, start, ...classifyDay(station, start, stats) };
       }),
     [station, fromYmd, stats],
   );

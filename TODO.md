@@ -128,7 +128,7 @@ All of these are enforced in CI.
       `/station/[id]?d=`. Cells get a measured integer width so the grid stays uniform, and sit
       flush (no gaps → no dead-zone taps). Station switcher extracted to `components/
       station-chips.tsx` (shared with the Tides tab). Tests: `lib/planner.test.ts` +
-      `e2e/planner.spec.ts`. NB: started as month+year with a toggle; the month grid was dropped
+      `e2e/smoke.spec.ts`. NB: started as month+year with a toggle; the month grid was dropped
       as redundant. Neutral by design — no good/bad judgement (see the roadmap "best-window
       planner" below for an opinionated layer on top).
 - [ ] **Weather overlay (optional, online)** — wind/swell from a free marine API (open-meteo),

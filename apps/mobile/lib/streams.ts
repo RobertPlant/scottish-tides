@@ -12,7 +12,7 @@
 
 import { ukEndOfDay } from '@/lib/datetime';
 import { type Station, stationById } from '@/lib/stations';
-import { classifyTide, dayEvents, dayRange, seaLevelSeries, tidalStats } from '@/lib/tide-day';
+import { classifyDay, seaLevelSeries } from '@/lib/tide-day';
 import { predictExtrema } from '@/lib/tides';
 
 export interface Race {
@@ -208,7 +208,7 @@ export function predictStreamDay(race: Race, dayStart: Date): StreamDay {
   if (!ref) {
     return { samples: [], slacks: [], peaks: [], springNeapFraction: 0, peakRate: 0 };
   }
-  const fraction = classifyTide(dayRange(dayEvents(ref, dayStart)), tidalStats(ref)).fraction;
+  const { fraction } = classifyDay(ref, dayStart).cls;
   return race.type === 'sill'
     ? predictSill(race, ref, dayStart, fraction)
     : predictGate(race, ref, dayStart, fraction);
