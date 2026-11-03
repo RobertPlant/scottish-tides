@@ -38,13 +38,15 @@ export function SelectedStationProvider({ children }: { children: ReactNode }) {
   // port first, and the station screen then wrote that default straight back
   // over the restored last station.
   useEffect(() => {
-    Promise.all([loadLastStation(), loadFavourites()]).then(([id, ids]) => {
+    const restore = async () => {
+      const [id, ids] = await Promise.all([loadLastStation(), loadFavourites()]);
       if (id && STATIONS.some((s) => s.id === id)) {
         setStationIdState(id);
       }
       setFavourites(ids.filter((fid) => STATIONS.some((s) => s.id === fid)));
       setReady(true);
-    });
+    };
+    void restore();
   }, []);
 
   const setStationId = useCallback((id: string) => {

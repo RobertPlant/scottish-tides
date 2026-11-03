@@ -43,7 +43,29 @@
     "rules": {
       "recommended": true,
       "style": {
-        "useBlockStatements": "error"
+        "useBlockStatements": "error",
+        "noNestedTernary": "error",
+        "useConst": "error",
+        "noParameterAssign": "error"
+      },
+      "complexity": {
+        "useFlatMap": "error",
+        "noExcessiveLinesPerFunction": {
+          "level": "warn",
+          "options": {
+            "maxLines": 50
+          }
+        }
+      },
+      "performance": {
+        "noDelete": "error"
+      },
+      "correctness": {
+        "noUnusedImports": "error",
+        "noUnusedVariables": "error"
+      },
+      "nursery": {
+        "noFloatingPromises": "error"
       }
     }
   },

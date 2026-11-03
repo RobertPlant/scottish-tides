@@ -11,7 +11,16 @@ import { parseYmd, ukDayStartFromYmd, ymdAddDays, ymdInUk } from '@/lib/datetime
 // Module-level so `setDay` can use it without taking a per-render closure as a
 // hook dependency — the initial-day clamp and the setter had a copy each.
 // ISO YYYY-MM-DD compares correctly as a string.
-const clamp = (d: string, min: string, max: string) => (d < min ? min : d > max ? max : d);
+function clamp(ymd: string, min: string, max: string): string {
+  if (ymd < min) {
+    return min;
+  }
+  if (ymd > max) {
+    return max;
+  }
+
+  return ymd;
+}
 
 // the ?d= day if it's a real date, kept inside the bounds, else today
 function getUrlDay(

@@ -31,8 +31,21 @@ const { left: PAD_LEFT, right: PAD_RIGHT, top: PAD_TOP } = CHART_PAD;
 function niceStep(raw: number): number {
   const pow = 10 ** Math.floor(Math.log10(raw));
   const n = raw / pow;
-  const s = n < 1.5 ? 1 : n < 3 ? 2 : n < 7 ? 5 : 10;
-  return s * pow;
+  return pickStepMultiple(n) * pow;
+}
+
+function pickStepMultiple(n: number): number {
+  if (n < 1.5) {
+    return 1;
+  }
+  if (n < 3) {
+    return 2;
+  }
+  if (n < 7) {
+    return 5;
+  }
+
+  return 10;
 }
 
 export function TideCurve({ series, events, now, height = 200, scrubbable = false, sun }: Props) {

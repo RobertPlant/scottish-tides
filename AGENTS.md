@@ -102,3 +102,40 @@ there's no such env var, so Playwright uses its own downloaded browser.
   React's `onChange`; set `.value` via the prototype setter and dispatch
   `input`+`change`. Also wait for dev-mode hydration first, or the synthetic
   event has no listener yet.
+
+## Code style
+
+From `~/projects/code-styles` (README + `typescript.md`), copied here because cloud sessions can't see
+that path. Biome formats and checks from the root (`npm run check`, CI runs `biome ci apps/mobile`).
+
+- 120 columns, single quotes, semicolons, trailing commas, `x => ...` with no brackets on one arg.
+- Never nest ternaries, in JSX included. Use early returns or a small render helper. Biome's
+  `noNestedTernary` enforces it.
+- `async`/`await`, never `.then()`. Every promise is awaited, returned or `void`ed (`noFloatingPromises`).
+- Braces on every `if`, `for` and `while`, one-liners included (`useBlockStatements`).
+- `const`, not `let`, unless there's truly no other way. Pick a value with a small helper and early returns,
+  not a default that gets reassigned.
+- Never mutate what a function is given, and never change a value once it's made: no `.sort()` (use
+  `toSorted()`), `push` or assigning into something parsed, loaded or returned. Build the changed copy. The
+  exception is a local the function is still building. `noParameterAssign` catches reassigning a parameter.
+- Functional by preference: `map`/`filter`/`flatMap`, `Object.groupBy`, `Object.fromEntries` over loops that
+  `push`. The engine's hot loops (`lib/tides/`) may stay index loops, with a one-line note.
+- `lib/` is pure: data in, new data out. AsyncStorage, the router and the DOM belong in screens, components
+  and hooks.
+- Functions under ~50 lines (Biome warns). Screens and charts that are longer get split as they're touched.
+- Name conditions before branching on them: `const isToday = ymd === todayYmd;` then `if (isToday) {`.
+  Guard clauses up front, then the happy path, with a blank line before the final `return`.
+- A function's name is a verb and its object (`getUrlDay`, `classifyDay`, `parseYmd`), not a noun
+  (`tidalStats`, `dayEvents`). `get` for a value worked out from what's given, `find` for a search that can
+  miss, `read`/`load` for storage, `parse` for unknown input, `build` for a new value, `list`/`count` for many,
+  `is`/`has` for a predicate. Rename old names when you touch them, not in a sweep.
+- Names say what the thing is, closures included: `stations.map(station => ...)`, never `s`. A sort's
+  comparator keeps `(a, b)`.
+- A file reads in one order: imports, then types, then constants in `SCREAMING_CASE`, then functions.
+- No `as` in new code (`as const` is fine): narrow with a type predicate or a validator.
+- Comments are rare one-line notes on why, not paragraphs. History goes in the commit or PR. When you change
+  code, trim the comments on it to that too. Docblocks only on exported functions, a title line and one sentence.
+- No em-dashes anywhere, comments or copy. Use a hyphen, comma or full stop. UI copy changes go in their own PR,
+  with any e2e assertion that quotes them.
+- An engine change keeps `npm run test:engine` green (see above), and its test has to fail when the change is
+  reverted.
