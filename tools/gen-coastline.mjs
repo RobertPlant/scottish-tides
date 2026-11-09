@@ -27,17 +27,34 @@ if (!gb) {
 }
 const polys = gb.geometry.coordinates; // MultiPolygon
 
-const inside = (p, e) =>
-  e === 0 ? p[0] >= BBOX[0] : e === 1 ? p[0] <= BBOX[2] : e === 2 ? p[1] >= BBOX[1] : p[1] <= BBOX[3];
+const inside = (p, e) => {
+  if (e === 0) {
+    return p[0] >= BBOX[0];
+  }
+  if (e === 1) {
+    return p[0] <= BBOX[2];
+  }
+  if (e === 2) {
+    return p[1] >= BBOX[1];
+  }
+
+  return p[1] <= BBOX[3];
+};
+const getCrossingFraction = (a, b, e) => {
+  if (e === 0) {
+    return (BBOX[0] - a[0]) / (b[0] - a[0]);
+  }
+  if (e === 1) {
+    return (BBOX[2] - a[0]) / (b[0] - a[0]);
+  }
+  if (e === 2) {
+    return (BBOX[1] - a[1]) / (b[1] - a[1]);
+  }
+
+  return (BBOX[3] - a[1]) / (b[1] - a[1]);
+};
 function isect(a, b, e) {
-  const t =
-    e === 0
-      ? (BBOX[0] - a[0]) / (b[0] - a[0])
-      : e === 1
-        ? (BBOX[2] - a[0]) / (b[0] - a[0])
-        : e === 2
-          ? (BBOX[1] - a[1]) / (b[1] - a[1])
-          : (BBOX[3] - a[1]) / (b[1] - a[1]);
+  const t = getCrossingFraction(a, b, e);
   return [a[0] + t * (b[0] - a[0]), a[1] + t * (b[1] - a[1])];
 }
 // Sutherland–Hodgman clip of a ring to the bounding box.
@@ -52,13 +69,17 @@ function clip(ring) {
       const ci = inside(cur, e);
       const pi = inside(prev, e);
       if (ci) {
-        if (!pi) out.push(isect(prev, cur, e));
+        if (!pi) {
+          out.push(isect(prev, cur, e));
+        }
         out.push(cur);
       } else if (pi) {
         out.push(isect(prev, cur, e));
       }
     }
-    if (!out.length) break;
+    if (!out.length) {
+      break;
+    }
   }
   return out;
 }
@@ -66,7 +87,9 @@ function clip(ring) {
 // points that matter for the shape, so it doesn't fold tight concavities (sea
 // lochs, sounds) into self-crossing bow-ties that then render as unfilled holes.
 function rdp(pts, eps) {
-  if (pts.length < 3) return pts.slice();
+  if (pts.length < 3) {
+    return pts.slice();
+  }
   const [ax, ay] = pts[0];
   const [bx, by] = pts[pts.length - 1];
   const dx = bx - ax;
@@ -86,7 +109,9 @@ function rdp(pts, eps) {
       idx = i;
     }
   }
-  if (maxD <= eps) return [pts[0], pts[pts.length - 1]];
+  if (maxD <= eps) {
+    return [pts[0], pts[pts.length - 1]];
+  }
   const left = rdp(pts.slice(0, idx + 1), eps);
   const right = rdp(pts.slice(idx), eps);
   return left.slice(0, -1).concat(right);
@@ -101,8 +126,12 @@ function selfIntersects(ring) {
   const hit = (p1, p2, p3, p4) => ccw(p1, p3, p4) !== ccw(p2, p3, p4) && ccw(p1, p2, p3) !== ccw(p1, p2, p4);
   for (let i = 0; i < n; i++) {
     for (let j = i + 2; j < n; j++) {
-      if (i === 0 && j === n - 1) continue; // adjacent across the closure
-      if (hit(ring[i], ring[(i + 1) % n], ring[j], ring[(j + 1) % n])) return true;
+      if (i === 0 && j === n - 1) {
+        continue; // adjacent across the closure
+      }
+      if (hit(ring[i], ring[(i + 1) % n], ring[j], ring[(j + 1) % n])) {
+        return true;
+      }
     }
   }
   return false;
@@ -111,8 +140,12 @@ function simplifyRing(ring) {
   const closed = ring.concat([ring[0]]);
   for (let eps = EPS_DEG; eps >= 0; eps /= 2) {
     const s = rdp(closed, eps).slice(0, -1); // drop the duplicated closing point
-    if (eps === 0 || !selfIntersects(s)) return s;
-    if (eps < 1e-5) return s;
+    if (eps === 0 || !selfIntersects(s)) {
+      return s;
+    }
+    if (eps < 1e-5) {
+      return s;
+    }
   }
   return ring;
 }
@@ -123,7 +156,9 @@ for (const poly of polys) {
   const clipped = clip(poly[0]);
   if (clipped.length >= 4) {
     const d = simplifyRing(clipped).map(p => [round(p[0]), round(p[1])]);
-    if (d.length >= 4) rings.push(d);
+    if (d.length >= 4) {
+      rings.push(d);
+    }
   }
 }
 rings.sort((a, b) => b.length - a.length);

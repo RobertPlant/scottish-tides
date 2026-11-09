@@ -106,7 +106,7 @@ there's no such env var, so Playwright uses its own downloaded browser.
 ## Code style
 
 From `~/projects/code-styles` (README + `typescript.md`), copied here because cloud sessions can't see
-that path. Biome formats and checks from the root (`npm run check`, CI runs `biome ci apps/mobile`).
+that path. Biome formats and checks from the root (`npm run check`, CI runs `biome ci apps/mobile tools`).
 
 - 120 columns, single quotes, semicolons, trailing commas, `x => ...` with no brackets on one arg.
 - Never nest ternaries, in JSX included. Use early returns or a small render helper. Biome's
