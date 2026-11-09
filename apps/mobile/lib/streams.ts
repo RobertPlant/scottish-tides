@@ -227,6 +227,7 @@ function predictGate(race: Race, ref: Station, dayStart: Date, fraction: number)
       t: e.time.getTime() + (e.type === 'high' ? hwOff : lwOff) * 60_000,
       afterLow: e.type === 'low',
     }))
+    // sort, not toSorted - Hermes doesn't have it
     .sort((a, b) => a.t - b.t);
 
   const segments: Segment[] = [];

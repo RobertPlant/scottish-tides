@@ -50,7 +50,7 @@ for (const w of reference.windows) {
   const timeTolS = m2 < 0.4 ? 900 : 180;
 
   test(`hourly heights match pytides - ${label}`, () => {
-    const times = Array.from({ length: w.spanHours + 1 }, (_, i) => new Date(t0.getTime() + i * 3600_000));
+    const times = Array.from({ length: w.spanHours + 1 }, (_, hour) => new Date(t0.getTime() + hour * 3600_000));
     const heights = tide.heightsAt(times);
     let maxErr = 0;
     for (let i = 0; i < heights.length; i++) {
