@@ -1,4 +1,4 @@
-Tide times, heights and curves for Scottish ports, predicted on your device from harmonic constituents. No account, no network, no tracking — everything the app needs is bundled, so it works on the water where there is no signal.
+Tide times, heights and curves for Scottish ports, predicted on your device from harmonic constituents. No account, no network, no tracking. Everything the app needs is bundled, so it works on the water where there is no signal.
 
 Features:
 
@@ -14,4 +14,4 @@ Stations: Oban, Tobermory, Leith, Ullapool, Wick, Aberdeen, Lerwick, Millport, P
 
 The prediction engine is a port of the pytides harmonic predictor and is checked against it automatically, agreeing to well under a millimetre on heights. Constituents are fitted from British Oceanographic Data Centre sea-level records.
 
-These predictions are estimates. Tidal stream figures in particular are modelled, not measured, and are not derived from a tidal atlas. Do not use this app for navigation — verify against an official tide table, pilot or atlas. The tidal races it covers can kill.
+These predictions are estimates. Tidal stream figures in particular are modelled, not measured, and are not derived from a tidal atlas. Do not use this app for navigation. Verify against an official tide table, pilot or atlas. The tidal races it covers can kill.

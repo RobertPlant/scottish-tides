@@ -26,7 +26,7 @@ import java.util.concurrent.atomic.AtomicInteger
  * This exists instead of `expo-location` because that module hard-depends on
  * `com.google.android.gms:play-services-location`, which is proprietary and
  * therefore forbidden in F-Droid's main repository. iOS still uses
- * `expo-location` — see `lib/native-location.ts`.
+ * `expo-location`, see `lib/native-location.ts`.
  */
 class PlatformLocationModule : Module() {
   override fun definition() = ModuleDefinition {
@@ -104,4 +104,4 @@ class PlatformLocationModule : Module() {
 private fun Location.toCoords() = bundleOf("latitude" to latitude, "longitude" to longitude)
 
 internal class LocationUnavailableException :
-  CodedException("Could not get a location fix — is location turned on?")
+  CodedException("Could not get a location fix. Is location turned on?")

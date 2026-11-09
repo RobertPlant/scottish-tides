@@ -76,7 +76,7 @@ export default function About() {
             </ThemedText>
           ) : null}
           <ThemedText style={{ marginTop: 8 }}>
-            Offline tide predictions and tidal-stream estimates for Scottish waters. All predictions run on-device — no
+            Offline tide predictions and tidal-stream estimates for Scottish waters. All predictions run on-device: no
             account, no tracking, no network needed.
           </ThemedText>
         </View>
@@ -140,8 +140,8 @@ export default function About() {
           <ThemedText type="defaultSemiBold">Disclaimer</ThemedText>
           <ThemedText type="caption" style={{ color: palette.muted }}>
             Heights are astronomical predictions and exclude weather (surge). Tidal streams are modelled estimates, not
-            a stream atlas. Never use this app as your sole source for navigation or for planning a race transit —
-            always cross-check the official pilot, chart and tidal-stream atlas.
+            a stream atlas. Never use this app as your sole source for navigation or for planning a race transit. Always
+            cross-check the official pilot, chart and tidal-stream atlas.
           </ThemedText>
         </Card>
       </ScrollView>

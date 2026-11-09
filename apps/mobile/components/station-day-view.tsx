@@ -144,8 +144,8 @@ export function StationDayView({
           <Note>
             <ThemedText type="caption" style={{ color: palette.muted }}>
               {station.standardPort
-                ? 'Standard port — predicted directly from its own gauge.'
-                : `Secondary port — derived from ${station.shift?.based_on ?? 'a nearby gauge'} by a constant Admiralty offset.`}
+                ? 'Standard port, predicted directly from its own gauge.'
+                : `Secondary port, derived from ${station.shift?.based_on ?? 'a nearby gauge'} by a constant Admiralty offset.`}
             </ThemedText>
             {station.data.obs_span ? (
               <ThemedText type="caption" style={{ color: palette.muted }}>
@@ -154,7 +154,7 @@ export function StationDayView({
             ) : null}
             <ThemedText type="caption" style={{ color: palette.muted }}>
               Heights vs {station.data.datum?.replace('The data refer to ', '') ?? 'chart datum'}. Astronomical only (no
-              surge). Water levels, not streams — never plan a race transit from these tables.
+              surge). Water levels, not streams. Never plan a race transit from these tables.
             </ThemedText>
           </Note>
         </View>

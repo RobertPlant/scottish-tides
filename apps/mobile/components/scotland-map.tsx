@@ -354,7 +354,7 @@ export function ScotlandMap({
         ) : null}
       </View>
 
-      <Text style={[styles.noteText, { color: palette.muted }]}>Schematic — not for navigation</Text>
+      <Text style={[styles.noteText, { color: palette.muted }]}>Schematic, not for navigation</Text>
     </View>
   );
 }
