@@ -1,7 +1,7 @@
 {
   "name": "Scottish Tides",
   "short_name": "Tides",
-  "description": "Offline tide predictions for Scotland — high/low water, curves, sun & moon.",
+  "description": "Offline tide predictions for Scotland: high/low water, curves, sun & moon.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",

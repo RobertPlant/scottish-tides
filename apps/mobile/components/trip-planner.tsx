@@ -151,7 +151,7 @@ export function TripPlanner({ station, header }: { station: Station; header?: Re
         <Note>
           <ThemedText type="caption" style={{ color: palette.muted }}>
             Each day is shaded by its tidal range on this station&apos;s neap→spring scale. Springs mean a wider range
-            and stronger tidal streams; neaps are gentler. Which is &ldquo;favourable&rdquo; depends on your trip — this
+            and stronger tidal streams; neaps are gentler. Which is &ldquo;favourable&rdquo; depends on your trip. This
             is an overview, not advice.
           </ThemedText>
           <ThemedText type="caption" style={{ color: palette.muted }}>

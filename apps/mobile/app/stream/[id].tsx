@@ -91,7 +91,7 @@ export default function RaceDetail() {
             <Card gap={10}>
               <ThemedText type="defaultSemiBold">Slack water (best transit)</ThemedText>
               {stream.slacks.length === 0 ? (
-                <ThemedText style={{ color: palette.muted }}>—</ThemedText>
+                <ThemedText style={{ color: palette.muted }}>None</ThemedText>
               ) : (
                 <ThemedText style={{ color: palette.tint }}>
                   {stream.slacks.map(s => formatTime(s)).join('   ·   ')}
@@ -121,7 +121,7 @@ export default function RaceDetail() {
             {hydrated ? ` (${Math.round(stream.springNeapFraction * 100)}% towards springs)` : ''}.
           </ThemedText>
           <ThemedText type="caption" style={{ color: palette.muted }}>
-            {race.source} Model only — slack/direction approximate. Not for navigation; check the tidal stream atlas and
+            {race.source} Model only, slack/direction approximate. Not for navigation; check the tidal stream atlas and
             pilot.
           </ThemedText>
         </Note>

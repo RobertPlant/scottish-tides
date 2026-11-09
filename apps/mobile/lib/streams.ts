@@ -56,7 +56,7 @@ export const RACES: Race[] = [
   {
     id: 'pentland-firth',
     name: 'Pentland Firth',
-    area: 'Caithness — Orkney',
+    area: 'Caithness to Orkney',
     lat: 58.72,
     lon: -3.15,
     referenceStationId: 'aberdeen',
@@ -69,14 +69,14 @@ export const RACES: Race[] = [
     springPeakKn: 12,
     neapPeakKn: 6,
     warning:
-      'One of the most dangerous tidal passages in Britain — overfalls (the Merry Men of Mey, Swelkie) build huge seas against wind. Transit only at slack with a firm escape plan.',
+      'One of the most dangerous tidal passages in Britain. Overfalls (the Merry Men of Mey, Swelkie) build huge seas against wind. Transit only at slack with a firm escape plan.',
     source:
       'Slack ≈ HW Aberdeen −1:05 (W-going begins) / +5:00 (E-going begins), from published figures; peak ~12 kn springs.',
   },
   {
     id: 'corryvreckan',
     name: 'Gulf of Corryvreckan',
-    area: 'Jura — Scarba',
+    area: 'Jura to Scarba',
     lat: 56.15,
     lon: -5.71,
     referenceStationId: 'oban',
@@ -89,14 +89,14 @@ export const RACES: Race[] = [
     springPeakKn: 8.5,
     neapPeakKn: 4,
     warning:
-      'The whirlpool — standing waves and the famous overfall on the west-going stream against swell. Slack window is short. Expert only.',
+      'The whirlpool: standing waves and the famous overfall on the west-going stream against swell. Slack window is short. Expert only.',
     source:
       'Slack ≈ HW Oban +4:00 / −2:30; W-going begins HW +4:10 (8.5 kn), E-going HW −2:10. From published figures.',
   },
   {
     id: 'grey-dogs',
     name: "Grey Dogs (Bealach a' Choin Ghlais)",
-    area: 'Scarba — Lunga',
+    area: 'Scarba to Lunga',
     lat: 56.18,
     lon: -5.67,
     referenceStationId: 'oban',
@@ -127,7 +127,7 @@ export const RACES: Race[] = [
     lochTauDrainHours: 8,
     headRateScale: 3.0,
     warning:
-      'A tidal rapid over a rock ledge: the falls run OUT on the ebb once the falling sea drops below Loch Etive, then IN on the flood. Strongly range-dependent — negligible on small neaps, violent on big springs.',
+      'A tidal rapid over a rock ledge: the falls run OUT on the ebb once the falling sea drops below Loch Etive, then IN on the flood. Strongly range-dependent: negligible on small neaps, violent on big springs.',
     source:
       'Modelled from the sea↔loch head; turn times calibrated to fallsoflora.info (XTide) to ~12 min. Rate magnitude indicative.',
   },
@@ -152,7 +152,7 @@ export const RACES: Race[] = [
   {
     id: 'sound-of-islay',
     name: 'Sound of Islay',
-    area: 'Islay — Jura',
+    area: 'Islay to Jura',
     lat: 55.86,
     lon: -6.1,
     referenceStationId: 'oban',
@@ -164,7 +164,7 @@ export const RACES: Race[] = [
     ebbName: 'S-going (ebb)',
     springPeakKn: 5,
     neapPeakKn: 2.5,
-    warning: 'A steady, strong tidal river — time a transit with the stream, not against.',
+    warning: 'A steady, strong tidal river. Time a transit with the stream, not against.',
     source: 'Slack ≈ HW Oban −0:40 / +5:30 (Rhinns-of-Islay figures, approximate); peak ~5 kn springs.',
   },
 ];

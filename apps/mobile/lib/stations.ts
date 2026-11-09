@@ -93,7 +93,7 @@ export const STATIONS: Station[] = [
   {
     id: 'port-ellen',
     name: 'Port Ellen',
-    subtitle: 'Islay — very small range',
+    subtitle: 'Islay, very small range',
     region: 'West Coast',
     lat: 55.6275,
     lon: -6.1886,

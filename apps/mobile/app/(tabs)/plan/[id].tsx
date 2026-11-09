@@ -32,7 +32,7 @@ export default function PlanScreen() {
             <View>
               <ThemedText type="title">{station.name}</ThemedText>
               <ThemedText type="caption" style={{ color: palette.muted }}>
-                Plan ahead — pick a day for the tides you want
+                Plan ahead: pick a day for the tides you want
               </ThemedText>
             </View>
           </View>

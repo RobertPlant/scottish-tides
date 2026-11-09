@@ -35,7 +35,7 @@ export default function MapScreen() {
     try {
       const coords = await getCurrentCoords();
       if (!coords) {
-        setLocErr('Location permission denied — enable it in Settings to use this.');
+        setLocErr('Location permission denied. Enable it in Settings to use this.');
         return;
       }
 
@@ -99,11 +99,11 @@ export default function MapScreen() {
         </ThemedText>
         <Note tone="warn" gap={4}>
           <ThemedText type="defaultSemiBold" style={{ color: palette.low }}>
-            ⚠ Estimates — not a tidal stream atlas
+            ⚠ Estimates, not a tidal stream atlas
           </ThemedText>
           <ThemedText type="caption" style={{ color: palette.muted }}>
             Slack times and rates are modelled from the tide and published peak figures. Timing and direction are
-            approximate. Verify against the pilot/atlas before committing — these races can kill.
+            approximate. Verify against the pilot/atlas before committing. These races can kill.
           </ThemedText>
         </Note>
         <View style={[styles.card, { backgroundColor: palette.surface, borderColor: palette.border }]}>
@@ -138,7 +138,7 @@ export default function MapScreen() {
       </View>
 
       <ThemedText type="caption" style={[styles.footer, { color: palette.muted }]}>
-        More ports as the data is fitted. Each station is a small set of harmonic constituents bundled in the app —
+        More ports as the data is fitted. Each station is a small set of harmonic constituents bundled in the app, so
         predictions run entirely offline.
       </ThemedText>
 
