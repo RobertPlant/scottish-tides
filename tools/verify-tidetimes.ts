@@ -103,4 +103,4 @@ async function main() {
   process.exitCode = failed ? 1 : 0;
 }
 
-main();
+void main();

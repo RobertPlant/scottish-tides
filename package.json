@@ -4,9 +4,9 @@
   "private": true,
   "license": "GPL-3.0-only",
   "scripts": {
-    "format": "biome format --write apps/mobile",
-    "lint": "biome lint apps/mobile",
-    "check": "biome check --write apps/mobile"
+    "format": "biome format --write apps/mobile tools",
+    "lint": "biome lint apps/mobile tools",
+    "check": "biome check --write apps/mobile tools"
   },
   "//": "biome is provided by devenv via pkgs.biome - no node_modules at this level"
 }

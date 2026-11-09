@@ -40,11 +40,24 @@ const PUBLISHED_AHEAD_DAYS = 7;
 
 const sleep = (ms: number) => new Promise(r => setTimeout(r, ms));
 
+const getOrdinalSuffix = (day: number): string => {
+  if (day % 10 === 1 && day !== 11) {
+    return 'st';
+  }
+  if (day % 10 === 2 && day !== 12) {
+    return 'nd';
+  }
+  if (day % 10 === 3 && day !== 13) {
+    return 'rd';
+  }
+
+  return 'th';
+};
+
 /** "1st December 2025", as the page title words the date it is for. */
 function titleDate(ymd: string): string {
   const [y, m, d] = ymd.split('-').map(Number);
-  const ord =
-    d % 10 === 1 && d !== 11 ? 'st' : d % 10 === 2 && d !== 12 ? 'nd' : d % 10 === 3 && d !== 13 ? 'rd' : 'th';
+  const ord = getOrdinalSuffix(d);
   const month = new Date(Date.UTC(y, m - 1, 1)).toLocaleString('en-GB', {
     month: 'long',
     timeZone: 'UTC',
