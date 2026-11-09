@@ -72,6 +72,7 @@ export function pruneMinorExtrema(events: TideEvent[], minProminenceM: number): 
     if (highs.length > 0 && lows.length > 0) {
       const hi = highs.reduce((a, b) => (b.height > a.height ? b : a));
       const lo = lows.reduce((a, b) => (b.height < a.height ? b : a));
+      // sort, not toSorted - Hermes doesn't have it
       return [hi, lo].sort((a, b) => a.time.getTime() - b.time.getTime());
     }
   }

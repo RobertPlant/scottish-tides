@@ -198,7 +198,7 @@ function DayBlock({
 }
 
 function Legend({ scheme, palette }: { scheme: Scheme; palette: ReturnType<typeof usePalette> }) {
-  const stops = Array.from({ length: 24 }, (_, i) => i / 23);
+  const stops = Array.from({ length: 24 }, (_, stop) => stop / 23);
   return (
     <Card gap={8}>
       <View style={styles.legendRow}>

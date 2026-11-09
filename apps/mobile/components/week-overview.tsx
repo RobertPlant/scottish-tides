@@ -34,8 +34,8 @@ export function WeekOverview({
   // does - without this it was recomputed on every one of those renders.
   const days = useMemo(
     () =>
-      Array.from({ length: 7 }, (_, i) => {
-        const ymd = ymdAddDays(fromYmd, i);
+      Array.from({ length: 7 }, (_, dayOffset) => {
+        const ymd = ymdAddDays(fromYmd, dayOffset);
         const start = ukDayStartFromYmd(ymd);
         return { ymd, start, ...classifyDay(station, start, stats) };
       }),

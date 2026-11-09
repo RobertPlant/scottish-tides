@@ -70,6 +70,7 @@ export function TideCurve({ series, events, now, height = 200, scrubbable = fals
     ...events.map(e => ({ t: e.time.getTime(), h: e.height })),
   ]
     .filter(p => p.t >= t0 && p.t <= t1)
+    // sort, not toSorted - Hermes doesn't have it
     .sort((a, b) => a.t - b.t);
 
   const hs = merged.map(p => p.h);

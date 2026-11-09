@@ -15,6 +15,7 @@ export function StationChips({ activeId, onSelect }: { activeId: string; onSelec
   const { isFavourite } = useSelectedStation();
 
   const chipStations = useMemo(
+    // sort, not toSorted - Hermes doesn't have it
     () => [...STATIONS].sort((a, b) => Number(isFavourite(b.id)) - Number(isFavourite(a.id))),
     [isFavourite],
   );

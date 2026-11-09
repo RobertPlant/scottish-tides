@@ -22,7 +22,7 @@ test('monthDays returns every day in order with correct fields', () => {
   assert.equal(days[30].ymd, '2026-07-31');
   assert.deepEqual(
     days.map(d => d.day),
-    Array.from({ length: 31 }, (_, i) => i + 1),
+    Array.from({ length: 31 }, (_, dayIndex) => dayIndex + 1),
   );
   // 2026-07-01 is a Wednesday → Monday-first index 2, not a weekend.
   assert.equal(days[0].weekday, 2);
@@ -42,7 +42,7 @@ test('yearMonths covers all twelve months with correct day counts', () => {
   assert.equal(months.length, 12);
   assert.deepEqual(
     months.map(m => m.month),
-    Array.from({ length: 12 }, (_, i) => i + 1),
+    Array.from({ length: 12 }, (_, monthIndex) => monthIndex + 1),
   );
   assert.equal(months[1].days.length, 29); // Feb 2024
   assert.equal(months[0].days.length, 31);
