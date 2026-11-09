@@ -22,14 +22,7 @@ import { Tide } from '../apps/mobile/lib/tides';
 import type { StationData } from '../apps/mobile/lib/tides';
 import { dayRange } from '../apps/mobile/lib/tide-day';
 
-const DATA_DIR = path.join(
-  path.dirname(fileURLToPath(import.meta.url)),
-  '..',
-  'apps',
-  'mobile',
-  'assets',
-  'data',
-);
+const DATA_DIR = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'apps', 'mobile', 'assets', 'data');
 const SIM_DAYS = 731; // ~2 years: covers the synodic, anomalistic and annual beats
 const WINDOW = 3; // half-window (days) for local spring-peak / neap-trough detection
 
@@ -78,9 +71,7 @@ for (const f of readdirSync(DATA_DIR)) {
     continue;
   }
   out[data.station] = refs(data);
-  console.log(
-    `${data.station.padEnd(16)} spring=${out[data.station].springRef} neap=${out[data.station].neapRef}`,
-  );
+  console.log(`${data.station.padEnd(16)} spring=${out[data.station].springRef} neap=${out[data.station].neapRef}`);
 }
 
 writeFileSync(path.join(DATA_DIR, 'coefficient-refs.json'), `${JSON.stringify(out, null, 2)}\n`);

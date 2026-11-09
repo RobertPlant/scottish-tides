@@ -21,7 +21,7 @@ const BBOX = [-8.2, 54.4, -0.5, 61.0]; // lon0, lat0, lon1, lat1
 const EPS_DEG = 0.006; // Douglas–Peucker tolerance (~0.6 km)
 
 const fc = feature(topo, topo.objects.countries);
-const gb = fc.features.find((f) => f.id === '826');
+const gb = fc.features.find(f => f.id === '826');
 if (!gb) {
   throw new Error('GB (ISO 826) not found in world-atlas data');
 }
@@ -98,8 +98,7 @@ function rdp(pts, eps) {
 function selfIntersects(ring) {
   const n = ring.length;
   const ccw = (a, b, c) => (c[1] - a[1]) * (b[0] - a[0]) > (b[1] - a[1]) * (c[0] - a[0]);
-  const hit = (p1, p2, p3, p4) =>
-    ccw(p1, p3, p4) !== ccw(p2, p3, p4) && ccw(p1, p2, p3) !== ccw(p1, p2, p4);
+  const hit = (p1, p2, p3, p4) => ccw(p1, p3, p4) !== ccw(p2, p3, p4) && ccw(p1, p2, p3) !== ccw(p1, p2, p4);
   for (let i = 0; i < n; i++) {
     for (let j = i + 2; j < n; j++) {
       if (i === 0 && j === n - 1) continue; // adjacent across the closure
@@ -117,13 +116,13 @@ function simplifyRing(ring) {
   }
   return ring;
 }
-const round = (v) => Math.round(v * 1000) / 1000;
+const round = v => Math.round(v * 1000) / 1000;
 
 const rings = [];
 for (const poly of polys) {
   const clipped = clip(poly[0]);
   if (clipped.length >= 4) {
-    const d = simplifyRing(clipped).map((p) => [round(p[0]), round(p[1])]);
+    const d = simplifyRing(clipped).map(p => [round(p[0]), round(p[1])]);
     if (d.length >= 4) rings.push(d);
   }
 }
