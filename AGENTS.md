@@ -115,11 +115,26 @@ that path. Biome formats and checks from the root (`npm run check`, CI runs `bio
 - Braces on every `if`, `for` and `while`, one-liners included (`useBlockStatements`).
 - `const`, not `let`, unless there's truly no other way. Pick a value with a small helper and early returns,
   not a default that gets reassigned.
-- Never mutate what a function is given, and never change a value once it's made: no `.sort()` (use
-  `toSorted()`), `push` or assigning into something parsed, loaded or returned. Build the changed copy. The
+- Never mutate what a function is given, and never change a value once it's made: no `.sort()`, `push` or
+  assigning into something parsed, loaded or returned. Build the changed copy. The
   exception is a local the function is still building. `noParameterAssign` catches reassigning a parameter.
-- Functional by preference: `map`/`filter`/`flatMap`, `Object.groupBy`, `Object.fromEntries` over loops that
-  `push`. The engine's hot loops (`lib/tides/`) may stay index loops, with a one-line note.
+- Functional by preference: `map`/`filter`/`flatMap`, `Object.fromEntries` over loops that `push`.
+- Hermes has no `toSorted` or `Map.groupBy`. In app code, `.sort()` the copy the function has just made (after a `map`
+  or `[...STATIONS]`) and group with a loop filling a local Map, each with a one-line note:
+  `// sort, not toSorted - Hermes doesn't have it`. `tools/` runs on Node, which has both.
+- No index loops (`for (let i = 0; ...)`) in new code. Doing something n times is
+  `for (const _ of Array.from({ length: n }))`, searching a range is `Array.from` then `find`. The engine's hot loops
+  (`lib/tides/`) may stay, with a one-line note.
+- Never call a function looked up by a key (`handlers[type]()`). Write the `if`s or a `switch` out, with a `never`
+  check on a union.
+- One `await` per line, never inside an expression. Work out the values together, a blank line, then the effects.
+- A library over hand-rolled parsing, one already installed first. One helper per job: find the first copy before
+  writing a second.
+- Stored data is parsed into a type as it's read. A stored list drops only the records that fail their check,
+  logging each, never the whole value.
+- Errors keep their `cause`, caught errors are `unknown`, and nothing is dropped by an empty `catch {}` without a
+  comment saying why it can't matter.
+- A union of strings, not a bare `true`/`false` argument. An object with named fields past two return values.
 - `lib/` is pure: data in, new data out. AsyncStorage, the router and the DOM belong in screens, components
   and hooks.
 - Functions under ~50 lines (Biome warns). Screens and charts that are longer get split as they're touched.
@@ -128,13 +143,15 @@ that path. Biome formats and checks from the root (`npm run check`, CI runs `bio
 - A function's name is a verb and its object (`getUrlDay`, `classifyDay`, `parseYmd`), not a noun
   (`tidalStats`, `dayEvents`). `get` for a value worked out from what's given, `find` for a search that can
   miss, `read`/`load` for storage, `parse` for unknown input, `build` for a new value, `list`/`count` for many,
-  `is`/`has` for a predicate. Rename old names when you touch them, not in a sweep.
-- Names say what the thing is, closures included: `stations.map(station => ...)`, never `s`. A sort's
-  comparator keeps `(a, b)`.
+  `render` for a helper returning JSX, `is`/`has` for a predicate. Rename old names when you touch them, not in a sweep.
+- Names say what the thing is, closures included: `stations.map(station => ...)`, never `s`, `i` or `j`. A
+  sort's comparator keeps `(a, b)`, an unused value is `_`, a caught error `err` and an event `event`.
+- New helpers are arrow consts. Leave existing `function`s until you're changing them anyway.
 - A file reads in one order: imports, then types, then constants in `SCREAMING_CASE`, then functions.
 - No `as` in new code (`as const` is fine): narrow with a type predicate or a validator.
 - Comments are rare one-line notes on why, not paragraphs. History goes in the commit or PR. When you change
-  code, trim the comments on it to that too. Docblocks only on exported functions, a title line and one sentence.
+  code, trim the comments on it to that too. No banner comments, ticket references or naming the tool that wrote the
+  code. Docblocks only on exported functions, a title line and one sentence.
 - No em-dashes anywhere, comments or copy. Use a hyphen, comma or full stop. UI copy changes go in their own PR,
   with any e2e assertion that quotes them.
 - An engine change keeps `npm run test:engine` green (see above), and its test has to fail when the change is
