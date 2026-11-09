@@ -46,7 +46,7 @@ async function main() {
     `${days.length} days from ${days[0]}; limits: median/mean |Δt| ${LIMITS.medianMin}/${LIMITS.meanAbsMin} min, median/mean |Δh| ${LIMITS.medianM}/${LIMITS.meanAbsM} m\n`,
   );
   console.log('station        n  unmatched   Δt median  mean|Δt|  p90|Δt|   Δh median  mean|Δh|');
-  for (const station of STATIONS.filter((s) => !values.station || s.id === values.station)) {
+  for (const station of STATIONS.filter(s => !values.station || s.id === values.station)) {
     const slug = SLUGS[station.id];
     if (!slug) {
       console.log(`${station.id.padEnd(13)}  not on tidetimes, skipped`);

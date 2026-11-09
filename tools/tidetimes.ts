@@ -38,19 +38,13 @@ export interface RefEvent {
 // How far ahead the site publishes dated pages; skip fetching beyond it.
 const PUBLISHED_AHEAD_DAYS = 7;
 
-const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+const sleep = (ms: number) => new Promise(r => setTimeout(r, ms));
 
 /** "1st December 2025", as the page title words the date it is for. */
 function titleDate(ymd: string): string {
   const [y, m, d] = ymd.split('-').map(Number);
   const ord =
-    d % 10 === 1 && d !== 11
-      ? 'st'
-      : d % 10 === 2 && d !== 12
-        ? 'nd'
-        : d % 10 === 3 && d !== 13
-          ? 'rd'
-          : 'th';
+    d % 10 === 1 && d !== 11 ? 'st' : d % 10 === 2 && d !== 12 ? 'nd' : d % 10 === 3 && d !== 13 ? 'rd' : 'th';
   const month = new Date(Date.UTC(y, m - 1, 1)).toLocaleString('en-GB', {
     month: 'long',
     timeZone: 'UTC',
@@ -89,12 +83,12 @@ export async function reference(slug: string, ymd: string): Promise<RefEvent[] |
   const rows = [...html.matchAll(ROW)];
   // In BST the page lists the day twice: vis2 in BST, vis0 in GMT. Otherwise
   // only vis2, already GMT.
-  const cls = rows.some((r) => r[1] === 'vis0') ? 'vis0' : 'vis2';
+  const cls = rows.some(r => r[1] === 'vis0') ? 'vis0' : 'vis2';
   const start = ukDayStartFromYmd(ymd);
   const startMin = start.getUTCHours() * 60 + start.getUTCMinutes();
   return rows
-    .filter((r) => r[1] === cls)
-    .map((r) => {
+    .filter(r => r[1] === cls)
+    .map(r => {
       // GMT clock time -> instant within the UK day (which starts at 23:00 GMT in BST).
       const sinceStart = (Number(r[3]) * 60 + Number(r[4]) - startMin + 1440) % 1440;
       return {
@@ -116,7 +110,7 @@ export function nearestSameType<E extends RefEvent | TideEvent>(
   events: E[],
 ): { e: E; d: number } | undefined {
   return events
-    .filter((e) => e.type === r.type)
-    .map((e) => ({ e, d: (e.time.getTime() - r.time.getTime()) / 60_000 }))
+    .filter(e => e.type === r.type)
+    .map(e => ({ e, d: (e.time.getTime() - r.time.getTime()) / 60_000 }))
     .sort((a, b) => Math.abs(a.d) - Math.abs(b.d))[0];
 }

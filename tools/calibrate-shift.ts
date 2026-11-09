@@ -42,7 +42,7 @@ async function main() {
       write: { type: 'boolean', default: false },
     },
   });
-  const station = STATIONS.find((s) => s.id === values.station);
+  const station = STATIONS.find(s => s.id === values.station);
   const slug = SLUGS[values.station];
   const baseSlug = SLUGS[station?.shift?.based_on?.toLowerCase() ?? ''];
   if (!station?.shift || !slug || !baseSlug) {
@@ -68,7 +68,7 @@ async function main() {
       continue;
     }
     used.push(ymd);
-    const baseEvents = baseDays.flatMap((d) => d ?? []);
+    const baseEvents = baseDays.flatMap(d => d ?? []);
     for (const r of refs) {
       const near = nearestSameType(r, baseEvents);
       if (!near || Math.abs(near.d) > OUTLIER_MIN) {
@@ -94,10 +94,8 @@ async function main() {
   }
   const scale = sbr / sbb;
   const offset = mr - scale * mb;
-  const heightErr = (k: number, c: number) =>
-    base.reduce((a, b, i) => a + Math.abs(c + k * b - ref[i]), 0) / n;
-  const timeErr = (xs: number[], m: number) =>
-    xs.reduce((a, x) => a + Math.abs(x - m), 0) / xs.length;
+  const heightErr = (k: number, c: number) => base.reduce((a, b, i) => a + Math.abs(c + k * b - ref[i]), 0) / n;
+  const timeErr = (xs: number[], m: number) => xs.reduce((a, x) => a + Math.abs(x - m), 0) / xs.length;
 
   const fit = {
     hw_time_min: Math.round(median(high)),
@@ -110,18 +108,10 @@ async function main() {
     `${station.name} from ${station.shift.based_on}, ${used.length} days ${used[0]} to ${used.at(-1)}: ${high.length} HW + ${low.length} LW matched, ${dropped} dropped (>${OUTLIER_MIN} min or unmatched)\n`,
   );
   console.log('                  current     fit');
-  console.log(
-    `hw_time_min   ${String(cur.hw_time_min).padStart(10)}${String(fit.hw_time_min).padStart(8)}`,
-  );
-  console.log(
-    `lw_time_min   ${String(cur.lw_time_min).padStart(10)}${String(fit.lw_time_min).padStart(8)}`,
-  );
-  console.log(
-    `height_scale  ${String(cur.height_scale).padStart(10)}${String(fit.height_scale).padStart(8)}`,
-  );
-  console.log(
-    `height_offset ${String(cur.height_offset_m).padStart(10)}${String(fit.height_offset_m).padStart(8)}`,
-  );
+  console.log(`hw_time_min   ${String(cur.hw_time_min).padStart(10)}${String(fit.hw_time_min).padStart(8)}`);
+  console.log(`lw_time_min   ${String(cur.lw_time_min).padStart(10)}${String(fit.lw_time_min).padStart(8)}`);
+  console.log(`height_scale  ${String(cur.height_scale).padStart(10)}${String(fit.height_scale).padStart(8)}`);
+  console.log(`height_offset ${String(cur.height_offset_m).padStart(10)}${String(fit.height_offset_m).padStart(8)}`);
   console.log(
     `\nmean |error|: HW ${timeErr(high, cur.hw_time_min).toFixed(1)} -> ${timeErr(high, fit.hw_time_min).toFixed(1)} min, ` +
       `LW ${timeErr(low, cur.lw_time_min).toFixed(1)} -> ${timeErr(low, fit.lw_time_min).toFixed(1)} min, ` +
