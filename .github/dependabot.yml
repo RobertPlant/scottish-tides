@@ -58,6 +58,8 @@ updates:
       # the set together by hand: `npm update @typescript-eslint/eslint-plugin
       # @typescript-eslint/parser`.
       - dependency-name: "@typescript-eslint/parser"
+      # pinned to devenv's playwright-driver, see //playwright in package.json
+      - dependency-name: "@playwright/test"
 
       # Grouping the Expo SDK set keeps it moving together; it does nothing to
       # stop the whole group moving past the SDK together, which is what #28

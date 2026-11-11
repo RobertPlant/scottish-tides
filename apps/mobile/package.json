@@ -64,8 +64,9 @@
     "react-native-svg": "15.16.0",
     "react-native-web": "~0.21.4"
   },
+  "//playwright": "Pinned exactly to devenv's pkgs.playwright-driver, whose browsers are what local e2e launches (chromium_headless_shell-1248 for 1.64.x). Any other version looks for a revision that isn't in the nix store. CI downloads its own browser so it passes either way. Move this with devenv's nixpkgs.",
   "devDependencies": {
-    "@playwright/test": "^1.65.0",
+    "@playwright/test": "1.64.1",
     "@types/react": "~19.3.0",
     "@typescript-eslint/parser": "^8.71.0",
     "eslint": "^9.39.5",
