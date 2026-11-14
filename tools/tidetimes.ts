@@ -5,7 +5,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { ukDayStartFromYmd, ymdAddDays, ymdInUk } from '../apps/mobile/lib/datetime';
+import { ymdAddDays, ymdInUk } from '../apps/mobile/lib/datetime';
 import type { TideEvent, TideEventType } from '../apps/mobile/lib/tides';
 
 // Our station id -> tidetimes slug. Port Ellen isn't on tidetimes; its nearest
@@ -94,22 +94,19 @@ export async function reference(slug: string, ymd: string): Promise<RefEvent[] |
     writeFileSync(file, html);
   }
   const rows = [...html.matchAll(ROW)];
-  // In BST the page lists the day twice: vis2 in BST, vis0 in GMT. Otherwise
-  // only vis2, already GMT.
+  // In BST the page lists the day twice: vis2 in BST, and vis0 in GMT for the GMT
+  // date (so a 23:xx row is that evening, not the night before). Otherwise only
+  // vis2, already GMT.
   const cls = rows.some(r => r[1] === 'vis0') ? 'vis0' : 'vis2';
-  const start = ukDayStartFromYmd(ymd);
-  const startMin = start.getUTCHours() * 60 + start.getUTCMinutes();
+  const [y, m, d] = ymd.split('-').map(Number);
+
   return rows
     .filter(r => r[1] === cls)
-    .map(r => {
-      // GMT clock time -> instant within the UK day (which starts at 23:00 GMT in BST).
-      const sinceStart = (Number(r[3]) * 60 + Number(r[4]) - startMin + 1440) % 1440;
-      return {
-        type: r[2] === 'High' ? 'high' : 'low',
-        time: new Date(start.getTime() + sinceStart * 60_000),
-        height: Number(r[5]),
-      };
-    });
+    .map(r => ({
+      type: r[2] === 'High' ? 'high' : 'low',
+      time: new Date(Date.UTC(y, m - 1, d, Number(r[3]), Number(r[4]))),
+      height: Number(r[5]),
+    }));
 }
 
 export const median = (xs: number[]) => {
