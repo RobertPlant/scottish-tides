@@ -50,7 +50,6 @@ import wickData from '@/assets/data/wick.json';
   lat: 58.4413,
   lon: -3.0860,
   data: wickData as StationData,
-  standardPort: true,
 },
 ```
 

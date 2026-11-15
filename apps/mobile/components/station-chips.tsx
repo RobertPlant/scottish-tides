@@ -2,7 +2,6 @@
 // starred). Shared by the Tides and Plan tabs so switching station feels the
 // same on both.
 
-import { useMemo } from 'react';
 import { Pressable, ScrollView, StyleSheet } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
@@ -14,11 +13,8 @@ export function StationChips({ activeId, onSelect }: { activeId: string; onSelec
   const palette = usePalette();
   const { isFavourite } = useSelectedStation();
 
-  const chipStations = useMemo(
-    // sort, not toSorted - Hermes doesn't have it
-    () => [...STATIONS].sort((a, b) => Number(isFavourite(b.id)) - Number(isFavourite(a.id))),
-    [isFavourite],
-  );
+  // sort, not toSorted - Hermes doesn't have it
+  const chipStations = [...STATIONS].sort((a, b) => Number(isFavourite(b.id)) - Number(isFavourite(a.id)));
 
   return (
     <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chips}>

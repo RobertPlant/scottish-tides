@@ -10,6 +10,7 @@ import Svg, { Circle, G, Line, Path, Rect, Text as SvgText } from 'react-native-
 
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { usePalette } from '@/hooks/use-theme-color';
+import type { SunTimes } from '@/lib/astronomy';
 import { CHART_PAD, chartFrame } from '@/lib/chart-frame';
 import { formatTime } from '@/lib/datetime';
 import type { TideEvent } from '@/lib/tides';
@@ -18,11 +19,9 @@ interface Props {
   series: { time: Date; height: number }[];
   events: TideEvent[];
   now?: Date;
-  height?: number;
-  /** Allow tapping/dragging the chart to read the height at any time. */
-  scrubbable?: boolean;
+  height: number;
   /** Sunrise/sunset for the day; shades the daylight hours behind the curve. */
-  sun?: { sunrise: Date | null; sunset: Date | null; alwaysUp?: boolean };
+  sun?: SunTimes;
 }
 
 const { left: PAD_LEFT, right: PAD_RIGHT, top: PAD_TOP } = CHART_PAD;
@@ -48,7 +47,7 @@ function pickStepMultiple(n: number): number {
   return 10;
 }
 
-export function TideCurve({ series, events, now, height = 200, scrubbable = false, sun }: Props) {
+export function TideCurve({ series, events, now, height, sun }: Props) {
   const palette = usePalette();
   const isDark = useColorScheme() === 'dark';
   const [width, setWidth] = useState(0);
@@ -150,14 +149,13 @@ export function TideCurve({ series, events, now, height = 200, scrubbable = fals
   // scotland-map.tsx already does pan/pinch. minDistance(0) + onBegin so a plain
   // tap scrubs, not just a drag.
   const scrubGesture = Gesture.Pan()
-    .enabled(scrubbable)
     .minDistance(0)
     .runOnJS(true)
     .onBegin(e => onScrub(e.x))
     .onUpdate(e => onScrub(e.x));
 
   const scrub =
-    scrubbable && scrubT !== null
+    scrubT !== null
       ? (() => {
           const { h, rising } = sampleAt(scrubT);
           return { sx: x(scrubT), sy: y(h), h, rising, time: new Date(scrubT) };

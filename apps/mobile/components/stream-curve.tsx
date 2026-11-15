@@ -16,12 +16,12 @@ interface Props {
   now?: Date;
   floodName: string;
   ebbName: string;
-  height?: number;
+  height: number;
 }
 
 const { left: PAD_LEFT, right: PAD_RIGHT, top: PAD_TOP, bottom: PAD_BOTTOM } = CHART_PAD;
 
-export function StreamCurve({ samples, slacks, now, floodName, ebbName, height = 200 }: Props) {
+export function StreamCurve({ samples, slacks, now, floodName, ebbName, height }: Props) {
   const palette = usePalette();
   const [width, setWidth] = useState(0);
   const onLayout = (e: LayoutChangeEvent) => setWidth(e.nativeEvent.layout.width);

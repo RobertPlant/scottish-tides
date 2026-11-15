@@ -26,8 +26,7 @@ export function WeekOverview({
   onSelectDay: (ymd: string) => void;
 }) {
   const palette = usePalette();
-  const stats = useMemo(() => tidalStats(station), [station]);
-
+  const stats = tidalStats(station);
   // Memoised: this is seven harmonic extrema solves (~3-4 ms on a desktop, more
   // on a phone). The parent re-renders on its 60-second "now" tick and on chart
   // hover, and the week only actually changes when the station or anchor day
@@ -37,9 +36,9 @@ export function WeekOverview({
       Array.from({ length: 7 }, (_, dayOffset) => {
         const ymd = ymdAddDays(fromYmd, dayOffset);
         const start = ukDayStartFromYmd(ymd);
-        return { ymd, start, ...classifyDay(station, start, stats) };
+        return { ymd, start, ...classifyDay(station, start) };
       }),
-    [station, fromYmd, stats],
+    [station, fromYmd],
   );
 
   // The window is anchored to the selected day, not always today - so only call

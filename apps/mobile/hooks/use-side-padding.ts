@@ -5,7 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
  * cutout and rounded corners at the side in landscape. Headers and the tab bar
  * already pad for these themselves.
  */
-export function useSidePadding(base = 16) {
+export function useSidePadding() {
   const { left, right } = useSafeAreaInsets();
-  return { paddingLeft: base + left, paddingRight: base + right };
+  return { paddingLeft: 16 + left, paddingRight: 16 + right };
 }

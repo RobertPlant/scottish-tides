@@ -37,15 +37,13 @@ export interface Station {
   id: string;
   name: string;
   /** Short note under the name, e.g. how it is derived. */
-  subtitle?: string;
+  subtitle: string;
   region: Region;
   lat: number;
   lon: number;
   data: StationData;
   /** Secondary-port correction applied to predictions, if any. */
   shift?: Shift;
-  /** True for ports with their own gauge (no shift). */
-  standardPort: boolean;
 }
 
 export const STATIONS: Station[] = [
@@ -57,7 +55,6 @@ export const STATIONS: Station[] = [
     lat: 55.7497,
     lon: -4.9064,
     data: millportData as StationData,
-    standardPort: true,
   },
   {
     id: 'portpatrick',
@@ -67,7 +64,6 @@ export const STATIONS: Station[] = [
     lat: 54.8423,
     lon: -5.1184,
     data: portpatrickData as StationData,
-    standardPort: true,
   },
   {
     id: 'oban',
@@ -78,7 +74,6 @@ export const STATIONS: Station[] = [
     lon: -5.4715,
     data: tobermoryData as StationData,
     shift: obanShift as Shift,
-    standardPort: false,
   },
   {
     id: 'tobermory',
@@ -88,7 +83,6 @@ export const STATIONS: Station[] = [
     lat: 56.6228,
     lon: -6.0637,
     data: tobermoryData as StationData,
-    standardPort: true,
   },
   {
     id: 'port-ellen',
@@ -98,7 +92,6 @@ export const STATIONS: Station[] = [
     lat: 55.6275,
     lon: -6.1886,
     data: portEllenData as StationData,
-    standardPort: true,
   },
   {
     id: 'stornoway',
@@ -108,7 +101,6 @@ export const STATIONS: Station[] = [
     lat: 58.2073,
     lon: -6.3887,
     data: stornowayData as StationData,
-    standardPort: true,
   },
   {
     id: 'ullapool',
@@ -118,7 +110,6 @@ export const STATIONS: Station[] = [
     lat: 57.8951,
     lon: -5.1589,
     data: ullapoolData as StationData,
-    standardPort: true,
   },
   {
     id: 'kinlochbervie',
@@ -128,7 +119,6 @@ export const STATIONS: Station[] = [
     lat: 58.4571,
     lon: -5.0501,
     data: kinlochbervieData as StationData,
-    standardPort: true,
   },
   {
     id: 'lerwick',
@@ -138,7 +128,6 @@ export const STATIONS: Station[] = [
     lat: 60.1547,
     lon: -1.1454,
     data: lerwickData as StationData,
-    standardPort: true,
   },
   {
     id: 'wick',
@@ -148,7 +137,6 @@ export const STATIONS: Station[] = [
     lat: 58.4413,
     lon: -3.0863,
     data: wickData as StationData,
-    standardPort: true,
   },
   {
     id: 'aberdeen',
@@ -158,7 +146,6 @@ export const STATIONS: Station[] = [
     lat: 57.1437,
     lon: -2.0797,
     data: aberdeenData as StationData,
-    standardPort: true,
   },
   {
     id: 'leith',
@@ -168,7 +155,6 @@ export const STATIONS: Station[] = [
     lat: 55.9896,
     lon: -3.1769,
     data: leithData as StationData,
-    standardPort: true,
   },
 ];
 

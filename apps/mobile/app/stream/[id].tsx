@@ -10,7 +10,6 @@ import { StreamCurve } from '@/components/stream-curve';
 import { ThemedText } from '@/components/themed-text';
 import { useDayNav } from '@/hooks/use-day-nav';
 import { useHydrated } from '@/hooks/use-hydrated';
-import { useNow } from '@/hooks/use-now';
 import { useSidePadding } from '@/hooks/use-side-padding';
 import { usePalette } from '@/hooks/use-theme-color';
 import { formatTime } from '@/lib/datetime';
@@ -35,9 +34,8 @@ export default function RaceDetail() {
   const race = raceById(id) ?? RACES[0];
   const ref = getReferenceStation(race);
 
-  const now = useNow();
-  const nav = useDayNav({ initialYmd: d, syncUrl: true });
-  const { dayStart, isToday } = nav;
+  const nav = useDayNav({ initialYmd: d });
+  const { dayStart, isToday, now } = nav;
   // Slack times for a day the static export can't know are worse than none at
   // all on a page about when it is safe to transit - see use-hydrated.ts. The
   // race's identity and its warning are constant, so those still pre-render.

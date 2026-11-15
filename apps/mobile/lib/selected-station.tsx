@@ -18,7 +18,7 @@ interface SelectedStationContext {
 
 const Ctx = createContext<SelectedStationContext | null>(null);
 
-const DEFAULT_ID = STATIONS.find(s => s.id === 'oban')?.id ?? STATIONS[0]?.id ?? 'oban';
+const DEFAULT_ID = 'oban';
 
 export function SelectedStationProvider({ children }: { children: ReactNode }) {
   const [stationId, setStationIdState] = useState(DEFAULT_ID);
