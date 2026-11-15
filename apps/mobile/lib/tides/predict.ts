@@ -63,15 +63,9 @@ function hoursBetween(t0: Date, t: Date): number {
 }
 
 export class Tide {
-  readonly station: string;
-  readonly datum?: string;
-  readonly units?: string;
   private model: ConstituentJSON[];
 
   constructor(data: StationData) {
-    this.station = data.station;
-    this.datum = data.datum;
-    this.units = data.units;
     // Normalise: amplitudes positive, phase in [0, 360).
     this.model = data.constituents.map(({ name, amplitude, phase }) => {
       let amp = amplitude;

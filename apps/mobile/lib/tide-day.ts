@@ -44,9 +44,9 @@ export function dayEvents(station: Station, dayStart: Date): TideEvent[] {
  * the base gauge's curve *shape* by the secondary-port offset (see `shiftCurve`);
  * the high/low markers from `dayEvents` remain exact and sit on the curve.
  */
-export function dayHeightSeries(station: Station, dayStart: Date, stepMinutes = 10): { time: Date; height: number }[] {
+export function dayHeightSeries(station: Station, dayStart: Date): { time: Date; height: number }[] {
   const { from, to } = dayWindow(dayStart);
-  return seaLevelSeries(station, from, to, stepMinutes);
+  return seaLevelSeries(station, from, to);
 }
 
 export interface TidalStats {
@@ -55,31 +55,18 @@ export interface TidalStats {
 }
 
 /**
- * Mean spring/neap range for a station. Prefers the empirically-calibrated
- * references in coefficient-refs.json (mean of realised spring-peak / neap-
- * trough daily ranges - see tools/gen-coefficient-refs.ts), which include K2,
- * N2 and the diurnal contribution that the idealised 2·(M2±S2) formula misses.
- * Falls back to that formula for any gauge without a baked reference. For
- * secondary ports both are multiplied by the height scale, since it scales
- * every tide's range equally.
+ * Mean spring/neap range for a station, from coefficient-refs.json (built by tools/gen-coefficient-refs.ts).
+ * Secondary ports multiply both by the height scale, since it scales every tide's range equally.
  */
 export function tidalStats(station: Station): TidalStats {
-  const rangeScale = station.shift?.height_scale ?? 1;
   const ref = COEF_REFS[station.data.station];
-  let springRange: number;
-  let neapRange: number;
-  if (ref) {
-    springRange = ref.springRef * rangeScale;
-    neapRange = ref.neapRef * rangeScale;
-  } else {
-    const amp = (name: string) => station.data.constituents.find(c => c.name === name)?.amplitude ?? 0;
-    springRange = 2 * (amp('M2') + amp('S2')) * rangeScale;
-    neapRange = 2 * Math.abs(amp('M2') - amp('S2')) * rangeScale;
+  if (!ref) {
+    throw new Error(`no coefficient ref for ${station.data.station}, run tools/gen-coefficient-refs.ts`);
   }
-  return {
-    springRange: Math.max(springRange, 0.1),
-    neapRange: Math.max(neapRange, 0.05),
-  };
+
+  const rangeScale = station.shift?.height_scale ?? 1;
+
+  return { springRange: ref.springRef * rangeScale, neapRange: ref.neapRef * rangeScale };
 }
 
 /** Range of a day's events: highest high water minus lowest low water. */
@@ -158,20 +145,15 @@ export function classifyDay(
  * Continuous sea level for a station over an arbitrary window (secondary ports
  * get the warped shift, see `shiftCurve`). Used by the Falls-of-Lora sill model.
  */
-export function seaLevelSeries(
-  station: Station,
-  from: Date,
-  to: Date,
-  stepMinutes = 10,
-): { time: Date; height: number }[] {
+export function seaLevelSeries(station: Station, from: Date, to: Date): { time: Date; height: number }[] {
   const { shift } = station;
   if (!shift) {
-    return heightSeries(station.data, from, to, stepMinutes);
+    return heightSeries(station.data, from, to);
   }
 
   // sample the base port earlier by the offset, so the shifted curve covers [from, to]
   const dtMs = getMeanShiftMs(shift);
-  const base = heightSeries(station.data, new Date(from.getTime() - dtMs), new Date(to.getTime() - dtMs), stepMinutes);
+  const base = heightSeries(station.data, new Date(from.getTime() - dtMs), new Date(to.getTime() - dtMs));
 
   return shiftCurve(base, shift);
 }

@@ -289,7 +289,6 @@ function predictSill(race: Race, ref: Station, dayStart: Date, fraction: number)
     ref,
     new Date(start - SILL_WARMUP_H * 3600_000),
     new Date(end + SILL_EVENT_PAD_H * 3600_000),
-    10,
   );
 
   // Loch level: an asymmetric first-order low-pass of the sea. It fills faster

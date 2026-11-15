@@ -5,9 +5,9 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
 import { ukDayStartFromYmd, ukEndOfDay, ymdAddDays, ymdInUk } from './datetime';
-import { type Station, stationById } from './stations';
+import { STATIONS, stationById } from './stations';
 import { classifyTide, dayEvents, dayHeightSeries, dayRange, type TidalStats, tidalStats } from './tide-day';
-import { predictExtrema, type StationData, type TideEvent } from './tides';
+import { predictExtrema, type TideEvent } from './tides';
 
 const ev = (type: 'high' | 'low', height: number): TideEvent => ({
   type,
@@ -63,58 +63,21 @@ test('classifyTide handles a degenerate spring==neap span', () => {
 
 // --- tidalStats -----------------------------------------------------------
 
-const fakeStation = (
-  stationName: string,
-  cons: { name: string; amplitude: number }[],
-  shift?: Station['shift'],
-): Station =>
-  ({
-    id: 'x',
-    name: 'x',
-    region: 'Clyde',
-    lat: 0,
-    lon: 0,
-    standardPort: !shift,
-    shift,
-    data: { station: stationName, constituents: cons } as unknown as StationData,
-  }) as Station;
-
-test('tidalStats falls back to 2·(M2±S2) when no baked reference', () => {
-  const s = fakeStation('__no_ref__', [
-    { name: 'M2', amplitude: 2.0 },
-    { name: 'S2', amplitude: 0.5 },
-  ]);
-  const { springRange, neapRange } = tidalStats(s);
-  assert.equal(springRange, 5.0); // 2·(2.0 + 0.5)
-  assert.equal(neapRange, 3.0); // 2·|2.0 − 0.5|
-});
-
-test('tidalStats clamps tiny ranges to sane floors', () => {
-  const s = fakeStation('__no_ref__', [{ name: 'M2', amplitude: 0.001 }]);
-  const { springRange, neapRange } = tidalStats(s);
-  assert.equal(springRange, 0.1);
-  assert.equal(neapRange, 0.05);
+test('every station has a coefficient ref', () => {
+  for (const station of STATIONS) {
+    assert.ok(tidalStats(station).springRange > 0, station.id);
+  }
 });
 
 test('tidalStats scales by the secondary-port height scale', () => {
-  const shift = {
-    hw_time_min: 0,
-    lw_time_min: 0,
-    height_scale: 0.8,
-    height_offset_m: 0.1,
-  } as Station['shift'];
-  const s = fakeStation(
-    '__no_ref__',
-    [
-      { name: 'M2', amplitude: 2.0 },
-      { name: 'S2', amplitude: 0.5 },
-    ],
-    shift,
-  );
-  const { springRange, neapRange } = tidalStats(s);
-  // 0.8 × 5.0 and 0.8 × 3.0; the offset doesn't change a range.
-  assert.equal(springRange, 4.0);
-  assert.ok(Math.abs(neapRange - 2.4) < 1e-9);
+  const oban = stationById('oban');
+  const tobermory = stationById('tobermory');
+  assert.ok(oban?.shift && tobermory);
+
+  const scaled = tidalStats(oban);
+  const base = tidalStats(tobermory);
+  assert.ok(Math.abs(scaled.springRange - base.springRange * oban.shift.height_scale) < 1e-9);
+  assert.ok(Math.abs(scaled.neapRange - base.neapRange * oban.shift.height_scale) < 1e-9);
 });
 
 test("a secondary port's day holds exactly its own events", () => {
