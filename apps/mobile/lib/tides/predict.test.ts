@@ -31,8 +31,8 @@ const reference = JSON.parse(readFileSync(path.join(here, '__fixtures__', 'refer
 // Port Ellen, ~0.5 m) the turning point is so flat that a sub-mm curve agreement
 // still leaves a few minutes of argmin wander, so the time gate is looser than
 // the height gate. Normal ports come in ≤47 s.
-const HEIGHT_TOL_M = 0.02; // hourly height match (curve fidelity - the real gate)
-const EVENT_HEIGHT_TOL_M = 0.03; // high/low water height
+const HEIGHT_TOL_M = 0.002; // hourly height match (curve fidelity - the real gate)
+const EVENT_HEIGHT_TOL_M = 0.003; // high/low water height
 
 function loadStation(file: string): StationData {
   return JSON.parse(readFileSync(path.join(dataDir, file), 'utf8'));
@@ -45,9 +45,9 @@ for (const w of reference.windows) {
   const tide = new Tide(station);
   // Timing of HW/LW is ill-conditioned at near-amphidromic flat ports (tiny M2):
   // the curve matches to 5e-5 m but the argmin still wanders minutes. Relax the
-  // time gate there; keep it tight (180 s) for normal ports (actual ≤47 s).
+  // time gate there (600 s, actual ≤336 s); keep it tight (120 s) for normal ports (actual ≤51 s).
   const m2 = station.constituents.find(c => c.name === 'M2')?.amplitude ?? 1;
-  const timeTolS = m2 < 0.4 ? 900 : 180;
+  const timeTolS = m2 < 0.4 ? 600 : 120;
 
   test(`hourly heights match pytides - ${label}`, () => {
     const times = Array.from({ length: w.spanHours + 1 }, (_, hour) => new Date(t0.getTime() + hour * 3600_000));
