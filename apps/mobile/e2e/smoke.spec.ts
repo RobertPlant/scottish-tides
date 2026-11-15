@@ -59,6 +59,33 @@ test('station detail: the date picker changes the day', async ({ page }) => {
   await assertNoErrorOverlay(page);
 });
 
+test('station detail: a date typed on the keyboard reaches the date field', async ({ page }) => {
+  await page.goto('/station/oban');
+  const input = page.locator('input[type=date]').last();
+  await expect(input).toBeVisible();
+
+  // chrome fires a change per year digit, so the field sees year 0002 on the way to the real one
+  const year = String(new Date().getFullYear() + 1);
+  const segments = new Map([
+    ['day', '15'],
+    ['month', '06'],
+    ['year', year],
+  ]);
+  const order = await page.evaluate(() =>
+    new Intl.DateTimeFormat(navigator.language)
+      .formatToParts(new Date())
+      .map(part => part.type)
+      .filter(type => type !== 'literal'),
+  );
+  await input.focus();
+  for (const type of order) {
+    await page.keyboard.type(segments.get(type) ?? '');
+  }
+
+  await expect(input).toHaveValue(`${year}-06-15`);
+  await expect(page.locator('body')).toContainText(`15 June ${year}`);
+});
+
 test('deep link to a station renders on direct load (refresh-safe routing)', async ({ page }) => {
   const errors: string[] = [];
   page.on('pageerror', e => errors.push(e.message));
