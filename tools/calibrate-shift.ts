@@ -21,12 +21,11 @@
 
 import { readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
 
 import { ymdAddDays, ymdInUk } from '../apps/mobile/lib/datetime';
 import { STATIONS } from '../apps/mobile/lib/stations';
-import { median, nearestSameType, type RefEvent, reference, SLUGS } from './tidetimes';
+import { mean, median, nearestSameType, type RefEvent, reference, SLUGS } from './tidetimes';
 
 // Matches further apart than this are a different turn of the tide (or a
 // double high water), not a calibration signal.
@@ -84,8 +83,8 @@ async function main() {
 
   // Least squares for ref = offset + scale * base.
   const n = base.length;
-  const mb = base.reduce((a, x) => a + x, 0) / n;
-  const mr = ref.reduce((a, x) => a + x, 0) / n;
+  const mb = mean(base);
+  const mr = mean(ref);
   let sbr = 0;
   let sbb = 0;
   for (let i = 0; i < n; i++) {
@@ -120,7 +119,7 @@ async function main() {
 
   if (values.write) {
     const file = path.join(
-      path.dirname(fileURLToPath(import.meta.url)),
+      import.meta.dirname,
       '..',
       'apps',
       'mobile',

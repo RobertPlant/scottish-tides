@@ -3,7 +3,6 @@
 
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
 
 import { ymdAddDays, ymdInUk } from '../apps/mobile/lib/datetime';
 import type { TideEvent, TideEventType } from '../apps/mobile/lib/tides';
@@ -25,7 +24,7 @@ export const SLUGS: Record<string, string | null> = {
   leith: 'leith',
 };
 
-const CACHE = path.join(path.dirname(fileURLToPath(import.meta.url)), '.cache', 'tidetimes');
+const CACHE = path.join(import.meta.dirname, '.cache', 'tidetimes');
 const ROW =
   /<tr class="(vis\d)">\s*<td class="tal">(High|Low)<\/td>\s*<td class="tac"><span>(\d\d):(\d\d)<\/span><\/td>\s*<td class="tar">([\d.]+)m/g;
 
@@ -40,24 +39,17 @@ const PUBLISHED_AHEAD_DAYS = 7;
 
 const sleep = (ms: number) => new Promise(r => setTimeout(r, ms));
 
-const getOrdinalSuffix = (day: number): string => {
-  if (day % 10 === 1 && day !== 11) {
-    return 'st';
-  }
-  if (day % 10 === 2 && day !== 12) {
-    return 'nd';
-  }
-  if (day % 10 === 3 && day !== 13) {
-    return 'rd';
-  }
-
-  return 'th';
-};
+const ORDINAL_RULES = new Intl.PluralRules('en-GB', { type: 'ordinal' });
+const ORDINAL_SUFFIXES = new Map([
+  ['one', 'st'],
+  ['two', 'nd'],
+  ['few', 'rd'],
+]);
 
 /** "1st December 2025", as the page title words the date it is for. */
 function titleDate(ymd: string): string {
   const [y, m, d] = ymd.split('-').map(Number);
-  const ord = getOrdinalSuffix(d);
+  const ord = ORDINAL_SUFFIXES.get(ORDINAL_RULES.select(d)) ?? 'th';
   const month = new Date(Date.UTC(y, m - 1, 1)).toLocaleString('en-GB', {
     month: 'long',
     timeZone: 'UTC',
@@ -108,6 +100,8 @@ export async function reference(slug: string, ymd: string): Promise<RefEvent[] |
       height: Number(r[5]),
     }));
 }
+
+export const mean = (xs: number[]) => xs.reduce((sum, x) => sum + x, 0) / xs.length;
 
 export const median = (xs: number[]) => {
   const s = [...xs].sort((a, b) => a - b);
