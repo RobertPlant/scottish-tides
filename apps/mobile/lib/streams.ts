@@ -268,6 +268,8 @@ function predictGate(race: Race, ref: Station, dayStart: Date, fraction: number)
 
 /** Hours of sea level fed through the reservoir filter before the day itself. */
 const SILL_WARMUP_H = 48;
+/** Hours either side of the day that events are found over, so a lobe crossing midnight keeps its real peak. */
+const SILL_EVENT_PAD_H = 12;
 
 function predictSill(race: Race, ref: Station, dayStart: Date, fraction: number): StreamDay {
   const tauFill = race.lochTauFillHours ?? 3.5;
@@ -283,7 +285,12 @@ function predictSill(race: Race, ref: Station, dayStart: Date, fraction: number)
   // warm-up, the error is 5.2 min at 16 h, 0.6 at 24 h and 0.06 (≈ 4 s) from
   // 48 h on, so 48 h is where it stops mattering. Costs one extra harmonic
   // pass over ~430 samples, on one screen.
-  const sea = seaLevelSeries(ref, new Date(start - SILL_WARMUP_H * 3600_000), new Date(end), 10);
+  const sea = seaLevelSeries(
+    ref,
+    new Date(start - SILL_WARMUP_H * 3600_000),
+    new Date(end + SILL_EVENT_PAD_H * 3600_000),
+    10,
+  );
 
   // Loch level: an asymmetric first-order low-pass of the sea. It fills faster
   // than it drains (the sill restricts outflow), so the falls run OUT longer.
@@ -297,9 +304,13 @@ function predictSill(race: Race, ref: Station, dayStart: Date, fraction: number)
     }
     return { time: s.time, rate: (s.height - loch) * scale }; // + = sea above loch = flood in
   });
+  const padMs = SILL_EVENT_PAD_H * 3600_000;
   const samples = all.filter(s => s.time.getTime() >= start && s.time.getTime() <= end);
-
-  const { slacks, peaks } = deriveEvents(samples, race.floodName, race.ebbName);
+  const padded = all.filter(s => s.time.getTime() >= start - padMs);
+  const events = deriveEvents(padded, race.floodName, race.ebbName);
+  const isInDay = (time: Date) => time.getTime() >= start && time.getTime() < end;
+  const slacks = events.slacks.filter(isInDay);
+  const peaks = events.peaks.filter(peak => isInDay(peak.time));
   const peakRate = samples.reduce((m, s) => Math.max(m, Math.abs(s.rate)), 0);
   return { samples, slacks, peaks, springNeapFraction: fraction, peakRate };
 }
