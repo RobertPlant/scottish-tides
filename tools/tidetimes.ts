@@ -22,6 +22,10 @@ export const SLUGS: Record<string, string | null> = {
   wick: 'wick',
   aberdeen: 'aberdeen',
   leith: 'leith',
+  mallaig: 'mallaig',
+  'kyle-of-lochalsh': 'kyle-of-lochalsh',
+  portree: 'portree',
+  uig: 'loch-snizort-uig-bay',
 };
 
 const CACHE = path.join(import.meta.dirname, '.cache', 'tidetimes');

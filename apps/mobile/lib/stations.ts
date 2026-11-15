@@ -8,14 +8,18 @@
 
 import aberdeenData from '@/assets/data/aberdeen.json';
 import kinlochbervieData from '@/assets/data/kinlochbervie.json';
+import kyleShift from '@/assets/data/kyle_of_lochalsh_from_ullapool.json';
 import leithData from '@/assets/data/leith.json';
 import lerwickData from '@/assets/data/lerwick.json';
+import mallaigShift from '@/assets/data/mallaig_from_tobermory.json';
 import millportData from '@/assets/data/millport.json';
 import obanShift from '@/assets/data/oban_from_tobermory.json';
 import portEllenData from '@/assets/data/port_ellen.json';
 import portpatrickData from '@/assets/data/portpatrick.json';
+import portreeShift from '@/assets/data/portree_from_ullapool.json';
 import stornowayData from '@/assets/data/stornoway.json';
 import tobermoryData from '@/assets/data/tobermory.json';
+import uigShift from '@/assets/data/uig_from_ullapool.json';
 import ullapoolData from '@/assets/data/ullapool.json';
 import wickData from '@/assets/data/wick.json';
 import type { Shift, StationData } from '@/lib/tides';
@@ -92,6 +96,46 @@ export const STATIONS: Station[] = [
     lat: 55.6275,
     lon: -6.1886,
     data: portEllenData as StationData,
+  },
+  {
+    id: 'mallaig',
+    name: 'Mallaig',
+    subtitle: 'Sound of Sleat, via Tobermory + offset',
+    region: 'West Coast',
+    lat: 57.0058,
+    lon: -5.8283,
+    data: tobermoryData as StationData,
+    shift: mallaigShift as Shift,
+  },
+  {
+    id: 'kyle-of-lochalsh',
+    name: 'Kyle of Lochalsh',
+    subtitle: 'Skye bridge, via Ullapool + offset',
+    region: 'West Coast',
+    lat: 57.2797,
+    lon: -5.7136,
+    data: ullapoolData as StationData,
+    shift: kyleShift as Shift,
+  },
+  {
+    id: 'portree',
+    name: 'Portree',
+    subtitle: 'Isle of Skye, via Ullapool + offset',
+    region: 'West Coast',
+    lat: 57.4128,
+    lon: -6.1917,
+    data: ullapoolData as StationData,
+    shift: portreeShift as Shift,
+  },
+  {
+    id: 'uig',
+    name: 'Uig',
+    subtitle: 'Loch Snizort, Skye, via Ullapool + offset',
+    region: 'West Coast',
+    lat: 57.5869,
+    lon: -6.3631,
+    data: ullapoolData as StationData,
+    shift: uigShift as Shift,
   },
   {
     id: 'stornoway',

@@ -1,0 +1,12 @@
+{
+  "name": "Kyle of Lochalsh",
+  "based_on": "Ullapool",
+  "method": "tidetimes.org.uk Kyle of Lochalsh vs its own Ullapool (UKHO-derived), applied to our gauge-fitted Ullapool: median time difference, least-squares height fit",
+  "hw_time_min": -13,
+  "lw_time_min": -9,
+  "height_scale": 1.039,
+  "height_offset_m": -0.128,
+  "note": "Height = offset + scale * Ullapool. Tobermory doesn't fit (its turns are 35 min apart and drift). HW scatters ~7 min round the median. Heights sit ~0.15 m above tidetimes, our Ullapool gauge fit's own gap to UKHO. Times are slack-water-ish only: Kyle Rhea's race is next door, use a stream atlas. Kayak-grade, not for navigation.",
+  "calibrated_from": "tidetimes.org.uk Kyle of Lochalsh vs Ullapool, 2025-10-01 to 2026-11-19 (every 3 day(s), 527 events) via tools/calibrate-shift.ts",
+  "calibrated_on": "2026-11-15"
+}

@@ -1,0 +1,12 @@
+{
+  "name": "Mallaig",
+  "based_on": "Tobermory",
+  "method": "tidetimes.org.uk Mallaig vs its own Tobermory (UKHO-derived), applied to our gauge-fitted Tobermory: median time difference, least-squares height fit",
+  "hw_time_min": 7,
+  "lw_time_min": 15,
+  "height_scale": 1.091,
+  "height_offset_m": -0.039,
+  "note": "Height = offset + scale * Tobermory: Mallaig's range is ~9% bigger. Ullapool doesn't fit (90% of turns over 40 min apart). HW scatters ~8 min round the median. Kayak-grade, not for navigation.",
+  "calibrated_from": "tidetimes.org.uk Mallaig vs Tobermory, 2025-10-01 to 2026-11-19 (every 3 day(s), 534 events) via tools/calibrate-shift.ts",
+  "calibrated_on": "2026-11-15"
+}
