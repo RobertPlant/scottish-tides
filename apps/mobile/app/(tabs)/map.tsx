@@ -80,7 +80,7 @@ export default function MapScreen() {
         </ThemedText>
       </Pressable>
       {locErr ? (
-        <ThemedText type="caption" style={{ color: palette.muted, marginTop: -8 }}>
+        <ThemedText type="caption" style={{ color: palette.muted, marginTop: -8 }} accessibilityLiveRegion="polite">
           {locErr}
         </ThemedText>
       ) : null}

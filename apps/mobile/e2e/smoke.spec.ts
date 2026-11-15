@@ -86,6 +86,16 @@ test('station detail: a date typed on the keyboard reaches the date field', asyn
   await expect(page.locator('body')).toContainText(`15 June ${year}`);
 });
 
+test('station detail: the chart is one named image and the day is announced', async ({ page }) => {
+  await page.goto('/station/oban');
+  await expect(page.locator('input[type=date]').last()).toBeVisible();
+
+  const chart = page.getByRole('img', { name: /Tide height through the day/ }).last();
+  await expect(chart).toBeAttached();
+  await expect(chart).not.toHaveAttribute('tabindex');
+  await expect(page.locator('[aria-live=polite]').last()).toContainText(/\d{4}/);
+});
+
 test('deep link to a station renders on direct load (refresh-safe routing)', async ({ page }) => {
   const errors: string[] = [];
   page.on('pageerror', e => errors.push(e.message));
@@ -129,9 +139,9 @@ test('tapping a day opens it on the Tides tab', async ({ page }) => {
 
   await page.goto('/plan/oban');
   await page.waitForTimeout(1500); // let hydration attach the cell's onPress
-  // Day cells carry an aria-label of "<ymd>: <class>, <range> metres range".
+  // Day cells carry an aria-label of "<weekday> <long date>: <class>, <range> metres range".
   await page
-    .getByRole('button', { name: new RegExp(`^${the15th}:`) })
+    .getByRole('button', { name: new RegExp(` ${longDate}:`) })
     .first()
     .click();
   await expect(page).toHaveURL(new RegExp(`d=${the15th}`));
@@ -163,7 +173,7 @@ test('tapping a day opens it when the Tides tab is already open', async ({ page 
 
   await page.goto('/station/oban');
   await tapUntil(page.getByRole('tab', { name: /Plan/ }).first(), /\/plan\//);
-  await tapUntil(page.getByRole('button', { name: new RegExp(`^${ymd}:`) }).first(), new RegExp(`d=${ymd}`));
+  await tapUntil(page.getByRole('button', { name: new RegExp(` ${longDate}:`) }).first(), new RegExp(`d=${ymd}`));
   await expect(page.locator('body')).toContainText(longDate);
 
   // the Tides tab links without ?d=, which mustn't drop the day back to today

@@ -260,7 +260,12 @@ export function ScotlandMap({
               to its child, and react-native-svg forwards anything it doesn't
               recognise onto the DOM <svg>, so React logged "Unknown event
               handler property" for each responder prop on every mount. */}
-          <View style={{ width, height }}>
+          <View
+            style={{ width, height }}
+            accessible
+            role="img"
+            aria-label="Map of tide stations and tidal streams. Every one is also listed below."
+          >
             <Svg width={width} height={height}>
               <Rect x={0} y={0} width={width} height={height} fill={sea} />
               <G transform={`translate(${view.x} ${view.y}) scale(${view.k})`}>{coastPaths}</G>

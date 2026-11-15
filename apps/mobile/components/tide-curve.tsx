@@ -168,140 +168,156 @@ export function TideCurve({ series, events, now, height = 200, scrubbable = fals
     <GestureDetector gesture={scrubGesture}>
       <View style={{ height }} onLayout={onLayout}>
         {width > 0 && (
-          <Svg width={width} height={height}>
-            {/* Daylight band behind the grid (sun above the horizon) */}
-            {dayBand && (
-              <Rect
-                x={dayBand.x0}
-                y={PAD_TOP}
-                width={Math.max(dayBand.x1 - dayBand.x0, 0)}
-                height={plotH}
-                fill={dayFill}
-                opacity={isDark ? 0.16 : 0.3}
-              />
-            )}
-            {dayEdges.map(ex => (
-              <Line
-                key={`sun${ex.toFixed(0)}`}
-                x1={ex}
-                y1={PAD_TOP}
-                x2={ex}
-                y2={baseY}
-                stroke={dayEdge}
-                strokeWidth={1.5}
-                strokeDasharray="2 2"
-              />
-            ))}
-
-            {/* Height gridlines + axis labels */}
-            {yTicks.map(v => (
-              <G key={`y${v}`}>
-                <Line
-                  x1={PAD_LEFT}
-                  y1={y(v)}
-                  x2={width - PAD_RIGHT}
-                  y2={y(v)}
-                  stroke={palette.border}
-                  strokeWidth={1}
+          <View accessible role="img" aria-label="Tide height through the day. High and low waters are in the table.">
+            <Svg width={width} height={height}>
+              {/* Daylight band behind the grid (sun above the horizon) */}
+              {dayBand && (
+                <Rect
+                  x={dayBand.x0}
+                  y={PAD_TOP}
+                  width={Math.max(dayBand.x1 - dayBand.x0, 0)}
+                  height={plotH}
+                  fill={dayFill}
+                  opacity={isDark ? 0.16 : 0.3}
                 />
-                <SvgText x={PAD_LEFT - 4} y={y(v) + 3} fill={palette.muted} fontSize={9} textAnchor="end">
-                  {v.toFixed(decimals)}
-                </SvgText>
-              </G>
-            ))}
-
-            {/* Hour ticks + labels */}
-            {hourTicks.map(tick => (
-              <G key={`x${tick.t}`}>
+              )}
+              {dayEdges.map(ex => (
                 <Line
-                  x1={x(tick.t)}
+                  key={`sun${ex.toFixed(0)}`}
+                  x1={ex}
                   y1={PAD_TOP}
-                  x2={x(tick.t)}
+                  x2={ex}
                   y2={baseY}
-                  stroke={palette.border}
-                  strokeWidth={1}
-                  opacity={0.5}
+                  stroke={dayEdge}
+                  strokeWidth={1.5}
+                  strokeDasharray="2 2"
                 />
-                <SvgText x={x(tick.t)} y={height - 7} fill={palette.muted} fontSize={9} textAnchor="middle">
-                  {tick.label}
-                </SvgText>
-              </G>
-            ))}
+              ))}
 
-            {/* Tide curve */}
-            <Path d={area} fill={palette.accent} opacity={0.16} />
-            <Path d={line} stroke={palette.accent} strokeWidth={2.5} fill="none" />
+              {/* Height gridlines + axis labels */}
+              {yTicks.map(v => (
+                <G key={`y${v}`}>
+                  <Line
+                    x1={PAD_LEFT}
+                    y1={y(v)}
+                    x2={width - PAD_RIGHT}
+                    y2={y(v)}
+                    stroke={palette.border}
+                    strokeWidth={1}
+                  />
+                  <SvgText x={PAD_LEFT - 4} y={y(v) + 3} fill={palette.muted} fontSize={9} textAnchor="end">
+                    {v.toFixed(decimals)}
+                  </SvgText>
+                </G>
+              ))}
 
-            {/* Now marker */}
-            {now && nowX !== null && (
-              <Line
-                x1={nowX}
-                y1={PAD_TOP - 4}
-                x2={nowX}
-                y2={baseY}
-                stroke={palette.text}
-                strokeWidth={1}
-                strokeDasharray="3 3"
-              />
-            )}
-            {nowX !== null && nowPoint && <Circle cx={nowX} cy={y(nowPoint.h)} r={4} fill={palette.text} />}
-            {/* Current-level readout at the top of the now line (today only) */}
-            {nowX !== null &&
-              nowPoint &&
-              (() => {
-                const label = `${nowPoint.h.toFixed(2)} m ${nowPoint.rising ? '▲' : '▼'}`;
-                const w = label.length * 6.2 + 12;
-                const lx = Math.min(Math.max(nowX - w / 2, PAD_LEFT), width - PAD_RIGHT - w);
-                const color = nowPoint.rising ? palette.high : palette.low;
+              {/* Hour ticks + labels */}
+              {hourTicks.map(tick => (
+                <G key={`x${tick.t}`}>
+                  <Line
+                    x1={x(tick.t)}
+                    y1={PAD_TOP}
+                    x2={x(tick.t)}
+                    y2={baseY}
+                    stroke={palette.border}
+                    strokeWidth={1}
+                    opacity={0.5}
+                  />
+                  <SvgText x={x(tick.t)} y={height - 7} fill={palette.muted} fontSize={9} textAnchor="middle">
+                    {tick.label}
+                  </SvgText>
+                </G>
+              ))}
+
+              {/* Tide curve */}
+              <Path d={area} fill={palette.accent} opacity={0.16} />
+              <Path d={line} stroke={palette.accent} strokeWidth={2.5} fill="none" />
+
+              {/* Now marker */}
+              {now && nowX !== null && (
+                <Line
+                  x1={nowX}
+                  y1={PAD_TOP - 4}
+                  x2={nowX}
+                  y2={baseY}
+                  stroke={palette.text}
+                  strokeWidth={1}
+                  strokeDasharray="3 3"
+                />
+              )}
+              {nowX !== null && nowPoint && <Circle cx={nowX} cy={y(nowPoint.h)} r={4} fill={palette.text} />}
+              {/* Current-level readout at the top of the now line (today only) */}
+              {nowX !== null &&
+                nowPoint &&
+                (() => {
+                  const label = `${nowPoint.h.toFixed(2)} m ${nowPoint.rising ? '▲' : '▼'}`;
+                  const w = label.length * 6.2 + 12;
+                  const lx = Math.min(Math.max(nowX - w / 2, PAD_LEFT), width - PAD_RIGHT - w);
+                  const color = nowPoint.rising ? palette.high : palette.low;
+                  return (
+                    <G>
+                      <Rect x={lx} y={1} width={w} height={16} rx={4} fill={color} />
+                      <SvgText
+                        x={lx + w / 2}
+                        y={12.5}
+                        fill="#ffffff"
+                        fontSize={10}
+                        fontWeight="700"
+                        textAnchor="middle"
+                      >
+                        {label}
+                      </SvgText>
+                    </G>
+                  );
+                })()}
+
+              {/* High/low water markers */}
+              {events.map(e => {
+                const ex = x(e.time.getTime());
+                if (ex < PAD_LEFT || ex > width - PAD_RIGHT) {
+                  return null;
+                }
+                const ey = y(e.height);
+                const color = e.type === 'high' ? palette.high : palette.low;
                 return (
-                  <G>
-                    <Rect x={lx} y={1} width={w} height={16} rx={4} fill={color} />
-                    <SvgText x={lx + w / 2} y={12.5} fill="#ffffff" fontSize={10} fontWeight="700" textAnchor="middle">
-                      {label}
+                  <G key={e.time.toISOString()}>
+                    <Circle cx={ex} cy={ey} r={3.5} fill={color} />
+                    <SvgText
+                      x={ex}
+                      y={e.type === 'high' ? ey - 6 : ey + 13}
+                      fill={palette.muted}
+                      fontSize={9}
+                      textAnchor="middle"
+                    >
+                      {formatTime(e.time)}
                     </SvgText>
                   </G>
                 );
-              })()}
+              })}
 
-            {/* High/low water markers */}
-            {events.map(e => {
-              const ex = x(e.time.getTime());
-              if (ex < PAD_LEFT || ex > width - PAD_RIGHT) {
-                return null;
-              }
-              const ey = y(e.height);
-              const color = e.type === 'high' ? palette.high : palette.low;
-              return (
-                <G key={e.time.toISOString()}>
-                  <Circle cx={ex} cy={ey} r={3.5} fill={color} />
-                  <SvgText
-                    x={ex}
-                    y={e.type === 'high' ? ey - 6 : ey + 13}
-                    fill={palette.muted}
-                    fontSize={9}
-                    textAnchor="middle"
-                  >
-                    {formatTime(e.time)}
-                  </SvgText>
+              {/* Scrub marker */}
+              {scrub && (
+                <G>
+                  <Line
+                    x1={scrub.sx}
+                    y1={PAD_TOP - 4}
+                    x2={scrub.sx}
+                    y2={baseY}
+                    stroke={palette.accent}
+                    strokeWidth={1}
+                  />
+                  <Circle
+                    cx={scrub.sx}
+                    cy={scrub.sy}
+                    r={4.5}
+                    fill={palette.accent}
+                    stroke={palette.surface}
+                    strokeWidth={1.5}
+                  />
                 </G>
-              );
-            })}
-
-            {/* Scrub marker */}
-            {scrub && (
-              <G>
-                <Line x1={scrub.sx} y1={PAD_TOP - 4} x2={scrub.sx} y2={baseY} stroke={palette.accent} strokeWidth={1} />
-                <Circle
-                  cx={scrub.sx}
-                  cy={scrub.sy}
-                  r={4.5}
-                  fill={palette.accent}
-                  stroke={palette.surface}
-                  strokeWidth={1.5}
-                />
-              </G>
-            )}
-          </Svg>
+              )}
+            </Svg>
+          </View>
         )}
         {scrub && (
           <View
