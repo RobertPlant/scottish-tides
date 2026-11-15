@@ -2,6 +2,8 @@
 // display them in UK local time so BST/GMT is handled automatically.
 
 export const UK_TZ = 'Europe/London';
+/** Years either side of this one that the planner and day views reach. */
+export const YEAR_SPAN = 5;
 
 /** "14:32" in UK local time. */
 export function formatTime(d: Date): string {
@@ -127,3 +129,10 @@ export function formatRelative(target: Date, now: Date = new Date()): string {
   const body = h > 0 ? `${h}h ${m}m` : `${m}m`;
   return past ? `${body} ago` : `in ${body}`;
 }
+
+/** First and last day the app predicts: 1 January YEAR_SPAN years back to 31 December YEAR_SPAN years on. */
+export const getDayRange = (todayYmd: string): { minYmd: string; maxYmd: string } => {
+  const year = Number(todayYmd.slice(0, 4));
+
+  return { minYmd: `${year - YEAR_SPAN}-01-01`, maxYmd: `${year + YEAR_SPAN}-12-31` };
+};

@@ -54,68 +54,81 @@ export function StreamCurve({ samples, slacks, now, floodName, ebbName, height =
   return (
     <View style={{ height }} onLayout={onLayout}>
       {width > 0 && (
-        <Svg width={width} height={height}>
-          {yTicks.map(v => (
-            <G key={`y${v}`}>
-              <Line
-                x1={PAD_LEFT}
-                y1={y(v)}
-                x2={width - PAD_RIGHT}
-                y2={y(v)}
-                stroke={v === 0 ? palette.muted : palette.border}
-                strokeWidth={1}
-              />
-              <SvgText x={PAD_LEFT - 4} y={y(v) + 3} fill={palette.muted} fontSize={9} textAnchor="end">
-                {Math.abs(v).toFixed(1)}
-              </SvgText>
-            </G>
-          ))}
-
-          {hourTicks.map(tk => (
-            <SvgText key={`x${tk.t}`} x={x(tk.t)} y={height - 7} fill={palette.muted} fontSize={9} textAnchor="middle">
-              {tk.label}
-            </SvgText>
-          ))}
-
-          <Path d={floodArea} fill={flood} opacity={0.18} />
-          <Path d={ebbArea} fill={ebb} opacity={0.18} />
-          <Path d={line} stroke={palette.text} strokeWidth={2} fill="none" />
-
-          {nowX !== null && (
-            <Line
-              x1={nowX}
-              y1={PAD_TOP}
-              x2={nowX}
-              y2={height - PAD_BOTTOM}
-              stroke={palette.text}
-              strokeWidth={1}
-              strokeDasharray="3 3"
-            />
-          )}
-
-          {slacks.map(s => {
-            const sx = x(s.getTime());
-            if (sx < PAD_LEFT || sx > width - PAD_RIGHT) {
-              return null;
-            }
-            return (
-              <G key={s.toISOString()}>
-                <Circle cx={sx} cy={zeroY} r={3.5} fill={palette.tint} />
-                <SvgText x={sx} y={zeroY - 6} fill={palette.muted} fontSize={9} textAnchor="middle">
-                  {formatTime(s)}
+        <View
+          accessible
+          role="img"
+          aria-label="Stream rate through the day. Slack water and peak times are listed below."
+        >
+          <Svg width={width} height={height}>
+            {yTicks.map(v => (
+              <G key={`y${v}`}>
+                <Line
+                  x1={PAD_LEFT}
+                  y1={y(v)}
+                  x2={width - PAD_RIGHT}
+                  y2={y(v)}
+                  stroke={v === 0 ? palette.muted : palette.border}
+                  strokeWidth={1}
+                />
+                <SvgText x={PAD_LEFT - 4} y={y(v) + 3} fill={palette.muted} fontSize={9} textAnchor="end">
+                  {Math.abs(v).toFixed(1)}
                 </SvgText>
               </G>
-            );
-          })}
+            ))}
 
-          {/* flood / ebb sense labels */}
-          <SvgText x={width - PAD_RIGHT} y={PAD_TOP + 9} fill={flood} fontSize={9} textAnchor="end">
-            {floodName} ▲
-          </SvgText>
-          <SvgText x={width - PAD_RIGHT} y={height - PAD_BOTTOM - 3} fill={ebb} fontSize={9} textAnchor="end">
-            {ebbName} ▼
-          </SvgText>
-        </Svg>
+            {hourTicks.map(tk => (
+              <SvgText
+                key={`x${tk.t}`}
+                x={x(tk.t)}
+                y={height - 7}
+                fill={palette.muted}
+                fontSize={9}
+                textAnchor="middle"
+              >
+                {tk.label}
+              </SvgText>
+            ))}
+
+            <Path d={floodArea} fill={flood} opacity={0.18} />
+            <Path d={ebbArea} fill={ebb} opacity={0.18} />
+            <Path d={line} stroke={palette.text} strokeWidth={2} fill="none" />
+
+            {nowX !== null && (
+              <Line
+                x1={nowX}
+                y1={PAD_TOP}
+                x2={nowX}
+                y2={height - PAD_BOTTOM}
+                stroke={palette.text}
+                strokeWidth={1}
+                strokeDasharray="3 3"
+              />
+            )}
+
+            {slacks.map(s => {
+              const sx = x(s.getTime());
+              if (sx < PAD_LEFT || sx > width - PAD_RIGHT) {
+                return null;
+              }
+              return (
+                <G key={s.toISOString()}>
+                  <Circle cx={sx} cy={zeroY} r={3.5} fill={palette.tint} />
+                  <SvgText x={sx} y={zeroY - 6} fill={palette.muted} fontSize={9} textAnchor="middle">
+                    {formatTime(s)}
+                  </SvgText>
+                </G>
+              );
+            })}
+
+            {/* flood / ebb sense labels */}
+            <SvgText x={width - PAD_RIGHT} y={PAD_TOP + 9} fill={flood} fontSize={9} textAnchor="end">
+              {floodName} ▲
+            </SvgText>
+            <SvgText x={width - PAD_RIGHT} y={height - PAD_BOTTOM - 3} fill={ebb} fontSize={9} textAnchor="end">
+              {ebbName} ▼
+            </SvgText>
+          </Svg>
+        </View>
       )}
     </View>
   );

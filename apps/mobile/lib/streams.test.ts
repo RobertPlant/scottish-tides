@@ -89,3 +89,17 @@ test('sill race: the yearly peak envelope matches the published neap/spring figu
   assert.ok(hi > race.springPeakKn * 0.8 && hi < race.springPeakKn * 1.1, `spring peak ${hi} kn`);
   assert.ok(lo < race.neapPeakKn, `neap peak ${lo} kn`);
 });
+
+test('sill race: peaks run flood, ebb, flood across midnight with no day-edge copies', () => {
+  const race = raceById('falls-of-lora');
+  assert.ok(race);
+
+  const ymds = Array.from({ length: 60 }, (_, offset) => ymdAddDays('2026-01-01', offset));
+  const peaks = ymds.flatMap(ymd => predictStreamDay(race, ukDayStartFromYmd(ymd)).peaks);
+  const repeats = peaks.slice(1).filter((peak, index) => Math.sign(peak.rate) === Math.sign(peaks[index].rate));
+
+  assert.deepEqual(
+    repeats.map(peak => peak.time.toISOString()),
+    [],
+  );
+});

@@ -7,6 +7,7 @@ import { Platform, Pressable, StyleSheet } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
 import { usePalette } from '@/hooks/use-theme-color';
+import { formatLongDay, ukDayStartFromYmd } from '@/lib/datetime';
 
 export interface DateFieldProps {
   /** Selected calendar date, YYYY-MM-DD. */
@@ -45,7 +46,7 @@ export function DateField({ value, onChange, min, max }: DateFieldProps) {
       <Pressable
         onPress={() => setShow(true)}
         accessibilityRole="button"
-        accessibilityLabel={`Pick a date, currently ${value}`}
+        accessibilityLabel={`Pick a date, currently ${formatLongDay(ukDayStartFromYmd(value))}`}
         style={[styles.button, { borderColor: palette.border, backgroundColor: palette.surface }]}
       >
         <ThemedText style={{ color: palette.accent, fontWeight: '600' }}>📅 Pick a date</ThemedText>

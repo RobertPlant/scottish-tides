@@ -33,7 +33,7 @@ export function DayNav({
         >
           <ThemedText style={{ color: palette.accent }}>‹ Prev</ThemedText>
         </Pressable>
-        <ThemedText type="defaultSemiBold" style={styles.navLabel}>
+        <ThemedText type="defaultSemiBold" style={styles.navLabel} accessibilityLiveRegion="polite">
           {formatLongDay(dayStart)}
         </ThemedText>
         <Pressable
