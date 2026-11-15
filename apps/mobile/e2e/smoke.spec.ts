@@ -1,4 +1,6 @@
-import { expect, type Locator, type Page, test } from '@playwright/test';
+import { expect, type Page, test } from '@playwright/test';
+
+import { tapUntil } from './helpers';
 
 // React Native Web quirks (see AGENTS.md):
 // - text rendered with numberOfLines uses -webkit-box clamping, which Playwright
@@ -138,7 +140,6 @@ test('tapping a day opens it on the Tides tab', async ({ page }) => {
   });
 
   await page.goto('/plan/oban');
-  await page.waitForTimeout(1500); // let hydration attach the cell's onPress
   // Day cells carry an aria-label of "<weekday> <long date>: <class>, <range> metres range".
   await page
     .getByRole('button', { name: new RegExp(` ${longDate}:`) })
@@ -161,24 +162,14 @@ test('tapping a day opens it when the Tides tab is already open', async ({ page 
     year: 'numeric',
   });
 
-  // retry each tap until the route moves: it's a no-op until hydration wires it up
-  const tapUntil = async (target: Locator, url: RegExp) => {
-    await expect(async () => {
-      if (!url.test(page.url())) {
-        await target.click({ timeout: 2000 });
-      }
-      await expect(page).toHaveURL(url, { timeout: 2000 });
-    }).toPass({ timeout: 30_000 });
-  };
-
   await page.goto('/station/oban');
-  await tapUntil(page.getByRole('tab', { name: /Plan/ }).first(), /\/plan\//);
-  await tapUntil(page.getByRole('button', { name: new RegExp(` ${longDate}:`) }).first(), new RegExp(`d=${ymd}`));
+  await tapUntil(page, page.getByRole('tab', { name: /Plan/ }).first(), /\/plan\//);
+  await tapUntil(page, page.getByRole('button', { name: new RegExp(` ${longDate}:`) }).first(), new RegExp(`d=${ymd}`));
   await expect(page.locator('body')).toContainText(longDate);
 
   // the Tides tab links without ?d=, which mustn't drop the day back to today
-  await tapUntil(page.getByRole('tab', { name: /Plan/ }).first(), /\/plan\//);
-  await tapUntil(page.getByRole('tab', { name: /Tides/ }).first(), /\/station\//);
+  await tapUntil(page, page.getByRole('tab', { name: /Plan/ }).first(), /\/plan\//);
+  await tapUntil(page, page.getByRole('tab', { name: /Tides/ }).first(), /\/station\//);
   await expect(page.locator('body')).toContainText(longDate);
 
   await assertNoErrorOverlay(page);
