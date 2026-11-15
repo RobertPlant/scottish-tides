@@ -20,7 +20,6 @@ import { usePalette } from '@/hooks/use-theme-color';
 import { formatLongDay, ukDayStartFromYmd, YEAR_SPAN, ymdInUk } from '@/lib/datetime';
 import { coeffFill, type DayCell, type Scheme, yearMonths } from '@/lib/planner';
 import type { Station } from '@/lib/stations';
-import { tidalStats } from '@/lib/tide-day';
 
 const MONTHS_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 const COLS = 31; // widest month; short months trail blank so rows stay aligned
@@ -43,14 +42,13 @@ export function TripPlanner({ station, header }: { station: Station; header?: Re
   const nowY = Number(todayYmd.slice(0, 4));
 
   const [year, setYear] = useState(nowY);
-  const stats = useMemo(() => tidalStats(station), [station]);
   // 365 harmonic extrema solves: ~130 ms on a desktop, so plausibly several
   // times that under Hermes on a phone. Memoised, so it's paid once per
   // station/year rather than per render -- but it is still one synchronous
   // block on mount and on every ‹ › press. If this grows (e.g. the opinionated
   // "best window" layer in TODO.md, which would add stream/daylight solves on
   // top), it needs deferring off the first paint rather than more memoising.
-  const months = useMemo(() => (hydrated ? yearMonths(station, year, stats) : []), [hydrated, station, year, stats]);
+  const months = useMemo(() => (hydrated ? yearMonths(station, year) : []), [hydrated, station, year]);
 
   const minYear = nowY - YEAR_SPAN;
   const maxYear = nowY + YEAR_SPAN;

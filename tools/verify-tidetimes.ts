@@ -16,7 +16,7 @@ import { parseArgs } from 'node:util';
 import { ukDayStartFromYmd, ymdAddDays, ymdInUk } from '../apps/mobile/lib/datetime';
 import { STATIONS } from '../apps/mobile/lib/stations';
 import { predictExtrema } from '../apps/mobile/lib/tides';
-import { median, nearestSameType, reference, SLUGS } from './tidetimes';
+import { mean, median, nearestSameType, reference, SLUGS } from './tidetimes';
 
 // Pass limits on the median and mean absolute errors. Half of Oban's events land
 // within ~6 min of tidetimes after calibration; its reference's own Oban-Tobermory
@@ -24,8 +24,6 @@ import { median, nearestSameType, reference, SLUGS } from './tidetimes';
 const LIMITS = { medianMin: 10, meanAbsMin: 15, medianM: 0.15, meanAbsM: 0.15 };
 // A reference event with no prediction of the same type within this is unmatched.
 const MATCH_WINDOW_MIN = 90;
-
-const meanAbs = (xs: number[]) => xs.reduce((a, x) => a + Math.abs(x), 0) / xs.length;
 
 async function main() {
   const { values } = parseArgs({
@@ -81,10 +79,10 @@ async function main() {
     const tsorted = dt.map(Math.abs).sort((a, b) => a - b);
     const row = {
       medianMin: median(dt),
-      meanAbsMin: meanAbs(dt),
+      meanAbsMin: mean(dt.map(Math.abs)),
       p90: tsorted[Math.floor(tsorted.length * 0.9)],
       medianM: median(dh),
-      meanAbsM: meanAbs(dh),
+      meanAbsM: mean(dh.map(Math.abs)),
     };
     const ok =
       Math.abs(row.medianMin) <= LIMITS.medianMin &&

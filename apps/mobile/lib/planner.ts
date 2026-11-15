@@ -11,8 +11,6 @@ import { classifyDay, type TidalStats, type TideClass, tidalStats } from '@/lib/
 export interface DayCell {
   ymd: string; // YYYY-MM-DD
   day: number; // day-of-month 1..31
-  month: number; // 1..12
-  year: number;
   /** 0 = Monday … 6 = Sunday (UK week starts Monday). */
   weekday: number;
   isWeekend: boolean;
@@ -34,12 +32,11 @@ export function daysInMonth(year: number, month: number): number {
   return new Date(Date.UTC(year, month, 0)).getUTCDate();
 }
 
-/** Classify a single civil day for a station. */
-export function dayCell(station: Station, ymd: string, stats: TidalStats): DayCell {
+function dayCell(station: Station, ymd: string, stats: TidalStats): DayCell {
   const { range, cls } = classifyDay(station, ukDayStartFromYmd(ymd), stats);
-  const [year, month, day] = ymd.split('-').map(Number);
+  const day = Number(ymd.slice(8, 10));
   const weekday = weekdayMonFirst(ymd);
-  return { ymd, day, month, year, weekday, isWeekend: weekday >= 5, range, cls };
+  return { ymd, day, weekday, isWeekend: weekday >= 5, range, cls };
 }
 
 /** Every day of a calendar month, in order. */
@@ -56,11 +53,9 @@ export function monthDays(
 }
 
 /** All twelve months of a year, each with its ordered days. */
-export function yearMonths(
-  station: Station,
-  year: number,
-  stats: TidalStats = tidalStats(station),
-): { month: number; days: DayCell[] }[] {
+export function yearMonths(station: Station, year: number): { month: number; days: DayCell[] }[] {
+  const stats = tidalStats(station);
+
   return Array.from({ length: 12 }, (_, monthIndex) => ({
     month: monthIndex + 1,
     days: monthDays(station, year, monthIndex + 1, stats),
@@ -71,7 +66,7 @@ export function yearMonths(
 // A sequential single-hue (teal) ramp: neaps → springs = low → high intensity.
 // Per-theme endpoints so the ramp reads as intensity on both surfaces (light:
 // pale→deep; dark: dim→bright). Kept here (pure) rather than in the theme file
-// because the interpolation + ink choice is the planner's own concern.
+// because the interpolation is the planner's own concern.
 
 export type Scheme = 'light' | 'dark';
 
@@ -84,18 +79,13 @@ const RAMP: Record<Scheme, { lo: Rgb; hi: Rgb }> = {
 
 const clamp01 = (t: number) => Math.min(Math.max(t, 0), 1);
 
-/**
- * Fill + readable ink for a day at spring-fraction `t` (0 = neaps, 1 = springs).
- * `bg` is the sequential ramp colour; `ink` flips between dark/light text by the
- * fill's relative luminance so a day number stays legible on any cell.
- */
-export function coeffFill(t: number, scheme: Scheme): { bg: string; ink: string } {
+/** Fill for a day at spring-fraction `t` (0 = neaps, 1 = springs), on the sequential ramp. */
+export function coeffFill(t: number, scheme: Scheme): { bg: string } {
   const { lo, hi } = RAMP[scheme];
   const f = clamp01(t);
   // Built as an explicit tuple: Array.prototype.map widens to number[], which
   // then needed a double cast back to a 3-tuple to index safely.
   const mix = (i: number) => Math.round(lo[i] + (hi[i] - lo[i]) * f);
   const [r, g, b] = [mix(0), mix(1), mix(2)];
-  const lum = (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
-  return { bg: `rgb(${r}, ${g}, ${b})`, ink: lum > 0.6 ? '#0c1722' : '#ffffff' };
+  return { bg: `rgb(${r}, ${g}, ${b})` };
 }

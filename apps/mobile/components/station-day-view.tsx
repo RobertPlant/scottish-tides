@@ -1,7 +1,5 @@
-// The full per-station "date view": now/next (today only), day navigation,
-// spring/neap + coefficient badge, scrubbable curve (with daylight shading),
-// HW/LW table, sun & moon, and the 7-day overview. Shared by the default tab
-// and the /station/[id] deep-link route so both show the complete picture.
+// The per-station day view: now/next (today only), day navigation, spring/neap badge, scrubbable curve,
+// HW/LW table, sun & moon, and the 7-day overview.
 
 import { type ReactNode, useMemo, useState } from 'react';
 import { Platform, ScrollView, StyleSheet, View } from 'react-native';
@@ -17,7 +15,6 @@ import { TideTable } from '@/components/tide-table';
 import { WeekOverview } from '@/components/week-overview';
 import { useDayNav } from '@/hooks/use-day-nav';
 import { useHydrated } from '@/hooks/use-hydrated';
-import { useNow } from '@/hooks/use-now';
 import { useSidePadding } from '@/hooks/use-side-padding';
 import { usePalette } from '@/hooks/use-theme-color';
 import { sunTimes } from '@/lib/astronomy';
@@ -28,14 +25,11 @@ import { classifyTide, dayEvents, dayHeightSeries, dayRange, tidalStats, tideCla
 export function StationDayView({
   station,
   initialYmd,
-  syncUrl = false,
   header,
 }: {
   station: Station;
   /** Optional starting day from a shareable ?d=YYYY-MM-DD link. */
   initialYmd?: string;
-  /** Keep ?d= in the URL in sync (only meaningful on the /station/[id] route). */
-  syncUrl?: boolean;
   /** Screen-specific identity header rendered above the day view. */
   header?: ReactNode;
 }) {
@@ -46,15 +40,13 @@ export function StationDayView({
   // native (no hover) it stays visible so tap-to-read is still discoverable.
   const [chartHovered, setChartHovered] = useState(false);
 
-  // Keep "now" live so the current-time marker/readout stays current.
-  const now = useNow();
   // Everything below the header is "what the tide is doing today", which the
   // static export cannot know - see use-hydrated.ts. Until the client takes
   // over, this screen is its header and nothing else.
   const hydrated = useHydrated();
 
-  const nav = useDayNav({ initialYmd, syncUrl });
-  const { ymd, dayStart, isToday } = nav;
+  const nav = useDayNav({ initialYmd });
+  const { ymd, dayStart, isToday, now } = nav;
 
   // Swipe left → next day, swipe right → previous day. gesture-handler rather
   // than PanResponder, whose panHandlers spread onStartShouldSetResponder and
@@ -84,12 +76,11 @@ export function StationDayView({
   const events = useMemo(() => (hydrated ? dayEvents(station, dayStart) : []), [hydrated, station, dayStart]);
   const series = useMemo(() => (hydrated ? dayHeightSeries(station, dayStart) : []), [hydrated, station, dayStart]);
   // midday, so sunrise/sunset land on this civil day (UK midnight is the previous UTC day in summer)
-  const noon = useMemo(() => new Date(dayStart.getTime() + 12 * 3600_000), [dayStart]);
-  const sun = useMemo(() => sunTimes(noon, station.lat, station.lon), [noon, station.lat, station.lon]);
+  const noon = new Date(dayStart.getTime() + 12 * 3600_000);
+  const sun = sunTimes(noon, station.lat, station.lon);
 
-  const stats = useMemo(() => tidalStats(station), [station]);
-  const range = useMemo(() => dayRange(events), [events]);
-  const tideClass = useMemo(() => classifyTide(range, stats), [range, stats]);
+  const range = dayRange(events);
+  const tideClass = classifyTide(range, tidalStats(station));
   const classColor = palette[tideClassKey(tideClass.label)];
 
   return (
@@ -112,14 +103,7 @@ export function StationDayView({
               </DayNav>
 
               <Card onPointerEnter={() => setChartHovered(true)} onPointerLeave={() => setChartHovered(false)}>
-                <TideCurve
-                  series={series}
-                  events={events}
-                  now={isToday ? now : undefined}
-                  height={220}
-                  scrubbable
-                  sun={sun}
-                />
+                <TideCurve series={series} events={events} now={isToday ? now : undefined} height={220} sun={sun} />
                 <ThemedText
                   type="caption"
                   style={[{ color: palette.muted }, Platform.OS === 'web' && !chartHovered && styles.hintHidden]}
@@ -143,9 +127,9 @@ export function StationDayView({
 
           <Note>
             <ThemedText type="caption" style={{ color: palette.muted }}>
-              {station.standardPort
-                ? 'Standard port, predicted directly from its own gauge.'
-                : `Secondary port, derived from ${station.shift?.based_on ?? 'a nearby gauge'} by a constant Admiralty offset.`}
+              {station.shift
+                ? `Secondary port, derived from ${station.shift.based_on ?? 'a nearby gauge'} by a constant Admiralty offset.`
+                : 'Standard port, predicted directly from its own gauge.'}
             </ThemedText>
             {station.data.obs_span ? (
               <ThemedText type="caption" style={{ color: palette.muted }}>

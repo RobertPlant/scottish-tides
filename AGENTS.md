@@ -11,9 +11,9 @@ eslint, typescript, or their resolvers.
 
 ## Stack
 
-Expo SDK 57, Expo Router 57, React Native 0.86, react-native-web. Styling is
+Expo SDK 58, Expo Router 58, React Native 0.88, react-native-web. Styling is
 plain `StyleSheet` + a light/dark `Colors` palette in `constants/theme.ts`
-(`ThemedText` / `useThemeColor` / `usePalette`). No backend, no auth, no network
+(`ThemedText` / `usePalette`). No backend, no auth, no network
 calls at runtime — everything the app needs is bundled.
 
 ## The tide engine is the keystone
@@ -100,8 +100,9 @@ there's no such env var, so Playwright uses its own downloaded browser.
   locators can resolve to two elements — scope to `:visible` / use `.first()`.
 - Driving a controlled `<input type="date">` from a test: `fill()` doesn't fire
   React's `onChange`; set `.value` via the prototype setter and dispatch
-  `input`+`change`. Also wait for dev-mode hydration first, or the synthetic
-  event has no listener yet.
+  `input`+`change`. Wait for the date field to appear first: it renders only after
+  hydration, so before that the event has no listener. To test typing, use
+  `page.keyboard`, since setting `.value` skips Chrome's per-digit events.
 
 ## Code style
 

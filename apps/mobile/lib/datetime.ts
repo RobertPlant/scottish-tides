@@ -1,7 +1,7 @@
 // Date/time helpers. All tide instants are absolute (UTC under the hood); we
 // display them in UK local time so BST/GMT is handled automatically.
 
-export const UK_TZ = 'Europe/London';
+const UK_TZ = 'Europe/London';
 /** Years either side of this one that the planner and day views reach. */
 export const YEAR_SPAN = 5;
 

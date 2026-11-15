@@ -1,5 +1,5 @@
 {
-  "$schema": "https://biomejs.dev/schemas/2.4.16/schema.json",
+  "$schema": "https://biomejs.dev/schemas/2.5.15/schema.json",
   "files": {
     "includes": [
       "**",
@@ -11,7 +11,6 @@
       "!**/ios",
       "!**/playwright-report",
       "!**/test-results",
-      "!**/*.min.js",
       "!**/assets/data/*.json",
       "!**/lib/tides/__fixtures__/*.json",
       "!**/expo-env.d.ts",

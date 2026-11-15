@@ -1,9 +1,9 @@
 # Scottish Tides — TODO / handoff
 
 Status snapshot (for picking up cold). Repo: https://github.com/RobertPlant/scottish-tides
-Stack: Expo SDK 57 universal app (web/iOS/Android), GPL-3.0, no backend, offline PWA.
-Gates: `tsc` clean · `npm run test:unit` 36/36 · `npm run test:engine` 22/22 ·
-`npm run test:e2e` 16/16 (run e2e in `devenv shell`) · `biome ci` clean.
+Stack: Expo SDK 58 universal app (web/iOS/Android), GPL-3.0, no backend, offline PWA.
+Gates: `tsc` clean · `npm run test:unit` 69/69 · `npm run test:engine` 23/23 ·
+`npm run test:e2e` 22/22 (run e2e in `devenv shell`) · `biome ci` clean.
 All of these are enforced in CI.
 
 ## Done (so you don't redo it)
@@ -56,8 +56,6 @@ All of these are enforced in CI.
       wrapping, array/object layout, redundant parens; no semantic changes). `tsc` + engine tests
       still green. The generated parity fixture (`lib/tides/__fixtures__/*.json`) is now Biome-
       excluded like `assets/data/*.json` so `gen-reference.py` output won't fight the formatter.
-      NB: a global `rtk` command-rewrite hook (`~/.claude/hooks/rtk-rewrite.sh`) rewrites `biome`
-      → `rtk lint`, which masked the pass at first — run Biome by absolute path to bypass it.
 - [ ] **Retry the TypeScript 7 bump** once typescript-eslint supports the native (Go) port.
       Tried `typescript@7.0.2`: `tsc --noEmit` is clean and `test:engine` passes, but `expo lint`
       crashes at load — `@typescript-eslint`/`ts-api-utils` read internal TS APIs the Go port
@@ -78,8 +76,8 @@ All of these are enforced in CI.
 - [ ] Re-run `tools/gen-reference.py` if any station JSON changes (keeps the parity test honest).
 
 ## 5. Native (currently web-first)
-- [x] **Geolocation works on native** — `map.tsx` calls `lib/native-location.ts`, which keeps the
-      browser `navigator.geolocation` path on web, `expo-location` on iOS, and our own
+- [x] **Geolocation works on native** — `map.tsx` calls `lib/native-location.ts`, which uses
+      `expo-location` on web and iOS, and our own
       `modules/platform-location` on Android (see below).
 - [x] **Android release APK builds locally** — `npm run build:android` inside `devenv shell`
       (prebuild + `gradlew assembleRelease`). Toolchain is pinned in `devenv.nix`; `android/` stays

@@ -37,7 +37,7 @@ function dPolynomial(coefficients: number[], argument: number): number {
 }
 
 /** Julian Date from a UTC instant (pytides uses naive-UTC datetime fields). */
-export function JD(t: Date): number {
+function JD(t: Date): number {
   let Y = t.getUTCFullYear();
   let M = t.getUTCMonth() + 1;
   const D =

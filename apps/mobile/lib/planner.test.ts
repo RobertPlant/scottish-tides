@@ -49,13 +49,11 @@ test('yearMonths covers all twelve months with correct day counts', () => {
   assert.equal(months[3].days.length, 30);
 });
 
-test('coeffFill ramps neaps→springs with readable ink', () => {
+test('coeffFill ramps neaps→springs', () => {
   const lo = coeffFill(0, 'light');
   const hi = coeffFill(1, 'light');
   assert.equal(lo.bg, 'rgb(220, 235, 234)'); // pale teal
   assert.equal(hi.bg, 'rgb(14, 110, 106)'); // deep teal
-  assert.equal(lo.ink, '#0c1722'); // dark ink on a light fill
-  assert.equal(hi.ink, '#ffffff'); // light ink on a dark fill
   // Dark theme: dim → bright.
   assert.equal(coeffFill(0, 'dark').bg, 'rgb(18, 55, 52)');
   assert.equal(coeffFill(1, 'dark').bg, 'rgb(99, 214, 208)');

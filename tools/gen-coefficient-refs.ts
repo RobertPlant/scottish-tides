@@ -14,15 +14,15 @@
 //
 // Re-run when a station's constituents change or a new gauge is added.
 
-import { readdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { writeFileSync } from 'node:fs';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
 
-import { Tide } from '../apps/mobile/lib/tides';
-import type { StationData } from '../apps/mobile/lib/tides';
+import { STATIONS } from '../apps/mobile/lib/stations';
 import { dayRange } from '../apps/mobile/lib/tide-day';
+import { type StationData, Tide } from '../apps/mobile/lib/tides';
+import { mean } from './tidetimes';
 
-const DATA_DIR = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'apps', 'mobile', 'assets', 'data');
+const DATA_DIR = path.join(import.meta.dirname, '..', 'apps', 'mobile', 'assets', 'data');
 const SIM_DAYS = 731; // ~2 years: covers the synodic, anomalistic and annual beats
 const WINDOW = 3; // half-window (days) for local spring-peak / neap-trough detection
 
@@ -30,8 +30,6 @@ const WINDOW = 3; // half-window (days) for local spring-peak / neap-trough dete
 function rawDayRange(tide: Tide, dayStart: Date): number {
   return dayRange(tide.extrema(dayStart, new Date(dayStart.getTime() + 24 * 3600e3)));
 }
-
-const mean = (xs: number[]) => xs.reduce((a, b) => a + b, 0) / xs.length;
 
 function refs(data: StationData): { springRef: number; neapRef: number } {
   const tide = new Tide(data);
@@ -56,22 +54,12 @@ function refs(data: StationData): { springRef: number; neapRef: number } {
   return { springRef: round(mean(peaks)), neapRef: round(mean(troughs)) };
 }
 
-const out: Record<string, { springRef: number; neapRef: number }> = {};
-for (const f of readdirSync(DATA_DIR)) {
-  if (!f.endsWith('.json') || f === 'coefficient-refs.json') {
-    continue;
-  }
-  let data: StationData;
-  try {
-    data = JSON.parse(readFileSync(path.join(DATA_DIR, f), 'utf8'));
-  } catch {
-    continue;
-  }
-  if (!Array.isArray(data.constituents) || !data.station) {
-    continue;
-  }
-  out[data.station] = refs(data);
-  console.log(`${data.station.padEnd(16)} spring=${out[data.station].springRef} neap=${out[data.station].neapRef}`);
+// one entry per gauge, so Oban shares Tobermory's
+const gauges = new Map(STATIONS.map(station => [station.data.station, station.data]));
+const sorted = [...gauges].toSorted(([a], [b]) => (a < b ? -1 : 1));
+const out = Object.fromEntries(sorted.map(([name, data]) => [name, refs(data)]));
+for (const [name, ref] of Object.entries(out)) {
+  console.log(`${name.padEnd(16)} spring=${ref.springRef} neap=${ref.neapRef}`);
 }
 
 writeFileSync(path.join(DATA_DIR, 'coefficient-refs.json'), `${JSON.stringify(out, null, 2)}\n`);

@@ -58,20 +58,18 @@ interface ViewState {
 const clamp = (v: number, lo: number, hi: number) => Math.min(Math.max(v, lo), hi);
 
 export function ScotlandMap({
-  stations = [],
+  stations,
   selectedId,
   onSelect,
-  streams = [],
-  selectedStreamId,
+  streams,
   onSelectStream,
 }: {
-  stations?: Station[];
-  selectedId?: string;
-  onSelect?: (id: string) => void;
+  stations: Station[];
+  selectedId: string;
+  onSelect: (id: string) => void;
   /** Tidal races to overlay, drawn as numbered diamonds (1-based, in order). */
-  streams?: StreamMarker[];
-  selectedStreamId?: string;
-  onSelectStream?: (id: string) => void;
+  streams: StreamMarker[];
+  onSelectStream: (id: string) => void;
 }) {
   const palette = usePalette();
   const isDark = useColorScheme() === 'dark';
@@ -150,8 +148,8 @@ export function ScotlandMap({
     streams: StreamMarker[];
     sx: (lon: number) => number;
     sy: (lat: number) => number;
-    onSelect?: (id: string) => void;
-    onSelectStream?: (id: string) => void;
+    onSelect: (id: string) => void;
+    onSelectStream: (id: string) => void;
   } | null>(null);
 
   const start = useRef<ViewState & { fx: number; fy: number }>({ k: 1, x: 0, y: 0, fx: 0, fy: 0 });
@@ -203,12 +201,12 @@ export function ScotlandMap({
         };
         const race = near(h.streams, st => ({ x: h.sx(st.lon), y: h.sy(st.lat) }));
         if (race) {
-          h.onSelectStream?.(race.id);
+          h.onSelectStream(race.id);
           return;
         }
         const station = near(h.stations, s => ({ x: h.sx(s.lon), y: h.sy(s.lat) }));
         if (station) {
-          h.onSelect?.(station.id);
+          h.onSelect(station.id);
         }
       });
     return Gesture.Race(pinch, pan, tap);
@@ -319,8 +317,7 @@ export function ScotlandMap({
                 // diamond (vs the round station pins) reads as "race / hazard".
                 const cx = sx(st.lon);
                 const cy = sy(st.lat);
-                const sel = st.id === selectedStreamId;
-                const r = sel ? 11 : 9;
+                const r = 9;
                 const pts = `${cx},${cy - r} ${cx + r},${cy} ${cx},${cy + r} ${cx - r},${cy}`;
                 return (
                   <G key={`stream-${st.id}`}>

@@ -7,13 +7,9 @@
 
 import { applyShift, type Shift, type StationData, Tide, type TideEvent } from './predict';
 
-export { astro } from './astro';
-export { noaa, NAME2CONST, type Constituent } from './constituents';
 export {
   Tide,
-  applyShift,
   shiftHeight,
-  type ConstituentJSON,
   type Shift,
   type StationData,
   type TideEvent,
@@ -21,6 +17,7 @@ export {
 } from './predict';
 
 const PRUNE_CONTEXT_MS = 12 * 3600_000;
+const SAMPLE_STEP_MS = 10 * 60_000;
 
 /**
  * Drop insignificant high/low waters by prominence. Near-amphidromic ports (e.g.
@@ -38,7 +35,7 @@ const PRUNE_CONTEXT_MS = 12 * 3600_000;
  * moved. When that happens the day falls back to its highest high and lowest
  * low, which is what the range meant all along.
  */
-export function pruneMinorExtrema(events: TideEvent[], minProminenceM: number): TideEvent[] {
+function pruneMinorExtrema(events: TideEvent[], minProminenceM: number): TideEvent[] {
   const evs = [...events];
   while (evs.length > 2) {
     let minIdx = -1;
@@ -64,7 +61,7 @@ export function pruneMinorExtrema(events: TideEvent[], minProminenceM: number): 
     }
   }
 
-  if (!evs.some(e => e.type === 'high') || !evs.some(e => e.type === 'low')) {
+  if (!hasBothKinds(evs)) {
     const highs = events.filter(e => e.type === 'high');
     const lows = events.filter(e => e.type === 'low');
     // Only when the day really has both - a window can legitimately hold a
@@ -118,17 +115,11 @@ function hasBothKinds(events: TideEvent[]): boolean {
   return events.some(e => e.type === 'high') && events.some(e => e.type === 'low');
 }
 
-/** Continuous height samples for charting, `stepMinutes` apart over [from, to]. */
-export function heightSeries(
-  data: StationData,
-  from: Date,
-  to: Date,
-  stepMinutes = 10,
-): { time: Date; height: number }[] {
+/** Continuous height samples for charting, 10 minutes apart over [from, to]. */
+export function heightSeries(data: StationData, from: Date, to: Date): { time: Date; height: number }[] {
   const tide = new Tide(data);
   const times: Date[] = [];
-  const stepMs = stepMinutes * 60_000;
-  for (let t = from.getTime(); t <= to.getTime(); t += stepMs) {
+  for (let t = from.getTime(); t <= to.getTime(); t += SAMPLE_STEP_MS) {
     times.push(new Date(t));
   }
   const heights = tide.heightsAt(times);

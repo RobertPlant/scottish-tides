@@ -3,6 +3,7 @@ import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
+import { Card } from '@/components/card';
 import { Note } from '@/components/note';
 import { ScotlandMap } from '@/components/scotland-map';
 import { ThemedText } from '@/components/themed-text';
@@ -106,7 +107,7 @@ export default function MapScreen() {
             approximate. Verify against the pilot/atlas before committing. These races can kill.
           </ThemedText>
         </Note>
-        <View style={[styles.card, { backgroundColor: palette.surface, borderColor: palette.border }]}>
+        <Card gap={0} style={styles.list}>
           {RACES.map((r, i) => (
             <Pressable
               key={r.id}
@@ -134,7 +135,7 @@ export default function MapScreen() {
               <ThemedText style={{ color: palette.muted }}>›</ThemedText>
             </Pressable>
           ))}
-        </View>
+        </Card>
       </View>
 
       <ThemedText type="caption" style={[styles.footer, { color: palette.muted }]}>
@@ -193,20 +194,16 @@ function Row({
       <Pressable
         onPress={() => onOpen(s.id)}
         accessibilityRole="button"
-        accessibilityLabel={`${s.name}${s.subtitle ? `, ${s.subtitle}` : ''}${
-          !s.standardPort ? ', secondary port' : ''
-        }`}
+        accessibilityLabel={`${s.name}, ${s.subtitle}${s.shift ? ', secondary port' : ''}`}
         style={styles.rowMain}
       >
         <View style={{ flex: 1 }}>
           <ThemedText type="defaultSemiBold">{s.name}</ThemedText>
-          {s.subtitle ? (
-            <ThemedText type="caption" style={{ color: palette.muted }}>
-              {s.subtitle}
-            </ThemedText>
-          ) : null}
+          <ThemedText type="caption" style={{ color: palette.muted }}>
+            {s.subtitle}
+          </ThemedText>
         </View>
-        {!s.standardPort ? (
+        {s.shift ? (
           <View style={[styles.badge, { borderColor: palette.border }]}>
             <ThemedText type="caption" style={{ color: palette.muted }}>
               secondary
@@ -235,11 +232,11 @@ function Group({
       <ThemedText type="caption" style={[styles.groupTitle, { color: palette.muted }]}>
         {title}
       </ThemedText>
-      <View style={[styles.card, { backgroundColor: palette.surface, borderColor: palette.border }]}>
+      <Card gap={0} style={styles.list}>
         {items.map((s, i) => (
           <Row key={s.id} s={s} last={i === items.length - 1} palette={palette} onOpen={onOpen} />
         ))}
-      </View>
+      </Card>
     </View>
   );
 }
@@ -254,7 +251,7 @@ const styles = StyleSheet.create({
   },
   group: { gap: 8 },
   groupTitle: { letterSpacing: 0.6 },
-  card: { borderRadius: 16, borderWidth: StyleSheet.hairlineWidth, paddingHorizontal: 14 },
+  list: { paddingVertical: 0, paddingHorizontal: 14 },
   row: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 14 },
   // Carries the row's own layout now that the star is a sibling, not a child.
   rowMain: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 10 },

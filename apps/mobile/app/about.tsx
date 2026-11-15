@@ -96,7 +96,7 @@ export default function About() {
             accessibilityLabel="View the source on GitHub"
             style={styles.linkRow}
           >
-            <ThemedText type="link">View the source on GitHub →</ThemedText>
+            <ThemedText style={{ color: palette.accent }}>View the source on GitHub →</ThemedText>
           </Pressable>
         </Card>
 

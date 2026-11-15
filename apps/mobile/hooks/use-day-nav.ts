@@ -1,6 +1,6 @@
 // Day selection + navigation shared by the station and tidal-stream day views:
 // the current YYYY-MM-DD, its UK day-start instant, today/min/max bounds, and a
-// setter that optionally keeps ?d= in the URL for shareable links.
+// setter that keeps ?d= in the URL for shareable links.
 
 import { useRouter } from 'expo-router';
 import { useCallback, useMemo, useState } from 'react';
@@ -32,6 +32,8 @@ function getUrlDay(urlYmd: string | undefined, todayYmd: string, minYmd: string,
 export interface DayNavState {
   ymd: string;
   dayStart: Date;
+  /** The ticking clock, once a minute. */
+  now: Date;
   todayYmd: string;
   isToday: boolean;
   minYmd: string;
@@ -41,19 +43,17 @@ export interface DayNavState {
 
 export function useDayNav({
   initialYmd,
-  syncUrl = false,
 }: {
   /** Optional starting day from a shareable ?d=YYYY-MM-DD link. */
   initialYmd?: string;
-  /** Keep ?d= in the URL in sync as the day changes. */
-  syncUrl?: boolean;
 }): DayNavState {
   const router = useRouter();
   // Derived from the ticking clock, not read once on mount: an app left open
   // overnight otherwise keeps calling yesterday "today". Taking it off `useNow`
   // rather than a bare `new Date()` also keeps it honest under the React
   // Compiler, which is free to cache a render-time value with no dependencies.
-  const todayYmd = ymdInUk(useNow());
+  const now = useNow();
+  const todayYmd = ymdInUk(now);
   const { minYmd, maxYmd } = getDayRange(todayYmd);
   // Clamped here rather than in the UI so every route in - Prev/Next, the swipe
   // gesture, the week strip, a hand-edited ?d= - obeys the same bounds. The date
@@ -79,13 +79,13 @@ export function useDayNav({
     (next: string) => {
       const clamped = clamp(next, minYmd, maxYmd);
       setYmd(clamped);
-      if (syncUrl && clamped !== initialYmd) {
+      if (clamped !== initialYmd) {
         setPendingUrlYmd(clamped);
         router.setParams({ d: clamped });
       }
     },
-    [router, syncUrl, minYmd, maxYmd, initialYmd],
+    [router, minYmd, maxYmd, initialYmd],
   );
 
-  return { ymd, dayStart, todayYmd, isToday: ymd === todayYmd, minYmd, maxYmd, setDay };
+  return { ymd, dayStart, now, todayYmd, isToday: ymd === todayYmd, minYmd, maxYmd, setDay };
 }

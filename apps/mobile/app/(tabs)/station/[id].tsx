@@ -35,7 +35,6 @@ export default function StationScreen() {
       <StationDayView
         station={station}
         initialYmd={d}
-        syncUrl
         header={
           <View style={styles.header}>
             <StationChips activeId={station.id} onSelect={switchStation} />
@@ -43,11 +42,9 @@ export default function StationScreen() {
             <View style={styles.nameRow}>
               <View style={{ flex: 1 }}>
                 <ThemedText type="title">{station.name}</ThemedText>
-                {station.subtitle ? (
-                  <ThemedText type="caption" style={{ color: palette.muted }}>
-                    {station.subtitle}
-                  </ThemedText>
-                ) : null}
+                <ThemedText type="caption" style={{ color: palette.muted }}>
+                  {station.subtitle}
+                </ThemedText>
               </View>
               <Pressable
                 onPress={() => toggleFavourite(station.id)}
