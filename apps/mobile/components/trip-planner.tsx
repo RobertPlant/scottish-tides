@@ -17,14 +17,13 @@ import { useHydrated } from '@/hooks/use-hydrated';
 import { useNow } from '@/hooks/use-now';
 import { useSidePadding } from '@/hooks/use-side-padding';
 import { usePalette } from '@/hooks/use-theme-color';
-import { ymdInUk } from '@/lib/datetime';
+import { YEAR_SPAN, ymdInUk } from '@/lib/datetime';
 import { coeffFill, type DayCell, type Scheme, yearMonths } from '@/lib/planner';
 import type { Station } from '@/lib/stations';
 import { tidalStats } from '@/lib/tide-day';
 
 const MONTHS_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 const COLS = 31; // widest month; short months trail blank so rows stay aligned
-const YEAR_SPAN = 5; // how far the ‹ › buttons roam from the current year
 
 export function TripPlanner({ station, header }: { station: Station; header?: ReactNode }) {
   const sidePadding = useSidePadding();

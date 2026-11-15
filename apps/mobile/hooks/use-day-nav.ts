@@ -6,7 +6,7 @@ import { useRouter } from 'expo-router';
 import { useCallback, useMemo, useState } from 'react';
 
 import { useNow } from '@/hooks/use-now';
-import { parseYmd, ukDayStartFromYmd, ymdAddDays, ymdInUk } from '@/lib/datetime';
+import { getDayRange, parseYmd, ukDayStartFromYmd, ymdInUk } from '@/lib/datetime';
 
 // Module-level so `setDay` can use it without taking a per-render closure as a
 // hook dependency - the initial-day clamp and the setter had a copy each.
@@ -54,8 +54,7 @@ export function useDayNav({
   // rather than a bare `new Date()` also keeps it honest under the React
   // Compiler, which is free to cache a render-time value with no dependencies.
   const todayYmd = ymdInUk(useNow());
-  const minYmd = ymdAddDays(todayYmd, -730);
-  const maxYmd = ymdAddDays(todayYmd, 730);
+  const { minYmd, maxYmd } = getDayRange(todayYmd);
   // Clamped here rather than in the UI so every route in - Prev/Next, the swipe
   // gesture, the week strip, a hand-edited ?d= - obeys the same bounds. The date
   // field already refuses out-of-range input; the others used to walk past it.
