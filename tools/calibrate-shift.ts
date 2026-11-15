@@ -125,7 +125,7 @@ async function main() {
       'mobile',
       'assets',
       'data',
-      `${station.id}_from_${station.shift.based_on?.toLowerCase()}.json`,
+      `${station.id.replaceAll('-', '_')}_from_${station.shift.based_on?.toLowerCase()}.json`,
     );
     const json = JSON.parse(readFileSync(file, 'utf8'));
     Object.assign(json, fit, {
