@@ -5,9 +5,15 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
 import { ukDayStartFromYmd, ymdAddDays } from './datetime';
-import { predictStreamDay, raceById } from './streams';
+import { getReferenceStation, predictStreamDay, RACES, raceById } from './streams';
 
 const DAY = ukDayStartFromYmd('2026-07-14');
+
+test('every race has a reference station', () => {
+  for (const race of RACES) {
+    assert.ok(getReferenceStation(race), race.id);
+  }
+});
 
 test('raceById finds races and misses unknowns', () => {
   assert.equal(raceById('pentland-firth')?.name, 'Pentland Firth');

@@ -15,7 +15,7 @@ import { type Station, stationById } from '@/lib/stations';
 import { classifyDay, seaLevelSeries } from '@/lib/tide-day';
 import { predictExtrema } from '@/lib/tides';
 
-export interface Race {
+interface RaceCommon {
   id: string;
   name: string;
   area: string;
@@ -23,12 +23,6 @@ export interface Race {
   lon: number;
   /** Bundled station whose tide drives the streams. */
   referenceStationId: string;
-  /**
-   * 'gate' - a strait that goes slack near the reference HW/LW (Pentland etc.).
-   * 'sill' - a basin behind a rock sill (Falls of Lora): the rate follows the
-   * head between the sea and the lagged loch level, giving asymmetric windows.
-   */
-  type: 'gate' | 'sill';
   floodName: string;
   ebbName: string;
   springPeakKn: number;
@@ -36,21 +30,31 @@ export interface Race {
   /** Race-specific hazard note. */
   warning: string;
   source: string;
-
-  // gate-type only:
-  /** Slack near the reference HW / LW, offset in minutes (approx). */
-  slackAtHwOffsetMin?: number;
-  slackAtLwOffsetMin?: number;
-  /** True if the "flood" runs during the rising tide (LW→HW) at the reference. */
-  floodFromLwToHw?: boolean;
-
-  // sill-type only: the basin lags the sea, and (because the sill restricts
-  // outflow) drains slower than it fills - an asymmetric low-pass.
-  lochTauFillHours?: number;
-  lochTauDrainHours?: number;
-  /** Knots of stream per metre of head (sea − loch). */
-  headRateScale?: number;
 }
+
+/** A strait that goes slack near the reference HW/LW (Pentland etc.). */
+interface GateRace extends RaceCommon {
+  type: 'gate';
+  /** Slack near the reference HW / LW, offset in minutes (approx). */
+  slackAtHwOffsetMin: number;
+  slackAtLwOffsetMin: number;
+  /** True if the "flood" runs during the rising tide (LW→HW) at the reference. */
+  floodFromLwToHw: boolean;
+}
+
+/**
+ * A basin behind a rock sill (Falls of Lora): the rate follows the head between the sea and the lagged loch,
+ * which drains slower than it fills because the sill restricts outflow.
+ */
+interface SillRace extends RaceCommon {
+  type: 'sill';
+  lochTauFillHours: number;
+  lochTauDrainHours: number;
+  /** Knots of stream per metre of head (sea − loch). */
+  headRateScale: number;
+}
+
+export type Race = GateRace | SillRace;
 
 export const RACES: Race[] = [
   {
@@ -201,26 +205,41 @@ interface Segment {
   flood: boolean;
 }
 
-/** Stream estimate for a race over the UK civil day starting at `dayStart`. */
-export function predictStreamDay(race: Race, dayStart: Date): StreamDay {
+/** The bundled station whose tide drives a race. */
+export function getReferenceStation(race: Race): Station {
   const ref = stationById(race.referenceStationId);
   if (!ref) {
-    return { samples: [], slacks: [], peaks: [], springNeapFraction: 0, peakRate: 0 };
+    throw new Error(`race ${race.id} has no station ${race.referenceStationId}`);
   }
+
+  return ref;
+}
+
+/** Stream estimate for a race over the UK civil day starting at `dayStart`. */
+export function predictStreamDay(race: Race, dayStart: Date): StreamDay {
+  const ref = getReferenceStation(race);
   const { fraction } = classifyDay(ref, dayStart).cls;
-  return race.type === 'sill' ? predictSill(race, ref, dayStart, fraction) : predictGate(race, ref, dayStart, fraction);
+
+  switch (race.type) {
+    case 'gate':
+      return predictGate(race, ref, dayStart, fraction);
+    case 'sill':
+      return predictSill(race, ref, dayStart, fraction);
+    default: {
+      const unknown: never = race;
+      throw new Error(`unknown race type ${JSON.stringify(unknown)}`);
+    }
+  }
 }
 
 // --- 'gate' races: slack near reference HW/LW, sinusoid between -----------------
 
-function predictGate(race: Race, ref: Station, dayStart: Date, fraction: number): StreamDay {
+function predictGate(race: GateRace, ref: Station, dayStart: Date, fraction: number): StreamDay {
   const from = new Date(dayStart.getTime() - 9 * 3600_000);
   const to = new Date(dayStart.getTime() + 33 * 3600_000);
   const events = predictExtrema(ref.data, from, to, ref.shift);
   const peakRate = race.neapPeakKn + fraction * (race.springPeakKn - race.neapPeakKn);
-  const hwOff = race.slackAtHwOffsetMin ?? 0;
-  const lwOff = race.slackAtLwOffsetMin ?? 0;
-  const floodFromLwToHw = race.floodFromLwToHw ?? true;
+  const { slackAtHwOffsetMin: hwOff, slackAtLwOffsetMin: lwOff, floodFromLwToHw } = race;
 
   const slacks = events
     .map(e => ({
@@ -271,10 +290,8 @@ const SILL_WARMUP_H = 48;
 /** Hours either side of the day that events are found over, so a lobe crossing midnight keeps its real peak. */
 const SILL_EVENT_PAD_H = 12;
 
-function predictSill(race: Race, ref: Station, dayStart: Date, fraction: number): StreamDay {
-  const tauFill = race.lochTauFillHours ?? 3.5;
-  const tauDrain = race.lochTauDrainHours ?? 8;
-  const scale = race.headRateScale ?? 4;
+function predictSill(race: SillRace, ref: Station, dayStart: Date, fraction: number): StreamDay {
+  const { lochTauFillHours: tauFill, lochTauDrainHours: tauDrain, headRateScale: scale } = race;
   const start = dayStart.getTime();
   const end = ukEndOfDay(dayStart).getTime();
 

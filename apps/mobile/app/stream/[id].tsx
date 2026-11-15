@@ -14,8 +14,7 @@ import { useNow } from '@/hooks/use-now';
 import { useSidePadding } from '@/hooks/use-side-padding';
 import { usePalette } from '@/hooks/use-theme-color';
 import { formatTime } from '@/lib/datetime';
-import { stationById } from '@/lib/stations';
-import { predictStreamDay, RACES, raceById } from '@/lib/streams';
+import { getReferenceStation, predictStreamDay, RACES, raceById } from '@/lib/streams';
 
 export async function generateStaticParams(): Promise<{ id: string }[]> {
   return RACES.map(r => ({ id: r.id }));
@@ -34,7 +33,7 @@ export default function RaceDetail() {
   const palette = usePalette();
   const { id, d } = useLocalSearchParams<{ id: string; d?: string }>();
   const race = raceById(id) ?? RACES[0];
-  const ref = stationById(race.referenceStationId);
+  const ref = getReferenceStation(race);
 
   const now = useNow();
   const nav = useDayNav({ initialYmd: d, syncUrl: true });
@@ -117,7 +116,7 @@ export default function RaceDetail() {
 
         <Note>
           <ThemedText type="caption" style={{ color: palette.muted }}>
-            Timed off HW/LW at {ref?.name ?? 'the reference port'}; rate scaled by the day&apos;s spring/neap
+            Timed off HW/LW at {ref.name}; rate scaled by the day&apos;s spring/neap
             {hydrated ? ` (${Math.round(stream.springNeapFraction * 100)}% towards springs)` : ''}.
           </ThemedText>
           <ThemedText type="caption" style={{ color: palette.muted }}>
