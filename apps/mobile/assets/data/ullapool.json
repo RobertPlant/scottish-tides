@@ -9,10 +9,11 @@
     "2019-01-01",
     "2022-04-19"
   ],
+  "z0_note": "Z0 lowered 0.14 m from the gauge fit (3.238) to match UKHO predictions via tidetimes.org.uk (our gauge fit read 0.14 m above them).",
   "constituents": [
     {
       "name": "Z0",
-      "amplitude": 3.23832,
+      "amplitude": 3.09832,
       "phase": 0.0
     },
     {
