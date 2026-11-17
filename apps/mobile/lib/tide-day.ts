@@ -3,7 +3,7 @@
 import coefficientRefs from '@/assets/data/coefficient-refs.json';
 import { ukEndOfDay } from '@/lib/datetime';
 import type { Station } from '@/lib/stations';
-import { heightSeries, predictExtrema, shiftHeight, type TideEvent } from '@/lib/tides';
+import { getHeightMap, heightSeries, predictExtrema, shiftHeight, type TideEvent } from '@/lib/tides';
 
 const COEF_REFS = coefficientRefs as Record<string, { springRef: number; neapRef: number }>;
 
@@ -56,7 +56,7 @@ export interface TidalStats {
 
 /**
  * Mean spring/neap range for a station, from coefficient-refs.json (built by tools/gen-coefficient-refs.ts).
- * Secondary ports multiply both by the height scale, since it scales every tide's range equally.
+ * Secondary ports multiply both by the mean of their high and low water height scales.
  */
 export function tidalStats(station: Station): TidalStats {
   const ref = COEF_REFS[station.data.station];
@@ -64,7 +64,10 @@ export function tidalStats(station: Station): TidalStats {
     throw new Error(`no coefficient ref for ${station.data.station}, run tools/gen-coefficient-refs.ts`);
   }
 
-  const rangeScale = station.shift?.height_scale ?? 1;
+  // ponytail: mean of the HW and LW scales, off by ~0.1 m on a split shift; use absolute spring/neap levels if that shows
+  const rangeScale = station.shift
+    ? (getHeightMap(station.shift, 'high').scale + getHeightMap(station.shift, 'low').scale) / 2
+    : 1;
 
   return { springRange: ref.springRef * rangeScale, neapRange: ref.neapRef * rangeScale };
 }

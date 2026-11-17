@@ -3,7 +3,8 @@
 // there: each of its secondary-port high/low waters is matched to its own
 // base-port one, then
 //   - hw_time_min / lw_time_min = median time difference per event type, and
-//   - height = height_offset_m + height_scale * base, by least squares.
+//   - height = height_offset_m + height_scale * base, by least squares, with
+//     low waters fitted on their own into lw_height_scale / lw_height_offset_m.
 // The app applies that to our gauge-fitted base port. Fitting tidetimes' Oban
 // straight against our Tobermory would also absorb the gap between our gauge
 // fit and UKHO's predictions (mean sea level epoch), dragging Oban onto UKHO's
@@ -25,11 +26,29 @@ import { parseArgs } from 'node:util';
 
 import { ymdAddDays, ymdInUk } from '../apps/mobile/lib/datetime';
 import { STATIONS } from '../apps/mobile/lib/stations';
+import { getHeightMap } from '../apps/mobile/lib/tides';
 import { mean, median, nearestSameType, type RefEvent, reference, SLUGS } from './tidetimes';
+
+type Line = { scale: number; offset: number };
+type Pair = { base: number; ref: number };
 
 // Matches further apart than this are a different turn of the tide (or a
 // double high water), not a calibration signal.
 const OUTLIER_MIN = 40;
+
+// Least squares for ref = offset + scale * base.
+const fitLine = (pairs: Pair[]): Line => {
+  const meanBase = mean(pairs.map(pair => pair.base));
+  const meanRef = mean(pairs.map(pair => pair.ref));
+  const covariance = pairs.reduce((sum, pair) => sum + (pair.base - meanBase) * (pair.ref - meanRef), 0);
+  const variance = pairs.reduce((sum, pair) => sum + (pair.base - meanBase) ** 2, 0);
+  const scale = covariance / variance;
+
+  return { scale, offset: meanRef - scale * meanBase };
+};
+
+const sumAbsError = (pairs: Pair[], line: Line) =>
+  pairs.reduce((sum, pair) => sum + Math.abs(line.offset + line.scale * pair.base - pair.ref), 0);
 
 async function main() {
   const { values } = parseArgs({
@@ -50,8 +69,7 @@ async function main() {
 
   const high: number[] = [];
   const low: number[] = [];
-  const base: number[] = [];
-  const ref: number[] = [];
+  const pairs: { type: 'high' | 'low'; base: number; ref: number }[] = [];
   let dropped = 0;
   const used: string[] = [];
   const days = Number(values.days);
@@ -76,33 +94,28 @@ async function main() {
       }
       // Shift minutes are reference − base, so the sign flips from `d`.
       (r.type === 'high' ? high : low).push(-near.d);
-      base.push(near.e.height);
-      ref.push(r.height);
+      pairs.push({ type: r.type, base: near.e.height, ref: r.height });
     }
   }
 
-  // Least squares for ref = offset + scale * base.
-  const n = base.length;
-  const mb = mean(base);
-  const mr = mean(ref);
-  let sbr = 0;
-  let sbb = 0;
-  for (let i = 0; i < n; i++) {
-    sbr += (base[i] - mb) * (ref[i] - mr);
-    sbb += (base[i] - mb) ** 2;
-  }
-  const scale = sbr / sbb;
-  const offset = mr - scale * mb;
-  const heightErr = (k: number, c: number) => base.reduce((a, b, i) => a + Math.abs(c + k * b - ref[i]), 0) / n;
+  const highPairs = pairs.filter(pair => pair.type === 'high');
+  const lowPairs = pairs.filter(pair => pair.type === 'low');
+  const hwFit = fitLine(highPairs);
+  const lwFit = fitLine(lowPairs);
+  const n = pairs.length;
+  const heightErr = (hw: Line, lw: Line) => (sumAbsError(highPairs, hw) + sumAbsError(lowPairs, lw)) / n;
   const timeErr = (xs: number[], m: number) => xs.reduce((a, x) => a + Math.abs(x - m), 0) / xs.length;
 
   const fit = {
     hw_time_min: Math.round(median(high)),
     lw_time_min: Math.round(median(low)),
-    height_scale: Number(scale.toFixed(3)),
-    height_offset_m: Number(offset.toFixed(3)),
+    height_scale: Number(hwFit.scale.toFixed(3)),
+    height_offset_m: Number(hwFit.offset.toFixed(3)),
+    lw_height_scale: Number(lwFit.scale.toFixed(3)),
+    lw_height_offset_m: Number(lwFit.offset.toFixed(3)),
   };
   const cur = station.shift;
+  const curLw = getHeightMap(cur, 'low');
   console.log(
     `${station.name} from ${station.shift.based_on}, ${used.length} days ${used[0]} to ${used.at(-1)}: ${high.length} HW + ${low.length} LW matched, ${dropped} dropped (>${OUTLIER_MIN} min or unmatched)\n`,
   );
@@ -111,10 +124,12 @@ async function main() {
   console.log(`lw_time_min   ${String(cur.lw_time_min).padStart(10)}${String(fit.lw_time_min).padStart(8)}`);
   console.log(`height_scale  ${String(cur.height_scale).padStart(10)}${String(fit.height_scale).padStart(8)}`);
   console.log(`height_offset ${String(cur.height_offset_m).padStart(10)}${String(fit.height_offset_m).padStart(8)}`);
+  console.log(`lw_scale      ${String(curLw.scale).padStart(10)}${String(fit.lw_height_scale).padStart(8)}`);
+  console.log(`lw_offset     ${String(curLw.offset).padStart(10)}${String(fit.lw_height_offset_m).padStart(8)}`);
   console.log(
     `\nmean |error|: HW ${timeErr(high, cur.hw_time_min).toFixed(1)} -> ${timeErr(high, fit.hw_time_min).toFixed(1)} min, ` +
       `LW ${timeErr(low, cur.lw_time_min).toFixed(1)} -> ${timeErr(low, fit.lw_time_min).toFixed(1)} min, ` +
-      `height ${heightErr(cur.height_scale, cur.height_offset_m).toFixed(3)} -> ${heightErr(scale, offset).toFixed(3)} m`,
+      `height ${heightErr(getHeightMap(cur, 'high'), curLw).toFixed(3)} -> ${heightErr(hwFit, lwFit).toFixed(3)} m`,
   );
 
   if (values.write) {

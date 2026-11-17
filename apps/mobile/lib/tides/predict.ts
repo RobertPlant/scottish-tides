@@ -32,6 +32,7 @@ export interface StationData {
 /**
  * Secondary-port correction (e.g. Oban derived from a Tobermory fit): a time
  * offset per event type, and height = height_offset_m + height_scale * base.
+ * Low waters take the lw_ pair instead when the port has one.
  */
 export interface Shift {
   name: string;
@@ -40,11 +41,39 @@ export interface Shift {
   lw_time_min: number;
   height_scale: number;
   height_offset_m: number;
+  lw_height_scale?: number;
+  lw_height_offset_m?: number;
 }
 
-/** A base-port height as the secondary port sees it. */
+/** The height map a high or low water goes through, scale and offset. */
+export const getHeightMap = (shift: Shift, type: TideEventType): { scale: number; offset: number } => {
+  const { lw_height_scale: lwScale, lw_height_offset_m: lwOffset } = shift;
+  const hasLowMap = lwScale !== undefined && lwOffset !== undefined;
+  if (type === 'low' && hasLowMap) {
+    return { scale: lwScale, offset: lwOffset };
+  }
+
+  return { scale: shift.height_scale, offset: shift.height_offset_m };
+};
+
+/** A base-port high or low water's height as the secondary port sees it. */
+export const shiftEventHeight = (height: number, shift: Shift, type: TideEventType): number => {
+  const { scale, offset } = getHeightMap(shift, type);
+
+  return offset + scale * height;
+};
+
+/**
+ * A base-port curve height as the secondary port sees it. Above where the high and low water maps
+ * cross it takes the high water one and below it the low water one, so the curve stays continuous.
+ */
 export function shiftHeight(height: number, shift: Shift): number {
-  return shift.height_offset_m + shift.height_scale * height;
+  const high = shiftEventHeight(height, shift, 'high');
+  const low = shiftEventHeight(height, shift, 'low');
+  const slopeGap = getHeightMap(shift, 'high').scale - getHeightMap(shift, 'low').scale;
+  const isHighSide = (high - low) * slopeGap >= 0;
+
+  return isHighSide ? high : low;
 }
 
 const HOUR_MS = 3600_000;
@@ -228,7 +257,7 @@ export function applyShift(events: TideEvent[], shift: Shift): TideEvent[] {
     const dtMin = e.type === 'high' ? shift.hw_time_min : shift.lw_time_min;
     return {
       time: new Date(e.time.getTime() + dtMin * 60_000),
-      height: shiftHeight(e.height, shift),
+      height: shiftEventHeight(e.height, shift, e.type),
       type: e.type,
     };
   });
