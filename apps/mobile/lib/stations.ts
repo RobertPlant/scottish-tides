@@ -8,7 +8,6 @@
 
 import aberdeenData from '@/assets/data/aberdeen.json';
 import kinlochbervieData from '@/assets/data/kinlochbervie.json';
-import kyleShift from '@/assets/data/kyle_of_lochalsh_from_ullapool.json';
 import leithData from '@/assets/data/leith.json';
 import lerwickData from '@/assets/data/lerwick.json';
 import mallaigShift from '@/assets/data/mallaig_from_tobermory.json';
@@ -106,16 +105,6 @@ export const STATIONS: Station[] = [
     lon: -5.8283,
     data: tobermoryData as StationData,
     shift: mallaigShift as Shift,
-  },
-  {
-    id: 'kyle-of-lochalsh',
-    name: 'Kyle of Lochalsh',
-    subtitle: 'Skye bridge, via Ullapool + offset',
-    region: 'West Coast',
-    lat: 57.2797,
-    lon: -5.7136,
-    data: ullapoolData as StationData,
-    shift: kyleShift as Shift,
   },
   {
     id: 'portree',

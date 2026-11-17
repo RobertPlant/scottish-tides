@@ -23,7 +23,6 @@ export const SLUGS: Record<string, string | null> = {
   aberdeen: 'aberdeen',
   leith: 'leith',
   mallaig: 'mallaig',
-  'kyle-of-lochalsh': 'kyle-of-lochalsh',
   portree: 'portree',
   uig: 'loch-snizort-uig-bay',
 };
