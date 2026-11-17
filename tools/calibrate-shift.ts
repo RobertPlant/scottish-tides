@@ -103,8 +103,7 @@ async function main() {
   const hwFit = fitLine(highPairs);
   const lwFit = fitLine(lowPairs);
   const n = pairs.length;
-  const heightErr = (hw: Line, lw: Line) =>
-    (sumAbsError(highPairs, hw) + sumAbsError(lowPairs, lw)) / n;
+  const heightErr = (hw: Line, lw: Line) => (sumAbsError(highPairs, hw) + sumAbsError(lowPairs, lw)) / n;
   const timeErr = (xs: number[], m: number) => xs.reduce((a, x) => a + Math.abs(x - m), 0) / xs.length;
 
   const fit = {
@@ -141,7 +140,7 @@ async function main() {
       'mobile',
       'assets',
       'data',
-      `${station.id.replaceAll('-', '_')}_from_${station.shift.based_on?.toLowerCase()}.json`,
+      `${station.id}_from_${station.shift.based_on?.toLowerCase()}.json`,
     );
     const json = JSON.parse(readFileSync(file, 'utf8'));
     Object.assign(json, fit, {
