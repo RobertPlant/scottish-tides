@@ -1,0 +1,14 @@
+{
+  "name": "Uig",
+  "based_on": "Ullapool",
+  "method": "tidetimes.org.uk Uig vs its own Ullapool (UKHO-derived), applied to our gauge-fitted Ullapool: median time difference, least-squares height fit",
+  "hw_time_min": -29,
+  "lw_time_min": -13,
+  "height_scale": 1.377,
+  "height_offset_m": -1.864,
+  "note": "HW and LW heights each = offset + scale * Ullapool (tidetimes: Loch Snizort (Uig Bay)). HW comes 16 min earlier than LW relative to Ullapool; 6% of events drop as a different turn. Heights follow tidetimes, Ullapool's Z0 is set to UKHO's level. Kayak-grade, not for navigation.",
+  "calibrated_from": "tidetimes.org.uk Uig vs Ullapool, 2025-10-01 to 2026-11-22 (every 3 day(s), 511 events) via tools/calibrate-shift.ts",
+  "calibrated_on": "2026-11-17",
+  "lw_height_scale": 0.859,
+  "lw_height_offset_m": 0.096
+}

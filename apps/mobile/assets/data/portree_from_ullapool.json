@@ -1,0 +1,14 @@
+{
+  "name": "Portree",
+  "based_on": "Ullapool",
+  "method": "tidetimes.org.uk Portree vs its own Ullapool (UKHO-derived), applied to our gauge-fitted Ullapool: median time difference, least-squares height fit",
+  "hw_time_min": -25,
+  "lw_time_min": -25,
+  "height_scale": 1.227,
+  "height_offset_m": -1.082,
+  "note": "HW and LW heights each = offset + scale * Ullapool. tidetimes' Portree is Ullapool moved 25 min to the minute, so times are as good as Ullapool's. Heights follow tidetimes, Ullapool's Z0 is set to UKHO's level. Kayak-grade, not for navigation.",
+  "calibrated_from": "tidetimes.org.uk Portree vs Ullapool, 2025-10-01 to 2026-11-22 (every 3 day(s), 548 events) via tools/calibrate-shift.ts",
+  "calibrated_on": "2026-11-17",
+  "lw_height_scale": 0.859,
+  "lw_height_offset_m": 0.096
+}
