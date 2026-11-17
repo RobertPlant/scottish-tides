@@ -103,8 +103,7 @@ async function main() {
   const hwFit = fitLine(highPairs);
   const lwFit = fitLine(lowPairs);
   const n = pairs.length;
-  const heightErr = (hw: Line, lw: Line) =>
-    (sumAbsError(highPairs, hw) + sumAbsError(lowPairs, lw)) / n;
+  const heightErr = (hw: Line, lw: Line) => (sumAbsError(highPairs, hw) + sumAbsError(lowPairs, lw)) / n;
   const timeErr = (xs: number[], m: number) => xs.reduce((a, x) => a + Math.abs(x - m), 0) / xs.length;
 
   const fit = {
