@@ -9,6 +9,7 @@ import { applyShift, type Shift, type StationData, Tide, type TideEvent } from '
 
 export {
   Tide,
+  getHeightMap,
   shiftHeight,
   type Shift,
   type StationData,
