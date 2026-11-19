@@ -10,6 +10,9 @@ import brodickShift from '@/assets/data/brodick_from_millport.json';
 import campbeltownShift from '@/assets/data/campbeltown_from_millport.json';
 import rothesayShift from '@/assets/data/rothesay_from_millport.json';
 import tarbertLochFyneShift from '@/assets/data/tarbert_loch_fyne_from_millport.json';
+import ardfernShift from '@/assets/data/ardfern_from_tobermory.json';
+import connelShift from '@/assets/data/connel_from_tobermory.json';
+import easdaleShift from '@/assets/data/easdale_from_tobermory.json';
 import aberdeenData from '@/assets/data/aberdeen.json';
 import kinlochbervieData from '@/assets/data/kinlochbervie.json';
 import leithData from '@/assets/data/leith.json';
@@ -139,6 +142,36 @@ export const STATIONS: Station[] = [
     lat: 55.6275,
     lon: -6.1886,
     data: portEllenData as StationData,
+  },
+  {
+    id: 'connel',
+    name: 'Connel',
+    subtitle: 'Loch Etive, via Tobermory + offset',
+    region: 'West Coast',
+    lat: 56.4545,
+    lon: -5.388,
+    data: tobermoryData as StationData,
+    shift: connelShift as Shift,
+  },
+  {
+    id: 'easdale',
+    name: 'Easdale',
+    subtitle: 'Isle of Seil, via Tobermory + offset',
+    region: 'West Coast',
+    lat: 56.293,
+    lon: -5.6556,
+    data: tobermoryData as StationData,
+    shift: easdaleShift as Shift,
+  },
+  {
+    id: 'ardfern',
+    name: 'Ardfern',
+    subtitle: 'Loch Craignish, via Tobermory + offset',
+    region: 'West Coast',
+    lat: 56.1826,
+    lon: -5.534,
+    data: tobermoryData as StationData,
+    shift: ardfernShift as Shift,
   },
   {
     id: 'mallaig',

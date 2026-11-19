@@ -1,0 +1,12 @@
+{
+  "name": "Easdale",
+  "based_on": "Tobermory",
+  "method": "tidetimes.org.uk Easdale vs its own Tobermory (UKHO-derived), applied to our gauge-fitted Tobermory: median time difference, least-squares height fit",
+  "hw_time_min": -30,
+  "lw_time_min": -44,
+  "height_scale": 0.607,
+  "height_offset_m": -0.077,
+  "note": "tidetimes' Seil Sound, the Admiralty port nearest Easdale and Cuan Sound. Height = offset + scale * Tobermory: range ~40% smaller. HW ~30 min and LW ~44 min before Tobermory, scattering ~8 min. One height map for HW and LW: separate ones fitted under 0.01 m better but don't cross inside the range, so the curve would miss the turns. Kayak-grade, not for navigation.",
+  "calibrated_from": "tidetimes.org.uk Easdale vs Tobermory, 2025-10-01 to 2026-11-25 (every 3 day(s), 545 events) via tools/calibrate-shift.ts",
+  "calibrated_on": "2026-11-19"
+}
