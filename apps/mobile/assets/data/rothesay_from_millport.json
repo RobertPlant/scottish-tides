@@ -1,0 +1,12 @@
+{
+  "name": "Rothesay",
+  "based_on": "Millport",
+  "method": "tidetimes.org.uk Rothesay vs its own Millport (UKHO-derived), applied to our gauge-fitted Millport: median time difference, least-squares height fit",
+  "hw_time_min": -10,
+  "lw_time_min": -2,
+  "height_scale": 1.096,
+  "height_offset_m": -0.011,
+  "note": "Height = offset + scale * Millport: Rothesay's range is ~10% bigger. HW is ~10 min before Millport's and scatters ~5 min round it. One height map for HW and LW: separate ones fitted under 0.01 m better but don't cross inside the range, so the curve would miss the low water heights. Kayak-grade, not for navigation.",
+  "calibrated_from": "tidetimes.org.uk Rothesay vs Millport, 2025-10-01 to 2026-11-25 (every 3 day(s), 544 events) via tools/calibrate-shift.ts",
+  "calibrated_on": "2026-11-19"
+}
