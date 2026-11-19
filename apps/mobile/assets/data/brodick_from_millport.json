@@ -4,11 +4,9 @@
   "method": "tidetimes.org.uk Brodick vs its own Millport (UKHO-derived), applied to our gauge-fitted Millport: median time difference, least-squares height fit",
   "hw_time_min": -4,
   "lw_time_min": -4,
-  "height_scale": 0.871,
-  "height_offset_m": 0.316,
-  "note": "HW and LW heights each = offset + scale * Millport: Brodick's range is ~13% smaller. Lamlash is HW only on tidetimes, so Brodick stands in for Arran's east side. Kayak-grade, not for navigation.",
+  "height_scale": 0.998,
+  "height_offset_m": -0.091,
+  "note": "Height = offset + scale * Millport, ~0.09 m lower. Lamlash is HW only on tidetimes, so Brodick stands in for Arran's east side. One height map for HW and LW: separate ones fitted under 0.01 m better but don't cross inside the range, so the curve would miss the low water heights. Kayak-grade, not for navigation.",
   "calibrated_from": "tidetimes.org.uk Brodick vs Millport, 2025-10-01 to 2026-11-25 (every 3 day(s), 543 events) via tools/calibrate-shift.ts",
-  "calibrated_on": "2026-11-19",
-  "lw_height_scale": 0.855,
-  "lw_height_offset_m": 0.009
+  "calibrated_on": "2026-11-19"
 }
