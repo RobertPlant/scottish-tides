@@ -6,6 +6,10 @@
 // To add a station: drop its constituents JSON in assets/data, import it here,
 // and append a Station. See docs/adding-a-station.md.
 
+import brodickShift from '@/assets/data/brodick_from_millport.json';
+import campbeltownShift from '@/assets/data/campbeltown_from_millport.json';
+import rothesayShift from '@/assets/data/rothesay_from_millport.json';
+import tarbertLochFyneShift from '@/assets/data/tarbert_loch_fyne_from_millport.json';
 import aberdeenData from '@/assets/data/aberdeen.json';
 import kinlochbervieData from '@/assets/data/kinlochbervie.json';
 import leithData from '@/assets/data/leith.json';
@@ -58,6 +62,46 @@ export const STATIONS: Station[] = [
     lat: 55.7497,
     lon: -4.9064,
     data: millportData as StationData,
+  },
+  {
+    id: 'rothesay',
+    name: 'Rothesay',
+    subtitle: 'Isle of Bute, via Millport + offset',
+    region: 'Clyde',
+    lat: 55.8375,
+    lon: -5.0545,
+    data: millportData as StationData,
+    shift: rothesayShift as Shift,
+  },
+  {
+    id: 'brodick',
+    name: 'Brodick',
+    subtitle: 'Isle of Arran, via Millport + offset',
+    region: 'Clyde',
+    lat: 55.5764,
+    lon: -5.1395,
+    data: millportData as StationData,
+    shift: brodickShift as Shift,
+  },
+  {
+    id: 'tarbert-loch-fyne',
+    name: 'Tarbert',
+    subtitle: 'Loch Fyne, via Millport + offset',
+    region: 'Clyde',
+    lat: 55.8645,
+    lon: -5.414,
+    data: millportData as StationData,
+    shift: tarbertLochFyneShift as Shift,
+  },
+  {
+    id: 'campbeltown',
+    name: 'Campbeltown',
+    subtitle: 'Kintyre, via Millport + offset',
+    region: 'Clyde',
+    lat: 55.423,
+    lon: -5.604,
+    data: millportData as StationData,
+    shift: campbeltownShift as Shift,
   },
   {
     id: 'portpatrick',
