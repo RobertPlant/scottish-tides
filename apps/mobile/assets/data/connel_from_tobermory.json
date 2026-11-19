@@ -1,0 +1,12 @@
+{
+  "name": "Connel",
+  "based_on": "Tobermory",
+  "method": "tidetimes.org.uk Connel vs its own Tobermory (UKHO-derived), applied to our gauge-fitted Tobermory: median time difference, least-squares height fit",
+  "hw_time_min": -1,
+  "lw_time_min": -2,
+  "height_scale": 0.75,
+  "height_offset_m": 0.223,
+  "note": "Height = offset + scale * Tobermory: Connel's range is ~25% smaller. Tidetimes' Connel is the Admiralty's, which doesn't model the Falls of Lora: inside the narrows the loch lags and drains on its own (see the streams page). One height map for HW and LW: separate ones fitted under 0.01 m better but don't cross inside the range, so the curve would miss the turns. Kayak-grade, not for navigation.",
+  "calibrated_from": "tidetimes.org.uk Connel vs Tobermory, 2025-10-01 to 2026-11-25 (every 3 day(s), 541 events) via tools/calibrate-shift.ts",
+  "calibrated_on": "2026-11-19"
+}

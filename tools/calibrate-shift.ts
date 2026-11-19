@@ -32,7 +32,7 @@ import { mean, median, nearestSameType, type RefEvent, reference, SLUGS } from '
 type Line = { scale: number; offset: number };
 type Pair = { base: number; ref: number };
 
-// Matches further apart than this are a different turn of the tide (or a
+// Matches further than this from the current shift are a different turn of the tide (or a
 // double high water), not a calibration signal.
 const OUTLIER_MIN = 40;
 
@@ -88,7 +88,9 @@ async function main() {
     const baseEvents = baseDays.flatMap(d => d ?? []);
     for (const r of refs) {
       const near = nearestSameType(r, baseEvents);
-      if (!near || Math.abs(near.d) > OUTLIER_MIN) {
+      // Centred on the current shift, so a port well over OUTLIER_MIN from its base still matches.
+      const expected = r.type === 'high' ? station.shift.hw_time_min : station.shift.lw_time_min;
+      if (!near || Math.abs(-near.d - expected) > OUTLIER_MIN) {
         dropped++;
         continue;
       }

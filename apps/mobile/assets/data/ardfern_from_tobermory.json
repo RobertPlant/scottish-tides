@@ -1,0 +1,12 @@
+{
+  "name": "Ardfern",
+  "based_on": "Tobermory",
+  "method": "tidetimes.org.uk Ardfern vs its own Tobermory (UKHO-derived), applied to our gauge-fitted Tobermory: median time difference, least-squares height fit",
+  "hw_time_min": -62,
+  "lw_time_min": -51,
+  "height_scale": 0.54,
+  "height_offset_m": -0.096,
+  "note": "tidetimes' Loch Beag, at the head of Loch Craignish, the Admiralty port nearest Ardfern and Crinan. Height = offset + scale * Tobermory: range ~45% smaller. HW ~1 h and LW ~51 min before Tobermory, HW scattering ~8 min. One height map for HW and LW: separate ones fitted under 0.01 m better but don't cross inside the range, so the curve would miss the turns. Kayak-grade, not for navigation.",
+  "calibrated_from": "tidetimes.org.uk Ardfern vs Tobermory, 2025-10-01 to 2026-11-25 (every 3 day(s), 543 events) via tools/calibrate-shift.ts",
+  "calibrated_on": "2026-11-19"
+}
