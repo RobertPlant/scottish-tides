@@ -29,6 +29,9 @@ export const SLUGS: Record<string, string | null> = {
   brodick: 'brodick-bay',
   'tarbert-loch-fyne': 'east-loch-tarbert',
   campbeltown: 'campbeltown',
+  connel: 'connel',
+  easdale: 'seil-sound',
+  ardfern: 'loch-beag',
 };
 
 const CACHE = path.join(import.meta.dirname, '.cache', 'tidetimes');
