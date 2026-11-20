@@ -146,7 +146,7 @@ export function classifyDay(
 
 /**
  * Continuous sea level for a station over an arbitrary window (secondary ports
- * get the warped shift, see `shiftCurve`). Used by the Falls-of-Lora sill model.
+ * get the warped shift, see `shiftCurve`).
  */
 export function seaLevelSeries(station: Station, from: Date, to: Date): { time: Date; height: number }[] {
   const { shift } = station;

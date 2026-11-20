@@ -4,11 +4,10 @@ The **Streams** feature estimates slack times and rates for well-known races. It
 is deliberately a *model*, not a tidal stream atlas, and uses no copyrighted
 Admiralty data.
 
-## The two models
+## The model
 
-Each race in `lib/streams.ts` → `RACES` has a `type`:
-
-**`gate`** — a strait/sound (Pentland Firth, Corryvreckan, Dorus Mòr…):
+Every race in `lib/streams.ts` → `RACES` is a "gate", a strait or sound
+(Pentland Firth, Corryvreckan, Dorus Mòr…):
 
 1. **Slack water** occurs near the reference port's HW/LW (± an offset), from the
    offline tide engine (`predictExtrema`).
@@ -27,19 +26,11 @@ Corryvreckan W-going begins HW Oban +4:10 / E-going −2:10; Pentland W-going HW
 The flood/ebb *magnitudes* are still modelled symmetric (the timing is the part
 that's calibrated).
 
-**`sill`** — a basin behind a rock sill (**Falls of Lora**, at Connel). Here the
-stream is driven by the **head between the open sea and the loch**, not by local
-HW/LW. We take the sea level (the reference port) and low-pass it to estimate the
-lagged loch level, then set the rate ∝ `head = sea − loch` (`headRateScale`). The
-loch's low-pass is **asymmetric** — it fills faster (`lochTauFillHours`) than it
-drains (`lochTauDrainHours`), because the sill restricts outflow — so the falls
-run **out** longer on the ebb (the documented mechanism), giving asymmetric,
-strongly range-dependent windows a sinusoid can't.
-
-The Falls-of-Lora constants are **calibrated against fallsoflora.info** (itself
-XTide): fill τ 3.5 h / drain τ 8 h reproduces the published turn times to ~12 min
-mean. `headRateScale` is set so big springs peak ~7 kn (the rate isn't published,
-so its magnitude is indicative). Re-calibrate against that site if needed.
+The **Falls of Lora** (Connel) is a gate too: the falls run out from HW Oban
++2:10 and in from LW Oban +2:50. Those are the fixed offsets fallsoflora.info
+puts on XTide's Oban, on every turn of its 2026 table, so they're a local rule of
+thumb rather than a model. A loch low-pass ("sill") model fitted to the same table
+did no better (~9-10 min mean against ~7.5 for the offsets) and was dropped.
 
 ## What's approximate
 

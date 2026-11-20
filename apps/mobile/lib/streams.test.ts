@@ -1,11 +1,12 @@
 // Tidal-stream estimates: gate races (slack near ref HW/LW, sinusoid between)
-// and the Falls of Lora sill model. Deterministic for a fixed day.
+// Deterministic for a fixed day.
 
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
 import { ukDayStartFromYmd, ymdAddDays } from './datetime';
 import { getReferenceStation, predictStreamDay, RACES, raceById } from './streams';
+import { dayEvents } from './tide-day';
 
 const DAY = ukDayStartFromYmd('2026-07-14');
 
@@ -58,45 +59,22 @@ test('gate race: peaks are signed and named consistently', () => {
   }
 });
 
-test('sill race (Falls of Lora): valid, range-scaled structure', () => {
+test('Falls of Lora: the falls run out from HW Oban +2:10 and in from LW Oban +2:50', () => {
   const race = raceById('falls-of-lora');
   assert.ok(race);
   const day = predictStreamDay(race, DAY);
+  const oban = getReferenceStation(race);
+  const turns = dayEvents(oban, DAY);
 
-  assert.ok(day.samples.length > 100); // 10-min sampling across the day
-  assert.ok(day.peakRate >= 0);
-  assert.ok(day.springNeapFraction >= 0 && day.springNeapFraction <= 1);
-  for (let i = 1; i < day.slacks.length; i++) {
-    assert.ok(day.slacks[i].getTime() >= day.slacks[i - 1].getTime());
+  for (const slack of day.slacks) {
+    const minutesAfter = turns.map(turn => ({ turn, minutes: (slack.getTime() - turn.time.getTime()) / 60_000 }));
+    const match = minutesAfter.find(({ minutes }) => minutes === 130 || minutes === 170);
+    assert.ok(match, slack.toISOString());
+    assert.equal(match.turn.type === 'high', match.minutes === 130);
   }
 });
 
-// The sill model derives its rate from the sea↔loch head (headRateScale), not
-// from springPeakKn/neapPeakKn like the gates - so nothing tied the two together
-// and a tweak to the scale could have sent the Falls to 20 kn with every test
-// still green, on a page about when a rapid is survivable. Swept over a year
-// rather than one day because the whole point is the spring/neap envelope.
-test('sill race: the yearly peak envelope matches the published neap/spring figures', () => {
-  const race = raceById('falls-of-lora');
-  assert.ok(race);
-
-  let lo = Number.POSITIVE_INFINITY;
-  let hi = 0;
-  let ymd = '2026-01-01';
-  for (let i = 0; i < 365; i++) {
-    const { peakRate } = predictStreamDay(race, ukDayStartFromYmd(ymd));
-    lo = Math.min(lo, peakRate);
-    hi = Math.max(hi, peakRate);
-    ymd = ymdAddDays(ymd, 1);
-  }
-
-  // Biggest spring lands on the published spring figure (+10% headroom); the
-  // smallest neap stays under the published neap figure. Currently 1.0 / 7.2.
-  assert.ok(hi > race.springPeakKn * 0.8 && hi < race.springPeakKn * 1.1, `spring peak ${hi} kn`);
-  assert.ok(lo < race.neapPeakKn, `neap peak ${lo} kn`);
-});
-
-test('sill race: peaks run flood, ebb, flood across midnight with no day-edge copies', () => {
+test('Falls of Lora: peaks run flood, ebb, flood across midnight with no day-edge copies', () => {
   const race = raceById('falls-of-lora');
   assert.ok(race);
 

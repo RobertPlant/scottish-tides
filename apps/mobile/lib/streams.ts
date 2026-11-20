@@ -12,10 +12,11 @@
 
 import { ukEndOfDay } from '@/lib/datetime';
 import { type Station, stationById } from '@/lib/stations';
-import { classifyDay, seaLevelSeries } from '@/lib/tide-day';
+import { classifyDay } from '@/lib/tide-day';
 import { predictExtrema } from '@/lib/tides';
 
-interface RaceCommon {
+/** A strait that goes slack near the reference port's HW and LW. */
+export interface Race {
   id: string;
   name: string;
   area: string;
@@ -23,6 +24,11 @@ interface RaceCommon {
   lon: number;
   /** Bundled station whose tide drives the streams. */
   referenceStationId: string;
+  /** Slack near the reference HW / LW, offset in minutes (approx). */
+  slackAtHwOffsetMin: number;
+  slackAtLwOffsetMin: number;
+  /** True if the "flood" runs during the rising tide (LW→HW) at the reference. */
+  floodFromLwToHw: boolean;
   floodName: string;
   ebbName: string;
   springPeakKn: number;
@@ -32,30 +38,6 @@ interface RaceCommon {
   source: string;
 }
 
-/** A strait that goes slack near the reference HW/LW (Pentland etc.). */
-interface GateRace extends RaceCommon {
-  type: 'gate';
-  /** Slack near the reference HW / LW, offset in minutes (approx). */
-  slackAtHwOffsetMin: number;
-  slackAtLwOffsetMin: number;
-  /** True if the "flood" runs during the rising tide (LW→HW) at the reference. */
-  floodFromLwToHw: boolean;
-}
-
-/**
- * A basin behind a rock sill (Falls of Lora): the rate follows the head between the sea and the lagged loch,
- * which drains slower than it fills because the sill restricts outflow.
- */
-interface SillRace extends RaceCommon {
-  type: 'sill';
-  lochTauFillHours: number;
-  lochTauDrainHours: number;
-  /** Knots of stream per metre of head (sea − loch). */
-  headRateScale: number;
-}
-
-export type Race = GateRace | SillRace;
-
 export const RACES: Race[] = [
   {
     id: 'pentland-firth',
@@ -64,7 +46,6 @@ export const RACES: Race[] = [
     lat: 58.72,
     lon: -3.15,
     referenceStationId: 'aberdeen',
-    type: 'gate',
     slackAtHwOffsetMin: -65,
     slackAtLwOffsetMin: -72,
     floodFromLwToHw: false,
@@ -84,7 +65,6 @@ export const RACES: Race[] = [
     lat: 56.15,
     lon: -5.71,
     referenceStationId: 'oban',
-    type: 'gate',
     slackAtHwOffsetMin: -140,
     slackAtLwOffsetMin: -127,
     floodFromLwToHw: true,
@@ -104,7 +84,6 @@ export const RACES: Race[] = [
     lat: 56.18,
     lon: -5.67,
     referenceStationId: 'oban',
-    type: 'gate',
     slackAtHwOffsetMin: -140,
     slackAtLwOffsetMin: -127,
     floodFromLwToHw: true,
@@ -122,18 +101,17 @@ export const RACES: Race[] = [
     lat: 56.45,
     lon: -5.39,
     referenceStationId: 'oban',
-    type: 'sill',
+    slackAtHwOffsetMin: 130,
+    slackAtLwOffsetMin: 170,
+    floodFromLwToHw: true,
     floodName: 'In-flowing (flood)',
     ebbName: 'Out-flowing (the falls)',
     springPeakKn: 7,
     neapPeakKn: 2,
-    lochTauFillHours: 3.5,
-    lochTauDrainHours: 8,
-    headRateScale: 3.0,
     warning:
       'A tidal rapid over a rock ledge: the falls run OUT on the ebb once the falling sea drops below Loch Etive, then IN on the flood. Strongly range-dependent: negligible on small neaps, violent on big springs.',
     source:
-      'Modelled from the sea↔loch head; turn times calibrated to fallsoflora.info (XTide) to ~12 min. Rate magnitude indicative.',
+      "Out-flow begins HW Oban +2:10, in-flow LW Oban +2:50: the fixed offsets fallsoflora.info puts on XTide's Oban (every turn in its 2026 table). Rate magnitude indicative.",
   },
   {
     id: 'dorus-mor',
@@ -142,7 +120,6 @@ export const RACES: Race[] = [
     lat: 56.11,
     lon: -5.61,
     referenceStationId: 'oban',
-    type: 'gate',
     slackAtHwOffsetMin: -90,
     slackAtLwOffsetMin: -90,
     floodFromLwToHw: true,
@@ -160,7 +137,6 @@ export const RACES: Race[] = [
     lat: 55.86,
     lon: -6.1,
     referenceStationId: 'oban',
-    type: 'gate',
     slackAtHwOffsetMin: -40,
     slackAtLwOffsetMin: -42,
     floodFromLwToHw: true,
@@ -170,6 +146,63 @@ export const RACES: Race[] = [
     neapPeakKn: 2.5,
     warning: 'A steady, strong tidal river. Time a transit with the stream, not against.',
     source: 'Slack ≈ HW Oban −0:40 / +5:30 (Rhinns-of-Islay figures, approximate); peak ~5 kn springs.',
+  },
+  {
+    id: 'cuan-sound',
+    name: 'Cuan Sound',
+    area: 'Seil to Luing',
+    lat: 56.267,
+    lon: -5.629,
+    referenceStationId: 'oban',
+    slackAtHwOffsetMin: -90,
+    slackAtLwOffsetMin: -100,
+    floodFromLwToHw: true,
+    floodName: 'W-going (N stream)',
+    ebbName: 'E-going (S stream)',
+    springPeakKn: 7,
+    neapPeakKn: 3.5,
+    warning:
+      'Narrow and dog-legged, with the Cleit rock mid-channel and only a very brief slack at springs; it runs at six knots within half an hour of slack. Turns with the wind and pressure as well as the tide.',
+    source:
+      'N-going (sets W) begins ≈ HW Oban +4:30, S-going (sets E) ≈ HW −1:30, 7 kn springs (Wikipedia, from an old gazetteer); forum reports put the turn 1 to 2 h before HW/LW Oban. Neap rate a guess.',
+  },
+  {
+    id: 'sound-of-luing',
+    name: 'Sound of Luing',
+    area: 'Luing to Scarba and Fladda',
+    lat: 56.23,
+    lon: -5.67,
+    referenceStationId: 'oban',
+    slackAtHwOffsetMin: -105,
+    slackAtLwOffsetMin: -100,
+    floodFromLwToHw: true,
+    floodName: 'N-going (flood)',
+    ebbName: 'S-going (ebb)',
+    springPeakKn: 7,
+    neapPeakKn: 5,
+    warning:
+      'Fastest at the north end around Fladda, with overfalls off the islets against wind. The tidal atlas shows ~2 kn mid-sound, far below what boats meet in the narrows.',
+    source:
+      'N-going begins ≈ HW Oban +4:30, S-going ≈ HW Oban −1:45 (Ardfern Yacht Centre, after the CCC directions; later at neaps). 7 kn springs, 5 kn neaps around Fladda (CCC, as quoted on YBW).',
+  },
+  {
+    id: 'kyle-rhea',
+    name: 'Kyle Rhea',
+    area: 'Glenelg to Skye',
+    lat: 57.235,
+    lon: -5.66,
+    referenceStationId: 'ullapool',
+    slackAtHwOffsetMin: 0,
+    slackAtLwOffsetMin: 0,
+    floodFromLwToHw: true,
+    floodName: 'N-going (flood)',
+    ebbName: 'S-going (ebb)',
+    springPeakKn: 8,
+    neapPeakKn: 5,
+    warning:
+      'Strong eddies and overfalls in the narrows, worst at the north end against a northerly. Too fast to punch on springs: go with it.',
+    source:
+      'S-going from ≈ HW Ullapool, N-going from ≈ HW +6 (visitmyharbour); over 8 kn springs and 5 kn on neap floods (Admiralty chart 2541). Sources disagree on the N-going start: check the atlas.',
   },
 ];
 
@@ -220,21 +253,6 @@ export function predictStreamDay(race: Race, dayStart: Date): StreamDay {
   const ref = getReferenceStation(race);
   const { fraction } = classifyDay(ref, dayStart).cls;
 
-  switch (race.type) {
-    case 'gate':
-      return predictGate(race, ref, dayStart, fraction);
-    case 'sill':
-      return predictSill(race, ref, dayStart, fraction);
-    default: {
-      const unknown: never = race;
-      throw new Error(`unknown race type ${JSON.stringify(unknown)}`);
-    }
-  }
-}
-
-// --- 'gate' races: slack near reference HW/LW, sinusoid between -----------------
-
-function predictGate(race: GateRace, ref: Station, dayStart: Date, fraction: number): StreamDay {
   const from = new Date(dayStart.getTime() - 9 * 3600_000);
   const to = new Date(dayStart.getTime() + 33 * 3600_000);
   const events = predictExtrema(ref.data, from, to, ref.shift);
@@ -281,89 +299,4 @@ function predictGate(race: GateRace, ref: Station, dayStart: Date, fraction: num
     .filter(p => p.time.getTime() >= start && p.time.getTime() <= end);
 
   return { samples, slacks: daySlacks, peaks, springNeapFraction: fraction, peakRate };
-}
-
-// --- 'sill' races (Falls of Lora): rate ∝ head between sea and lagged loch -----
-
-/** Hours of sea level fed through the reservoir filter before the day itself. */
-const SILL_WARMUP_H = 48;
-/** Hours either side of the day that events are found over, so a lobe crossing midnight keeps its real peak. */
-const SILL_EVENT_PAD_H = 12;
-
-function predictSill(race: SillRace, ref: Station, dayStart: Date, fraction: number): StreamDay {
-  const { lochTauFillHours: tauFill, lochTauDrainHours: tauDrain, headRateScale: scale } = race;
-  const start = dayStart.getTime();
-  const end = ukEndOfDay(dayStart).getTime();
-
-  // Sea level over a padded window so the reservoir filter has warmed up. 16 h
-  // was not enough: the loch starts at sea level, and at τ_drain = 8 h that
-  // initial guess is still worth up to 5 min of slack-time error on the day
-  // itself - against a model calibrated to ~12 min. Measured against a 240 h
-  // warm-up, the error is 5.2 min at 16 h, 0.6 at 24 h and 0.06 (≈ 4 s) from
-  // 48 h on, so 48 h is where it stops mattering. Costs one extra harmonic
-  // pass over ~430 samples, on one screen.
-  const sea = seaLevelSeries(
-    ref,
-    new Date(start - SILL_WARMUP_H * 3600_000),
-    new Date(end + SILL_EVENT_PAD_H * 3600_000),
-  );
-
-  // Loch level: an asymmetric first-order low-pass of the sea. It fills faster
-  // than it drains (the sill restricts outflow), so the falls run OUT longer.
-  // head = sea − loch.
-  let loch = sea[0].height;
-  const all: StreamSample[] = sea.map((s, i) => {
-    if (i > 0) {
-      const dtH = (s.time.getTime() - sea[i - 1].time.getTime()) / 3600_000;
-      const tau = sea[i - 1].height < loch ? tauDrain : tauFill;
-      loch += (dtH / tau) * (sea[i - 1].height - loch);
-    }
-    return { time: s.time, rate: (s.height - loch) * scale }; // + = sea above loch = flood in
-  });
-  const padMs = SILL_EVENT_PAD_H * 3600_000;
-  const samples = all.filter(s => s.time.getTime() >= start && s.time.getTime() <= end);
-  const padded = all.filter(s => s.time.getTime() >= start - padMs);
-  const events = deriveEvents(padded, race.floodName, race.ebbName);
-  const isInDay = (time: Date) => time.getTime() >= start && time.getTime() < end;
-  const slacks = events.slacks.filter(isInDay);
-  const peaks = events.peaks.filter(peak => isInDay(peak.time));
-  const peakRate = samples.reduce((m, s) => Math.max(m, Math.abs(s.rate)), 0);
-  return { samples, slacks, peaks, springNeapFraction: fraction, peakRate };
-}
-
-/** Slacks (zero crossings) and peaks (lobe maxima) from a signed-rate series. */
-function deriveEvents(
-  samples: StreamSample[],
-  floodName: string,
-  ebbName: string,
-): { slacks: Date[]; peaks: StreamPeak[] } {
-  const slacks: Date[] = [];
-  const crossings: number[] = [0];
-  for (let i = 1; i < samples.length; i++) {
-    const a = samples[i - 1].rate;
-    const b = samples[i].rate;
-    if ((a <= 0 && b > 0) || (a >= 0 && b < 0)) {
-      const f = a !== b ? a / (a - b) : 0;
-      const t = samples[i - 1].time.getTime() + f * (samples[i].time.getTime() - samples[i - 1].time.getTime());
-      slacks.push(new Date(t));
-      crossings.push(i);
-    }
-  }
-  crossings.push(samples.length - 1);
-
-  const peaks: StreamPeak[] = [];
-  for (let k = 0; k < crossings.length - 1; k++) {
-    let bi = crossings[k];
-    let bv = 0;
-    for (let i = crossings[k]; i <= crossings[k + 1]; i++) {
-      if (Math.abs(samples[i].rate) > Math.abs(bv)) {
-        bv = samples[i].rate;
-        bi = i;
-      }
-    }
-    if (Math.abs(bv) > 0.3) {
-      peaks.push({ time: samples[bi].time, rate: bv, dirName: bv > 0 ? floodName : ebbName });
-    }
-  }
-  return { slacks, peaks };
 }
