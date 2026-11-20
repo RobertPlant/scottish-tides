@@ -171,6 +171,66 @@ export const RACES: Race[] = [
     warning: 'A steady, strong tidal river. Time a transit with the stream, not against.',
     source: 'Slack ≈ HW Oban −0:40 / +5:30 (Rhinns-of-Islay figures, approximate); peak ~5 kn springs.',
   },
+  {
+    id: 'cuan-sound',
+    name: 'Cuan Sound',
+    area: 'Seil to Luing',
+    lat: 56.267,
+    lon: -5.629,
+    referenceStationId: 'oban',
+    type: 'gate',
+    slackAtHwOffsetMin: -90,
+    slackAtLwOffsetMin: -100,
+    floodFromLwToHw: true,
+    floodName: 'W-going (N stream)',
+    ebbName: 'E-going (S stream)',
+    springPeakKn: 7,
+    neapPeakKn: 3.5,
+    warning:
+      'Narrow and dog-legged, with the Cleit rock mid-channel and only a very brief slack at springs; it runs at six knots within half an hour of slack. Turns with the wind and pressure as well as the tide.',
+    source:
+      'N-going (sets W) begins ≈ HW Oban +4:30, S-going (sets E) ≈ HW −1:30, 7 kn springs (Wikipedia, from an old gazetteer); forum reports put the turn 1 to 2 h before HW/LW Oban. Neap rate a guess.',
+  },
+  {
+    id: 'sound-of-luing',
+    name: 'Sound of Luing',
+    area: 'Luing to Scarba and Fladda',
+    lat: 56.23,
+    lon: -5.67,
+    referenceStationId: 'oban',
+    type: 'gate',
+    slackAtHwOffsetMin: -105,
+    slackAtLwOffsetMin: -100,
+    floodFromLwToHw: true,
+    floodName: 'N-going (flood)',
+    ebbName: 'S-going (ebb)',
+    springPeakKn: 7,
+    neapPeakKn: 5,
+    warning:
+      'Fastest at the north end around Fladda, with overfalls off the islets against wind. The tidal atlas shows ~2 kn mid-sound, far below what boats meet in the narrows.',
+    source:
+      'N-going begins ≈ HW Oban +4:30, S-going ≈ HW Oban −1:45 (Ardfern Yacht Centre, after the CCC directions; later at neaps). 7 kn springs, 5 kn neaps around Fladda (CCC, as quoted on YBW).',
+  },
+  {
+    id: 'kyle-rhea',
+    name: 'Kyle Rhea',
+    area: 'Glenelg to Skye',
+    lat: 57.235,
+    lon: -5.66,
+    referenceStationId: 'ullapool',
+    type: 'gate',
+    slackAtHwOffsetMin: 0,
+    slackAtLwOffsetMin: 0,
+    floodFromLwToHw: true,
+    floodName: 'N-going (flood)',
+    ebbName: 'S-going (ebb)',
+    springPeakKn: 8,
+    neapPeakKn: 5,
+    warning:
+      'Strong eddies and overfalls in the narrows, worst at the north end against a northerly. Too fast to punch on springs: go with it.',
+    source:
+      'S-going from ≈ HW Ullapool, N-going from ≈ HW +6 (visitmyharbour); over 8 kn springs and 5 kn on neap floods (Admiralty chart 2541). Sources disagree on the N-going start: check the atlas.',
+  },
 ];
 
 export function raceById(id: string): Race | undefined {
