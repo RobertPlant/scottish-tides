@@ -111,7 +111,7 @@ export const RACES: Race[] = [
     warning:
       'A tidal rapid over a rock ledge: the falls run OUT on the ebb once the falling sea drops below Loch Etive, then IN on the flood. Strongly range-dependent: negligible on small neaps, violent on big springs.',
     source:
-      'Out-flow begins HW Oban +2:10, in-flow LW Oban +2:50: the fixed offsets fallsoflora.info puts on XTide\'s Oban (every turn in its 2026 table). Rate magnitude indicative.',
+      "Out-flow begins HW Oban +2:10, in-flow LW Oban +2:50: the fixed offsets fallsoflora.info puts on XTide's Oban (every turn in its 2026 table). Rate magnitude indicative.",
   },
   {
     id: 'dorus-mor',
