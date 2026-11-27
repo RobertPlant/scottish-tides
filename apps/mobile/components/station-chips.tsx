@@ -1,62 +1,102 @@
-// Horizontal station switcher: a scrollable row of chips (favourites first,
+// Station switcher: a search box over a scrollable row of chips (favourites first,
 // starred). Shared by the Tides and Plan tabs so switching station feels the
 // same on both.
 
-import { Pressable, ScrollView, StyleSheet } from 'react-native';
+import { useState } from 'react';
+import { Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
 import { usePalette } from '@/hooks/use-theme-color';
 import { useSelectedStation } from '@/lib/selected-station';
-import { STATIONS } from '@/lib/stations';
+import { listMatchingStations, STATIONS, type Station } from '@/lib/stations';
 
-export function StationChips({ activeId, onSelect }: { activeId: string; onSelect: (id: string) => void }) {
+type ChipProps = { station: Station; isActive: boolean; isFavourite: boolean; onPress: () => void };
+
+export const StationChips = ({ activeId, onSelect }: { activeId: string; onSelect: (id: string) => void }) => {
   const palette = usePalette();
   const { isFavourite } = useSelectedStation();
+  const [query, setQuery] = useState('');
 
   // sort, not toSorted - Hermes doesn't have it
-  const chipStations = [...STATIONS].sort((a, b) => Number(isFavourite(b.id)) - Number(isFavourite(a.id)));
+  const chipStations = listMatchingStations(STATIONS, query).sort(
+    (a, b) => Number(isFavourite(b.id)) - Number(isFavourite(a.id)),
+  );
+  const select = (id: string) => {
+    setQuery('');
+    onSelect(id);
+  };
 
   return (
-    <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chips}>
-      {chipStations.map(s => {
-        const active = s.id === activeId;
-        const favd = isFavourite(s.id);
-        return (
-          <Pressable
-            key={s.id}
-            onPress={() => onSelect(s.id)}
-            accessibilityRole="button"
-            accessibilityState={{ selected: active }}
-            accessibilityLabel={favd ? `${s.name} (favourite)` : s.name}
-            style={[
-              styles.chip,
-              {
-                backgroundColor: active ? palette.tint : palette.surface,
-                borderColor: active ? palette.tint : palette.border,
-              },
-            ]}
-          >
-            {favd ? (
-              <ThemedText
-                accessibilityElementsHidden
-                importantForAccessibility="no"
-                style={{ color: active ? palette.background : palette.accent }}
-              >
-                ★
-              </ThemedText>
-            ) : null}
-            <ThemedText style={{ color: active ? palette.background : palette.text, fontWeight: '600' }}>
-              {s.name}
-            </ThemedText>
-          </Pressable>
-        );
-      })}
-    </ScrollView>
+    <View style={styles.wrap}>
+      <TextInput
+        value={query}
+        onChangeText={setQuery}
+        placeholder="Find a port"
+        placeholderTextColor={palette.muted}
+        accessibilityLabel="Find a port"
+        autoCorrect={false}
+        autoCapitalize="none"
+        clearButtonMode="while-editing"
+        inputMode="search"
+        style={[styles.search, { color: palette.text, backgroundColor: palette.surface, borderColor: palette.border }]}
+      />
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chips}>
+        {chipStations.length === 0 ? (
+          <ThemedText type="caption" style={[styles.empty, { color: palette.muted }]}>
+            No ports match
+          </ThemedText>
+        ) : null}
+        {chipStations.map(station => (
+          <StationChip
+            key={station.id}
+            station={station}
+            isActive={station.id === activeId}
+            isFavourite={isFavourite(station.id)}
+            onPress={() => select(station.id)}
+          />
+        ))}
+      </ScrollView>
+    </View>
   );
-}
+};
+
+const StationChip = ({ station, isActive, isFavourite, onPress }: ChipProps) => {
+  const palette = usePalette();
+  const textColor = isActive ? palette.background : palette.text;
+
+  return (
+    <Pressable
+      onPress={onPress}
+      accessibilityRole="button"
+      accessibilityState={{ selected: isActive }}
+      accessibilityLabel={isFavourite ? `${station.name} (favourite)` : station.name}
+      style={[
+        styles.chip,
+        {
+          backgroundColor: isActive ? palette.tint : palette.surface,
+          borderColor: isActive ? palette.tint : palette.border,
+        },
+      ]}
+    >
+      {isFavourite ? (
+        <ThemedText
+          accessibilityElementsHidden
+          importantForAccessibility="no"
+          style={{ color: isActive ? palette.background : palette.accent }}
+        >
+          ★
+        </ThemedText>
+      ) : null}
+      <ThemedText style={{ color: textColor, fontWeight: '600' }}>{station.name}</ThemedText>
+    </Pressable>
+  );
+};
 
 const styles = StyleSheet.create({
+  wrap: { gap: 8 },
+  search: { borderWidth: 1, borderRadius: 12, paddingHorizontal: 12, paddingVertical: 10, fontSize: 15 },
   chips: { gap: 8, paddingVertical: 2 },
+  empty: { paddingVertical: 8 },
   chip: {
     flexDirection: 'row',
     alignItems: 'center',
