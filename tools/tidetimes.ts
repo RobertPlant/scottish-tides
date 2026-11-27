@@ -32,6 +32,9 @@ export const SLUGS: Record<string, string | null> = {
   connel: 'connel',
   easdale: 'seil-sound',
   ardfern: 'loch-beag',
+  plockton: 'plockton',
+  achiltibuie: 'tanera-mor',
+  lochinver: 'loch-inver',
 };
 
 const CACHE = path.join(import.meta.dirname, '.cache', 'tidetimes');

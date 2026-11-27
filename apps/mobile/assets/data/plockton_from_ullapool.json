@@ -1,0 +1,14 @@
+{
+  "name": "Plockton",
+  "based_on": "Ullapool",
+  "method": "tidetimes.org.uk Plockton vs its own Ullapool (UKHO-derived), applied to our gauge-fitted Ullapool: median time difference, least-squares height fit",
+  "hw_time_min": -13,
+  "lw_time_min": -7,
+  "height_scale": 1,
+  "height_offset_m": 0.3,
+  "note": "HW and LW heights each = offset + scale * Ullapool; the two maps cross at ~2.1 m on Ullapool, inside the range. LW is 7 min before Ullapool to within a minute or two, HW 13 min before but scattering ~7 min. Heights follow tidetimes, Ullapool's Z0 is set to UKHO's level. Kayak-grade, not for navigation.",
+  "calibrated_from": "tidetimes.org.uk Plockton vs Ullapool, 2025-10-01 to 2026-12-01 (every 3 day(s), 554 events) via tools/calibrate-shift.ts",
+  "calibrated_on": "2026-11-27",
+  "lw_height_scale": 1.211,
+  "lw_height_offset_m": -0.144
+}
