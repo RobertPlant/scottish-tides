@@ -18,6 +18,17 @@ test('favouriting a station persists and pins it', async ({ page }) => {
   await expect(page.locator('body')).toContainText('FAVOURITES'); // persisted
 });
 
+test('finding a port filters the chips and switches station', async ({ page }) => {
+  await page.goto('/station/oban');
+  await waitForDayView(page);
+  const chips = page.locator('[role=button]:visible');
+  await page.getByLabel('Find a port').first().fill('skye');
+  await expect(chips.filter({ hasText: 'Portree' })).toHaveCount(1);
+  await expect(chips.filter({ hasText: 'Millport' })).toHaveCount(0);
+  await tapUntil(page, chips.filter({ hasText: 'Portree' }), /\/station\/portree/);
+  await expect(page.getByLabel('Find a port').first()).toHaveValue('');
+});
+
 test('streams: race list and detail render with the safety warning', async ({ page }) => {
   await page.goto('/map');
   await expect(page.locator('body')).toContainText('not a tidal stream atlas');

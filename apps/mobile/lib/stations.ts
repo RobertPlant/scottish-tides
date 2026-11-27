@@ -271,3 +271,12 @@ export const STATIONS: Station[] = [
 export function stationById(id: string): Station | undefined {
   return STATIONS.find(s => s.id === id);
 }
+
+/** List the stations whose name, subtitle or region contains the query, ignoring case. */
+export const listMatchingStations = (stations: Station[], query: string): Station[] => {
+  const needle = query.trim().toLowerCase();
+
+  return stations.filter(station =>
+    [station.name, station.subtitle, station.region].some(text => text.toLowerCase().includes(needle)),
+  );
+};
