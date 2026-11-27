@@ -26,6 +26,9 @@ import portreeShift from '@/assets/data/portree_from_ullapool.json';
 import stornowayData from '@/assets/data/stornoway.json';
 import tobermoryData from '@/assets/data/tobermory.json';
 import uigShift from '@/assets/data/uig_from_ullapool.json';
+import achiltibuieShift from '@/assets/data/achiltibuie_from_ullapool.json';
+import lochinverShift from '@/assets/data/lochinver_from_ullapool.json';
+import plocktonShift from '@/assets/data/plockton_from_ullapool.json';
 import ullapoolData from '@/assets/data/ullapool.json';
 import wickData from '@/assets/data/wick.json';
 import type { Shift, StationData } from '@/lib/tides';
@@ -220,6 +223,36 @@ export const STATIONS: Station[] = [
     lat: 57.8951,
     lon: -5.1589,
     data: ullapoolData as StationData,
+  },
+  {
+    id: 'plockton',
+    name: 'Plockton',
+    subtitle: 'Loch Carron, via Ullapool + offset',
+    region: 'North-West',
+    lat: 57.3383,
+    lon: -5.6467,
+    data: ullapoolData as StationData,
+    shift: plocktonShift as Shift,
+  },
+  {
+    id: 'achiltibuie',
+    name: 'Achiltibuie',
+    subtitle: 'Summer Isles (Tanera Mòr), via Ullapool + offset',
+    region: 'North-West',
+    lat: 58.0122,
+    lon: -5.3556,
+    data: ullapoolData as StationData,
+    shift: achiltibuieShift as Shift,
+  },
+  {
+    id: 'lochinver',
+    name: 'Lochinver',
+    subtitle: 'Assynt, via Ullapool + offset',
+    region: 'North-West',
+    lat: 58.1472,
+    lon: -5.2433,
+    data: ullapoolData as StationData,
+    shift: lochinverShift as Shift,
   },
   {
     id: 'kinlochbervie',

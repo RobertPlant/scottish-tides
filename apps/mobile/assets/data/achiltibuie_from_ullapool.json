@@ -1,0 +1,12 @@
+{
+  "name": "Achiltibuie",
+  "based_on": "Ullapool",
+  "method": "tidetimes.org.uk Tanera Mor vs its own Ullapool (UKHO-derived), applied to our gauge-fitted Ullapool: median time difference, least-squares height fit",
+  "hw_time_min": -5,
+  "lw_time_min": -10,
+  "height_scale": 0.975,
+  "height_offset_m": 0.096,
+  "note": "tidetimes' Tanera Mor, in the Summer Isles off Achiltibuie. Height = offset + scale * Ullapool. tidetimes' Tanera Mor is Ullapool moved 5 min (HW) and 10 min (LW) to the minute, so times are as good as Ullapool's. One height map for HW and LW: separate ones fitted ~0.03 m better but don't cross inside the range, so the curve would miss the turns. Heights follow tidetimes, Ullapool's Z0 is set to UKHO's level. Kayak-grade, not for navigation.",
+  "calibrated_from": "tidetimes.org.uk Achiltibuie vs Ullapool, 2025-10-01 to 2026-12-01 (every 3 day(s), 556 events) via tools/calibrate-shift.ts",
+  "calibrated_on": "2026-11-27"
+}
